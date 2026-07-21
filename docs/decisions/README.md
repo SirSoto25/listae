@@ -36,3 +36,4 @@ Implicaciones positivas y negativas.
 | 005 | Perfil con HTML template + CSS libre (Google Fonts) | aceptada |
 | 006 | Deploy local-first | aceptada |
 | 007 | Documentación continua en Markdown | aceptada |
+| 008 | Global template skills + Listae project skills | aceptada |

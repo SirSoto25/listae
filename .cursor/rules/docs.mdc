@@ -1,0 +1,11 @@
+---
+description: Keep Listae docs/decisions and docs/context updated when scope or architecture changes.
+alwaysApply: true
+---
+
+# Listae documentation
+
+- After a product/architecture decision: add an ADR under `docs/decisions/` and update the index.
+- After scope or repo status changes: update `docs/context/`.
+- Use skill `listae-docs-sync` for paths and checklists.
+- Prefer linking ADRs from context notes rather than duplicating decision text.

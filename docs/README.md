@@ -20,3 +20,5 @@ Convención del repo: **ir dejando rastro en Markdown** a medida que avanzamos.
 - Spec v1: [superpowers/specs/2026-07-21-listae-design.md](./superpowers/specs/2026-07-21-listae-design.md)
 - Contexto producto: [context/2026-07-21-producto-y-alcance.md](./context/2026-07-21-producto-y-alcance.md)
 - Decisiones: ver [decisions/](./decisions/)
+- Agent skills del repo: [../.cursor/skills/](../.cursor/skills/)
+- Rules: [../.cursor/rules/](../.cursor/rules/)

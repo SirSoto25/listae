@@ -1,0 +1,14 @@
+---
+description: Security rules for Listae user HTML/CSS themes — sanitization, Google Fonts-only imports, no user JS, precise CSS error reporting.
+globs: "**/{*theme*,*profil*,*sanit*,customize}/**"
+alwaysApply: false
+---
+
+# Listae theme security
+
+- Never execute user-supplied JavaScript on profile pages or previews.
+- HTML: allowlist only; strip scripts, event handlers, dangerous URLs.
+- CSS `@import`: allow **only** `fonts.googleapis.com` and `fonts.gstatic.com`.
+- Validation errors must cite **line/column** or the **exact** rejected `@import`/URL.
+- Serve preview/public theme UI in iframe `sandbox` without `allow-scripts`.
+- Follow skill `listae-theme-engine` and ADR `docs/decisions/005-profile-html-css.md`.

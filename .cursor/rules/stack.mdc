@@ -1,0 +1,15 @@
+---
+description: Listae stack constraints — Next.js full-stack, Drizzle, SQLite→Postgres, Auth.js magic link. No Nest, Mongo, or Redis as v1 runtime.
+alwaysApply: true
+---
+
+# Listae stack
+
+- **App:** Next.js App Router + TypeScript (single repo). No separate Nest/Express API.
+- **ORM/DB:** Drizzle + SQLite locally; schema must stay Postgres-portable.
+- **Auth:** Auth.js magic link (email). No password auth in v1.
+- **Cache:** DB-backed `SearchCacheStore`; Redis adapter later only — do not add Redis dependency in v1.
+- **Deploy:** local-first until the owner requests hosting (ADR 006).
+- **Not in v1:** MongoDB, social graph, long reviews, NestJS.
+
+Canonical spec: `docs/superpowers/specs/2026-07-21-listae-design.md`.

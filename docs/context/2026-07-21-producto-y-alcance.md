@@ -46,9 +46,10 @@ Next.js full-stack · Auth.js magic link · Drizzle · SQLite local · caché b�
 ## Estado actual del repo
 
 - Spec de diseño escrita y en GitHub.
-- ADRs 001–007 y docs de contexto en el repo.
+- ADRs 001–008 y docs de contexto en el repo.
+- Skills globales (plantillas) en `~/.agents/skills/` + skills/rules Listae en `.cursor/`.
 - App Next.js **aún no scaffolded**.
-- Primer commit en `main`: `8f7b640` (docs iniciales).
+- Commits docs en `main` (ver historial GitHub).
 
 ## Próximo paso acordado (pendiente de OK al spec)
 
