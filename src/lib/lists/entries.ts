@@ -32,6 +32,12 @@ export type EntryInput = {
   notes?: unknown;
 };
 
+type ProgressTotals = {
+  episodesTotal?: number | null;
+  chaptersTotal?: number | null;
+  pagesTotal?: number | null;
+};
+
 export type NormalizedEntryInput = {
   status: ListStatus;
   score: number | null;
@@ -62,6 +68,7 @@ function parseProgress(raw: unknown): number {
 export function normalizeEntryInput(
   workType: WorkType,
   input: EntryInput,
+  totals: ProgressTotals = {},
 ): NormalizedEntryInput {
   if (
     typeof input.status !== "string" ||
@@ -86,6 +93,15 @@ export function normalizeEntryInput(
 
   const progressValue = parseProgress(input.progressValue);
   if (workType === "anime" || workType === "series") {
+    if (
+      totals.episodesTotal !== null &&
+      totals.episodesTotal !== undefined &&
+      progressValue > totals.episodesTotal
+    ) {
+      throw new Error(
+        `progress cannot exceed ${totals.episodesTotal} episodes`,
+      );
+    }
     return {
       ...base,
       progressValue,
@@ -95,6 +111,13 @@ export function normalizeEntryInput(
 
   if (input.progressUnit !== "chapters" && input.progressUnit !== "pages") {
     throw new Error("progress unit must be chapters or pages");
+  }
+  const total =
+    input.progressUnit === "chapters"
+      ? totals.chaptersTotal
+      : totals.pagesTotal;
+  if (total !== null && total !== undefined && progressValue > total) {
+    throw new Error(`progress cannot exceed ${total} ${input.progressUnit}`);
   }
 
   return {
@@ -122,7 +145,11 @@ export async function addListEntry(
     throw new Error("work not found");
   }
 
-  const values = normalizeEntryInput(work.type, input);
+  const values = normalizeEntryInput(work.type, input, {
+    episodesTotal: work.episodesTotal,
+    chaptersTotal: work.chaptersTotal,
+    pagesTotal: work.pagesTotal,
+  });
   const now = new Date();
   const id = randomUUID();
   await db

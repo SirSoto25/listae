@@ -13,6 +13,13 @@ type OpenLibraryDocument = {
   subject?: string[];
 };
 
+type OpenLibraryWork = {
+  title?: string;
+  first_publish_date?: string;
+  covers?: number[];
+  subjects?: string[];
+};
+
 type OpenLibraryResponse = {
   docs?: OpenLibraryDocument[];
 };
@@ -92,4 +99,43 @@ export async function searchOpenLibrary(
       },
     ];
   });
+}
+
+export async function resolveOpenLibrary(
+  externalId: string,
+): Promise<CatalogHit> {
+  if (!/^OL\d+W$/.test(externalId)) {
+    throw new Error("invalid Open Library identity");
+  }
+
+  const response = await fetch(
+    `https://openlibrary.org/works/${externalId}.json`,
+    { cache: "no-store" },
+  );
+  if (!response.ok) {
+    throw new Error(
+      `Open Library lookup failed with status ${response.status}`,
+    );
+  }
+
+  const work = (await response.json()) as OpenLibraryWork;
+  if (!work.title) {
+    throw new Error("Open Library record is invalid");
+  }
+
+  const year = work.first_publish_date
+    ? Number.parseInt(work.first_publish_date.slice(0, 4), 10)
+    : undefined;
+  const cover = work.covers?.find((id) => id > 0);
+
+  return {
+    source: "openlibrary",
+    externalId,
+    type: inferType({ subject: work.subjects }, "all"),
+    title: work.title,
+    ...(Number.isInteger(year) ? { year } : {}),
+    ...(cover === undefined
+      ? {}
+      : { coverUrl: `${OPEN_LIBRARY_COVER_URL}/${cover}-M.jpg` }),
+  };
 }

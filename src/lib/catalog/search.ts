@@ -4,11 +4,20 @@ import {
 } from "@/lib/cache/db-search-cache";
 import type { WorkType } from "@/types/domain";
 
-import { searchOpenLibrary } from "./openlibrary";
-import { searchTmdb } from "./tmdb";
+import { resolveOpenLibrary, searchOpenLibrary } from "./openlibrary";
+import { resolveTmdb, searchTmdb } from "./tmdb";
 import type { CatalogHit } from "./types";
 
 const SEARCH_CACHE_TTL_SECONDS = 1800;
+
+export async function resolveCatalogHit(
+  source: CatalogHit["source"],
+  externalId: string,
+): Promise<CatalogHit> {
+  return source === "tmdb"
+    ? resolveTmdb(externalId)
+    : resolveOpenLibrary(externalId);
+}
 
 function parseCachedHits(payload: string): CatalogHit[] | null {
   try {

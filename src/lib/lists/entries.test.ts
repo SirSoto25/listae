@@ -88,4 +88,31 @@ describe("normalizeEntryInput", () => {
       }),
     ).toThrow("progress unit must be chapters or pages");
   });
+
+  it("enforces the total for the selected progress unit", () => {
+    const totals = { chaptersTotal: 12, pagesTotal: 300 };
+
+    expect(() =>
+      normalizeEntryInput(
+        "book",
+        {
+          status: "in_progress",
+          progressValue: "13",
+          progressUnit: "chapters",
+        },
+        totals,
+      ),
+    ).toThrow("progress cannot exceed 12 chapters");
+    expect(
+      normalizeEntryInput(
+        "book",
+        {
+          status: "in_progress",
+          progressValue: "13",
+          progressUnit: "pages",
+        },
+        totals,
+      ),
+    ).toMatchObject({ progressValue: 13, progressUnit: "pages" });
+  });
 });

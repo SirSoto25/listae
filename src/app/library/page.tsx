@@ -122,13 +122,6 @@ export default async function LibraryPage({
         ) : (
           <div className="mt-8 space-y-4">
             {entries.map(({ entry, work }) => {
-              const total =
-                work.type === "anime" || work.type === "series"
-                  ? work.episodesTotal
-                  : entry.progressUnit === "pages"
-                    ? work.pagesTotal
-                    : work.chaptersTotal;
-
               return (
                 <article
                   key={entry.id}
@@ -160,7 +153,9 @@ export default async function LibraryPage({
                     compact
                     workId={work.id}
                     workType={work.type}
-                    total={total}
+                    episodesTotal={work.episodesTotal}
+                    chaptersTotal={work.chaptersTotal}
+                    pagesTotal={work.pagesTotal}
                     entry={entry}
                     returnPath={returnPath}
                   />

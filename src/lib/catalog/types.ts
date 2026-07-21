@@ -7,6 +7,9 @@ export type CatalogHit = {
   title: string;
   year?: number;
   coverUrl?: string;
+  episodesTotal?: number;
+  chaptersTotal?: number;
+  pagesTotal?: number;
 };
 
 export type ManualWorkInput = {

@@ -1,8 +1,17 @@
 import { sql } from "drizzle-orm";
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
+
+const mocks = vi.hoisted(() => ({
+  resolveCatalogHit: vi.fn(),
+}));
+
+vi.mock("./search", () => ({
+  resolveCatalogHit: mocks.resolveCatalogHit,
+}));
 
 let database: typeof import("@/lib/db").db;
 let createManualWork: typeof import("./works").createManualWork;
+let importWork: typeof import("./works").importWork;
 let upsertWorkFromHit: typeof import("./works").upsertWorkFromHit;
 
 beforeAll(async () => {
@@ -14,7 +23,7 @@ beforeAll(async () => {
   ]);
 
   database = dbModule.db;
-  ({ createManualWork, upsertWorkFromHit } = worksModule);
+  ({ createManualWork, importWork, upsertWorkFromHit } = worksModule);
   database.run(sql`
     create table works (
       id text primary key,
@@ -57,7 +66,7 @@ describe("work helpers", () => {
       database.get<{ title: string }>(
         sql`select title from works where id = ${first.id}`,
       )?.title,
-    ).toBe("Dune: Part One");
+    ).toBe("Dune");
   });
 
   it("creates independent manual works", async () => {
@@ -65,5 +74,37 @@ describe("work helpers", () => {
     const second = await createManualWork({ type: "book", title: "My Book" });
 
     expect(second.id).not.toBe(first.id);
+  });
+
+  it("imports metadata resolved by the provider", async () => {
+    mocks.resolveCatalogHit.mockResolvedValue({
+      source: "openlibrary",
+      externalId: "OL123W",
+      type: "book",
+      title: "Canonical title",
+      year: 2024,
+      pagesTotal: 250,
+    });
+
+    const imported = await importWork("openlibrary", "OL123W");
+
+    expect(mocks.resolveCatalogHit).toHaveBeenCalledWith(
+      "openlibrary",
+      "OL123W",
+    );
+    expect(
+      database.get<{
+        title: string;
+        year: number;
+        pagesTotal: number;
+      }>(
+        sql`select title, year, pages_total as pagesTotal
+            from works where id = ${imported.id}`,
+      ),
+    ).toEqual({
+      title: "Canonical title",
+      year: 2024,
+      pagesTotal: 250,
+    });
   });
 });

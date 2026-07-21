@@ -8,6 +8,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { addListEntry, updateListEntry } from "@/lib/lists/entries";
+import { safeReturnPath } from "@/lib/safe-return-path";
 
 async function requireUserId(): Promise<string> {
   const session = await auth();
@@ -36,13 +37,6 @@ function entryInput(formData: FormData) {
   };
 }
 
-function safeReturnPath(formData: FormData, fallback: string): string {
-  const value = formData.get("returnPath");
-  return typeof value === "string" && /^\/(?!\/)/.test(value)
-    ? value
-    : fallback;
-}
-
 export async function addToList(formData: FormData): Promise<never> {
   const userId = await requireUserId();
   const workId = String(formData.get("workId") ?? "");
@@ -53,7 +47,12 @@ export async function addToList(formData: FormData): Promise<never> {
   await addListEntry(userId, workId, entryInput(formData));
   revalidatePath("/library");
   revalidatePath(`/title/${workId}`);
-  redirect(safeReturnPath(formData, `/title/${workId}?saved=1`));
+  redirect(
+    safeReturnPath(
+      formData.get("returnPath"),
+      `/title/${workId}?saved=1`,
+    ),
+  );
 }
 
 export async function updateEntry(formData: FormData): Promise<never> {
@@ -66,5 +65,10 @@ export async function updateEntry(formData: FormData): Promise<never> {
   await updateListEntry(userId, workId, entryInput(formData));
   revalidatePath("/library");
   revalidatePath(`/title/${workId}`);
-  redirect(safeReturnPath(formData, `/title/${workId}?saved=1`));
+  redirect(
+    safeReturnPath(
+      formData.get("returnPath"),
+      `/title/${workId}?saved=1`,
+    ),
+  );
 }

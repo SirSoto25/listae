@@ -2,8 +2,16 @@
 
 import { redirect } from "next/navigation";
 
-import { createManualWork, upsertWorkFromHit } from "@/lib/catalog/works";
+import { auth } from "@/lib/auth";
+import { createManualWork, importWork } from "@/lib/catalog/works";
 import { WORK_TYPES, type WorkType } from "@/types/domain";
+
+async function requireAuthenticatedUser(): Promise<void> {
+  const session = await auth();
+  if (!session?.user?.email) {
+    redirect("/login");
+  }
+}
 
 function requireWorkType(raw: FormDataEntryValue | null): WorkType {
   if (
@@ -27,25 +35,18 @@ function optionalInteger(raw: FormDataEntryValue | null): number | undefined {
 }
 
 export async function importHitAction(formData: FormData): Promise<never> {
+  await requireAuthenticatedUser();
   const source = formData.get("source");
   if (source !== "tmdb" && source !== "openlibrary") {
     throw new Error("invalid catalog source");
   }
 
   const externalId = String(formData.get("externalId") ?? "").trim();
-  const title = String(formData.get("title") ?? "").trim();
-  if (!externalId || !title) {
-    throw new Error("catalog identity and title are required");
+  if (!externalId) {
+    throw new Error("catalog identity is required");
   }
 
-  const work = await upsertWorkFromHit({
-    source,
-    externalId,
-    type: requireWorkType(formData.get("type")),
-    title,
-    year: optionalInteger(formData.get("year")),
-    coverUrl: String(formData.get("coverUrl") ?? "").trim() || undefined,
-  });
+  const work = await importWork(source, externalId);
 
   redirect(`/title/${work.id}`);
 }
@@ -53,6 +54,7 @@ export async function importHitAction(formData: FormData): Promise<never> {
 export async function createManualWorkAction(
   formData: FormData,
 ): Promise<never> {
+  await requireAuthenticatedUser();
   const work = await createManualWork({
     type: requireWorkType(formData.get("type")),
     title: String(formData.get("title") ?? ""),

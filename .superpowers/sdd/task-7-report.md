@@ -31,3 +31,13 @@ Complete. Task 7 implements list-entry validation and persistence, catalog searc
 
 - Real TMDB/Open Library responses were not manually exercised because provider credentials/network availability are environment-dependent; provider and cache unit tests remain green.
 - Server-action validation errors currently use the framework error boundary rather than inline form messages; the validation itself is enforced server-side.
+
+## Fix: review findings
+
+- Catalog imports now require authentication, resolve canonical metadata server-side from provider identity, and never overwrite existing shared works.
+- Entry forms receive all progress totals and switch bounds with the selected unit; create/update helpers enforce the same totals server-side.
+- Return redirects are restricted to safe `/library` and UUID-based `/title/[id]` paths.
+- `pnpm test -- src/lib/catalog/works.test.ts src/lib/lists/entries.test.ts src/lib/safe-return-path.test.ts src/app/actions/works.test.ts`: 4 files passed, 30 tests passed.
+- `pnpm test`: 12 files passed, 65 tests passed.
+- `pnpm lint`: passed.
+- `pnpm build`: passed.

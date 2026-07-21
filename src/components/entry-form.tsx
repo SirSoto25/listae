@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 import { addToList, updateEntry } from "@/app/actions/entries";
 import {
   LIST_STATUSES,
@@ -9,7 +13,9 @@ import {
 type EntryFormProps = {
   workId: string;
   workType: WorkType;
-  total?: number | null;
+  episodesTotal?: number | null;
+  chaptersTotal?: number | null;
+  pagesTotal?: number | null;
   entry?: {
     status: ListStatus;
     score: number | null;
@@ -32,7 +38,9 @@ const statusLabels: Record<ListStatus, string> = {
 export function EntryForm({
   workId,
   workType,
-  total,
+  episodesTotal,
+  chaptersTotal,
+  pagesTotal,
   entry,
   compact = false,
   returnPath,
@@ -40,6 +48,14 @@ export function EntryForm({
   const isReading = ["book", "manga", "comic"].includes(workType);
   const hasProgress = workType !== "movie";
   const action = entry ? updateEntry : addToList;
+  const [progressUnit, setProgressUnit] = useState<"chapters" | "pages">(
+    entry?.progressUnit === "pages" ? "pages" : "chapters",
+  );
+  const progressMax = isReading
+    ? progressUnit === "pages"
+      ? pagesTotal
+      : chaptersTotal
+    : episodesTotal;
 
   return (
     <form
@@ -97,7 +113,7 @@ export function EntryForm({
               name="progressValue"
               min={0}
               step={1}
-              max={total ?? undefined}
+              max={progressMax ?? undefined}
               defaultValue={entry?.progressValue ?? 0}
             />
           </label>
@@ -107,7 +123,10 @@ export function EntryForm({
               <select
                 className="mt-1.5 h-11 w-full rounded-xl border border-stone-300 bg-white px-2 font-normal text-stone-950 outline-none focus:border-amber-600"
                 name="progressUnit"
-                defaultValue={entry?.progressUnit ?? "chapters"}
+                value={progressUnit}
+                onChange={(event) =>
+                  setProgressUnit(event.target.value as "chapters" | "pages")
+                }
               >
                 <option value="chapters">Chapters</option>
                 <option value="pages">Pages</option>
@@ -115,7 +134,9 @@ export function EntryForm({
             </label>
           ) : (
             <div className="pt-8 text-sm text-stone-500">
-              {total ? `/ ${total} episodes` : "episodes"}
+              {episodesTotal
+                ? `/ ${episodesTotal} episodes`
+                : "episodes"}
             </div>
           )}
         </div>

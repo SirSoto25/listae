@@ -15,6 +15,12 @@ type TmdbResult = {
   poster_path?: string | null;
 };
 
+type TmdbDetails = TmdbResult & {
+  genres?: Array<{ id: number }>;
+  number_of_episodes?: number;
+  original_language?: string;
+};
+
 type TmdbResponse = {
   results?: TmdbResult[];
 };
@@ -58,7 +64,7 @@ function mapResult(
 
   return {
     source: "tmdb",
-    externalId: String(result.id),
+    externalId: `${mediaType}:${result.id}`,
     type,
     title,
     ...(year === undefined ? {} : { year }),
@@ -106,4 +112,45 @@ export async function searchTmdb(
   return (data.results ?? [])
     .map((result) => mapResult(result, typeFilter))
     .filter((hit): hit is CatalogHit => hit !== null);
+}
+
+export async function resolveTmdb(externalId: string): Promise<CatalogHit> {
+  const identity = /^(movie|tv):(\d+)$/.exec(externalId);
+  if (!identity) {
+    throw new Error("invalid TMDB identity");
+  }
+
+  const apiKey = process.env.TMDB_API_KEY;
+  if (!apiKey) {
+    throw new Error("TMDB_API_KEY is not configured");
+  }
+
+  const [, mediaType, id] = identity;
+  const url = new URL(`${TMDB_BASE_URL}/${mediaType}/${id}`);
+  url.searchParams.set("api_key", apiKey);
+  const response = await fetch(url, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`TMDB lookup failed with status ${response.status}`);
+  }
+
+  const details = (await response.json()) as TmdbDetails;
+  const hit = mapResult(
+    { ...details, id: Number(id), media_type: mediaType as "movie" | "tv" },
+    "all",
+  );
+  if (!hit) {
+    throw new Error("TMDB record is invalid");
+  }
+
+  if (
+    mediaType === "tv" &&
+    details.original_language === "ja" &&
+    details.genres?.some((genre) => genre.id === 16)
+  ) {
+    hit.type = "anime";
+  }
+  if (mediaType === "tv" && details.number_of_episodes !== undefined) {
+    hit.episodesTotal = details.number_of_episodes;
+  }
+  return hit;
 }

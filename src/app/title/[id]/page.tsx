@@ -36,13 +36,6 @@ export default async function TitlePage({
   const entry = user ? await getEntry(user.id, work.id) : null;
   const { saved } = await searchParams;
 
-  const total =
-    work.type === "anime" || work.type === "series"
-      ? work.episodesTotal
-      : entry?.progressUnit === "pages"
-        ? work.pagesTotal
-        : work.chaptersTotal;
-
   return (
     <main className="flex-1 bg-[#f7f5f0] px-6 py-10 text-stone-950">
       <div className="mx-auto max-w-5xl">
@@ -123,7 +116,9 @@ export default async function TitlePage({
                 <EntryForm
                   workId={work.id}
                   workType={work.type}
-                  total={total}
+                  episodesTotal={work.episodesTotal}
+                  chaptersTotal={work.chaptersTotal}
+                  pagesTotal={work.pagesTotal}
                   entry={entry}
                 />
               ) : (
