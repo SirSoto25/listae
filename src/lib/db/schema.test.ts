@@ -1,6 +1,8 @@
+import { sql } from "drizzle-orm";
 import { getTableConfig } from "drizzle-orm/sqlite-core";
 import { describe, expect, it } from "vitest";
 
+import { db } from "./index";
 import {
   accounts,
   listEntries,
@@ -58,5 +60,10 @@ describe("database schema", () => {
 
     expect(externalWorkIndex?.config.unique).toBe(true);
     expect(externalWorkIndex?.config.where).toBeDefined();
+  });
+
+  it("enables foreign key enforcement on the runtime client", () => {
+    const result = db.get<{ foreign_keys: number }>(sql`PRAGMA foreign_keys`);
+    expect(result?.foreign_keys).toBe(1);
   });
 });

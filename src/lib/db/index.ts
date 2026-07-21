@@ -11,5 +11,6 @@ const dbPath =
 fs.mkdirSync(path.dirname(dbPath), { recursive: true });
 
 const sqlite = new Database(dbPath);
+sqlite.pragma("foreign_keys = ON");
 
 export const db = drizzle(sqlite, { schema });
