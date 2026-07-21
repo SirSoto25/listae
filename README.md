@@ -18,6 +18,18 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## Database
+
+Listae uses Drizzle ORM with SQLite for local development. The default database
+is `data/listae.db`; override it with a `file:` URL in `DATABASE_URL`.
+
+```bash
+pnpm db:push
+```
+
+Use `pnpm db:generate` to create migrations and `pnpm db:migrate` to apply
+generated migrations.
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More
