@@ -1,48 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Listae
 
-## Getting Started
+Listae is a local-first, multi-user media tracker inspired by MyAnimeList. It
+tracks anime, series, movies, books, manga, and comics without adding a social
+network. Each user gets a public, customizable list at `/u/[username]`.
 
-First, run the development server:
+The MVP uses Next.js, Auth.js magic links, Drizzle ORM, and SQLite. See the
+[approved design spec](docs/superpowers/specs/2026-07-21-listae-design.md) for
+the product scope and architecture.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Local setup
+
+1. Install dependencies:
+
+   ```bash
+   pnpm i
+   ```
+
+2. Copy `.env.example` to `.env.local` and replace `AUTH_SECRET` with a strong
+   random value. The example defaults to the local SQLite database at
+   `data/listae.db`.
+
+3. Create/update the local database:
+
+   ```bash
+   pnpm db:push
+   ```
+
+4. Start the development server:
+
+   ```bash
+   pnpm dev
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000).
+
+## Magic-link login
+
+SMTP is optional for local development. Leave `EMAIL_SERVER` unset and submit
+an email at `/login`; Listae prints a line like this in the server console:
+
+```text
+[listae magic link] you@example.com -> http://localhost:3000/api/auth/callback/...
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open that URL to sign in, then choose a username during onboarding. To send
+real email instead, set `EMAIL_SERVER` and `EMAIL_FROM` in `.env.local`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Catalog providers
 
-## Database
+Set `TMDB_API_KEY` in `.env.local` to search TMDB for movies and series. Open
+Library search does not require a key, and manual title creation remains
+available when an external provider is unavailable or has no match.
 
-Listae uses Drizzle ORM with SQLite for local development. The default database
-is `data/listae.db`; override it with a `file:` URL in `DATABASE_URL`.
+## Scripts
 
-```bash
-pnpm db:push
-```
+| Command | Purpose |
+|---------|---------|
+| `pnpm dev` | Run the local Next.js development server |
+| `pnpm build` | Create an optimized production build |
+| `pnpm start` | Serve the production build |
+| `pnpm lint` | Run ESLint |
+| `pnpm test` | Run the Vitest suite once |
+| `pnpm test:watch` | Run Vitest in watch mode |
+| `pnpm db:push` | Push the Drizzle schema to the configured database |
+| `pnpm db:generate` | Generate Drizzle migrations |
+| `pnpm db:migrate` | Apply generated Drizzle migrations |
 
-Use `pnpm db:generate` to create migrations and `pnpm db:migrate` to apply
-generated migrations.
+## MVP status
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Implementation and verification evidence is tracked in
+[`docs/context/2026-07-21-mvp-impl-status.md`](docs/context/2026-07-21-mvp-impl-status.md).
+Production hosting and SMTP delivery are intentionally deferred until local
+manual testing is complete.
