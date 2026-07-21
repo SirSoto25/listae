@@ -73,4 +73,24 @@ describe("searchCatalog", () => {
       1800,
     );
   });
+
+  it("returns stale cache hits when all providers fail", async () => {
+    const stale = [
+      {
+        source: "tmdb",
+        externalId: "11",
+        type: "movie",
+        title: "Dune",
+      },
+    ];
+    mocks.get
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(JSON.stringify(stale));
+    mocks.searchTmdb.mockRejectedValue(new Error("TMDB unavailable"));
+    mocks.searchOpenLibrary.mockRejectedValue(
+      new Error("Open Library unavailable"),
+    );
+
+    await expect(searchCatalog("Dune", "all")).resolves.toEqual(stale);
+  });
 });

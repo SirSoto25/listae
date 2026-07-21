@@ -40,6 +40,9 @@ export async function searchCatalog(
   if (cachedPayload !== null) {
     await cache.invalidate(key);
   }
+  const stalePayload = await cache.get(key, true);
+  const staleHits =
+    stalePayload === null ? null : parseCachedHits(stalePayload);
 
   const searches: Promise<CatalogHit[]>[] = [];
   if (["all", "anime", "series", "movie"].includes(typeFilter)) {
@@ -56,7 +59,7 @@ export async function searchCatalog(
   );
 
   if (successful.length === 0) {
-    return cachedHits ?? [];
+    return staleHits ?? [];
   }
 
   const hits = successful.flatMap((result) => result.value);

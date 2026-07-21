@@ -51,18 +51,14 @@ describe("DB search cache", () => {
     await expect(cache.get("fresh")).resolves.toBe('{"value":1}');
   });
 
-  it("skips and removes expired payloads", async () => {
+  it("skips expired payloads but allows a stale read", async () => {
     await cache.set("expired", '{"value":2}', 60);
     database.run(
       sql`update search_cache set expires_at = 0 where key = 'expired'`,
     );
 
     await expect(cache.get("expired")).resolves.toBeNull();
-    expect(
-      database.get<{ count: number }>(
-        sql`select count(*) as count from search_cache where key = 'expired'`,
-      )?.count,
-    ).toBe(0);
+    await expect(cache.get("expired", true)).resolves.toBe('{"value":2}');
   });
 
   it("invalidates one key or the entire cache", async () => {

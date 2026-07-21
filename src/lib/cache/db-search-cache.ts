@@ -18,7 +18,7 @@ export function buildSearchCacheKey(
 
 export function createDbSearchCacheStore(): SearchCacheStore {
   return {
-    async get(key) {
+    async get(key, allowStale = false) {
       const row = db
         .select({
           payload: searchCache.payload,
@@ -32,8 +32,7 @@ export function createDbSearchCacheStore(): SearchCacheStore {
         return null;
       }
 
-      if (row.expiresAt <= nowInSeconds()) {
-        db.delete(searchCache).where(eq(searchCache.key, key)).run();
+      if (row.expiresAt <= nowInSeconds() && !allowStale) {
         return null;
       }
 
