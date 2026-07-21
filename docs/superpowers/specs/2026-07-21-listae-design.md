@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-21  
 **Repo:** https://github.com/SirSoto25/listae.git  
-**Status:** Draft for user review
+**Status:** Approved (2026-07-21) — proceed to implementation plan
 
 **Docs vivos:** decisiones en [`docs/decisions/`](../../decisions/), contexto en [`docs/context/`](../../context/). Ver [`docs/README.md`](../../README.md).
 

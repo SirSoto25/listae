@@ -51,8 +51,8 @@ Next.js full-stack · Auth.js magic link · Drizzle · SQLite local · caché b�
 - App Next.js **aún no scaffolded**.
 - Commits docs en `main` (ver historial GitHub).
 
-## Próximo paso acordado (pendiente de OK al spec)
+## Próximo paso acordado
 
-1. Usuario revisa y aprueba el spec.
-2. Plan de implementación (`docs/superpowers/plans/`).
-3. Scaffold Next.js + schema + auth + flujos MVP.
+1. ~~Usuario revisa y aprueba el spec.~~ ✅
+2. ~~Plan de implementación.~~ ✅ `docs/superpowers/plans/2026-07-21-listae-mvp.md`
+3. Ejecutar el plan (scaffold → schema → auth → theme → catalog → library → perfil).
