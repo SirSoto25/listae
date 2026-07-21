@@ -22,6 +22,18 @@ describe("validateThemeCss", () => {
     }
   });
 
+  it("rejects a non-Google @import after an allowed import", () => {
+    const evilImport = `@import url("https://evil.example/x.css");`;
+    const css = `@import url("https://fonts.googleapis.com/css2?family=Inter");${evilImport}`;
+    const result = validateThemeCss(css);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors[0].snippet).toBe(evilImport);
+      expect(result.errors[0].line).toBe(1);
+    }
+  });
+
   it("rejects expression()", () => {
     const result = validateThemeCss(
       `body { width: expression(alert(1)); }`,
