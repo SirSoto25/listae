@@ -10,6 +10,7 @@ import {
   users,
   verificationTokens,
 } from "@/lib/db/schema";
+import { ensureProfileTheme } from "@/lib/theme/store";
 
 import { displayNameFromEmail } from "./validation";
 
@@ -50,6 +51,7 @@ export const authConfig = {
           .update(users)
           .set({ displayName: displayNameFromEmail(user.email) })
           .where(eq(users.id, user.id));
+        await ensureProfileTheme(user.id);
       }
     },
   },

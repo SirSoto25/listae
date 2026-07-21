@@ -88,12 +88,20 @@ export default async function LibraryPage({
               this view
             </p>
           </div>
-          <Link
-            className="inline-flex h-11 items-center justify-center rounded-xl bg-stone-950 px-5 text-sm font-bold text-white hover:bg-amber-700"
-            href="/"
-          >
-            + Find a title
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 bg-white px-5 text-sm font-bold text-stone-800 hover:border-amber-700 hover:text-amber-700"
+              href={`/u/${user.username}/customize`}
+            >
+              Customize profile
+            </Link>
+            <Link
+              className="inline-flex h-11 items-center justify-center rounded-xl bg-stone-950 px-5 text-sm font-bold text-white hover:bg-amber-700"
+              href="/"
+            >
+              + Find a title
+            </Link>
+          </div>
         </div>
 
         <div className="mt-6">
