@@ -2,15 +2,22 @@
 
 ## Estado
 
-- Spec **Approved**: `docs/superpowers/specs/2026-07-22-library-domains-design.md`
-- Plan: `docs/superpowers/plans/2026-07-22-library-domains.md`
+- Spec Approved + plan en curso (SDD)
 - Branch: `feat/library-domains`
-- **No code yet** — awaiting execution choice (SDD vs inline)
+- Preferencia fija: **siempre subagentes** → `docs/context/2026-07-22-agent-preferences.md` + `.cursor/rules/agent-execution-sdd.mdc`
+- Briefs SDD de este epic: `.superpowers/sdd/ld-task-N-brief.md` (evitar colisión con briefs de otros epics)
 
-## Locked summary
+## Progreso
 
-Tabs AV/Lectura/Todo (default all); placeholders + CSS var picker; displayName=username; soft warning if username=email local-part.
+| Task | Estado | Commit |
+|------|--------|--------|
+| 1 domain helpers | complete | `e536c20` |
+| 2–9 | pending | — |
+
+## Código canónico
+
+- `src/types/domain.ts` — `LIBRARY_DOMAINS`, `parseLibraryDomain`, `workTypesForDomain`, `domainForWorkType`
 
 ## Antes de compactar
 
-Actualizar este archivo + ledger SDD.
+Volcar este archivo + `.superpowers/sdd/progress.md`.
