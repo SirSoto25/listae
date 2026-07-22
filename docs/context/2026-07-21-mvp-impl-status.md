@@ -7,6 +7,8 @@ La implementación planificada para el MVP está completa en
 Drizzle, autenticación por magic link, catálogo híbrido, biblioteca personal y
 perfiles públicos personalizables.
 
+**PR:** https://github.com/SirSoto25/listae/pull/1 (abierto, mergeable)
+
 ## Checklist de implementación
 
 - [x] Task 1 — Scaffold Next.js, Vitest y scripts base.
@@ -23,7 +25,7 @@ perfiles públicos personalizables.
 
 Ejecutada el 2026-07-21 desde `feat/listae-mvp`:
 
-- [x] `pnpm test` — 13 archivos y 68 tests pasaron.
+- [x] `pnpm test` — 14 archivos y 70 tests pasaron (incluye integración de perfil).
 - [x] `pnpm build` — compilación, TypeScript y generación de rutas completaron
   correctamente.
 - [x] El build incluye `/`, `/login`, `/onboarding`, `/library`,
@@ -52,3 +54,6 @@ marcados como pendientes y no se consideran verificados por los unit tests.
 - Migración de SQLite a Postgres.
 - Adaptador Redis para `SearchCacheStore`.
 - Fuente dedicada de anime, por ejemplo AniList.
+- Deduplicación suave de obras manuales; validación de forma de JSON de caché;
+  migraciones Drizzle versionadas (hoy `db:push`).
+- Checks manuales de navegador listados arriba (pendientes del usuario).
