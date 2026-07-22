@@ -4,26 +4,31 @@ import { useRouter } from "next/navigation";
 
 import {
   LIST_STATUSES,
-  WORK_TYPES,
+  workTypesForDomain,
+  type LibraryDomain,
   type ListStatus,
   type WorkType,
 } from "@/types/domain";
 
 type LibraryFiltersProps = {
+  domain: LibraryDomain;
   type: WorkType | "all";
   status: ListStatus | "all";
   sort: "updatedAt" | "score" | "title";
 };
 
 export function LibraryFilters({
+  domain,
   type,
   status,
   sort,
 }: LibraryFiltersProps) {
   const router = useRouter();
+  const typeOptions = workTypesForDomain(domain);
 
   function update(name: string, value: string) {
     const params = new URLSearchParams({
+      domain,
       type,
       status,
       sort,
@@ -45,7 +50,7 @@ export function LibraryFilters({
           onChange={(event) => update("type", event.target.value)}
         >
           <option value="all">All types</option>
-          {WORK_TYPES.map((workType) => (
+          {typeOptions.map((workType) => (
             <option key={workType} value={workType}>
               {workType}
             </option>
