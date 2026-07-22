@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { DEFAULT_CSS, DEFAULT_HTML_TEMPLATE } from "../defaults";
 import {
+  buildDomainListsHtml,
   buildListsHtml,
   renderProfileHtml,
   type ProfileEntry,
@@ -61,6 +62,32 @@ describe("buildListsHtml", () => {
   });
 });
 
+describe("buildDomainListsHtml", () => {
+  it("wraps audiovisual entries in a domain section", () => {
+    const html = buildDomainListsHtml(entries, "audiovisual");
+
+    expect(html).toContain(
+      'class="listae-domain listae-domain--audiovisual"',
+    );
+    expect(html).toContain('data-domain="audiovisual"');
+    expect(html).toContain("Frieren");
+    expect(html).not.toContain("Dune");
+    expect(html).toContain('data-status="in_progress"');
+  });
+
+  it("wraps reading entries in a domain section", () => {
+    const html = buildDomainListsHtml(entries, "reading");
+
+    expect(html).toContain(
+      'class="listae-domain listae-domain--reading"',
+    );
+    expect(html).toContain('data-domain="reading"');
+    expect(html).toContain("Dune");
+    expect(html).not.toContain("Frieren");
+    expect(html).toContain('data-status="completed"');
+  });
+});
+
 describe("renderProfileHtml", () => {
   it("replaces the supported top-level placeholders", () => {
     const html = renderProfileHtml({
@@ -74,6 +101,28 @@ describe("renderProfileHtml", () => {
     expect(html).toContain("<h1>Alex</h1>");
     expect(html).toContain("<span>@alex</span>");
     expect(html).toContain("Dune");
+    expect(html).not.toContain("{{lists}}");
+  });
+
+  it("replaces domain list placeholders and keeps {{lists}}", () => {
+    const html = renderProfileHtml({
+      template:
+        "{{audiovisual_lists}}{{reading_lists}}{{lists}}",
+      username: "alex",
+      displayName: "Alex",
+      entries,
+    });
+
+    expect(html).toContain(
+      'class="listae-domain listae-domain--audiovisual"',
+    );
+    expect(html).toContain(
+      'class="listae-domain listae-domain--reading"',
+    );
+    expect(html).toContain("Frieren");
+    expect(html).toContain("Dune");
+    expect(html).not.toContain("{{audiovisual_lists}}");
+    expect(html).not.toContain("{{reading_lists}}");
     expect(html).not.toContain("{{lists}}");
   });
 
