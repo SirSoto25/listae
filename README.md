@@ -48,9 +48,10 @@ real email instead, set `EMAIL_SERVER` and `EMAIL_FROM` in `.env.local`.
 
 ## Catalog providers
 
-Set `TMDB_API_KEY` in `.env.local` to search TMDB for movies and series. Open
-Library search does not require a key, and manual title creation remains
-available when an external provider is unavailable or has no match.
+Set `TMDB_API_KEY` in `.env.local` to search TMDB for movies and series. Either
+the **v3 API Key** or the **v4 Read Access Token** (JWT starting with `eyJ`)
+works. Open Library search does not require a key, and manual title creation
+remains available when an external provider is unavailable or has no match.
 
 ## Scripts
 
