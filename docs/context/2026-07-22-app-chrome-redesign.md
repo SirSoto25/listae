@@ -2,38 +2,28 @@
 
 ## Estado
 
-- Spec aprobada: `docs/superpowers/specs/2026-07-22-app-chrome-redesign-dark-mode-design.md`
+- Spec: `docs/superpowers/specs/2026-07-22-app-chrome-redesign-dark-mode-design.md` (Approved)
 - Plan: `docs/superpowers/plans/2026-07-22-app-chrome-redesign-dark-mode.md`
 - Branch: `feat/app-chrome-redesign`
-- Ejecución: Subagent-Driven Development (implementer + review por tarea)
+- Ejecución: SDD (implementer + review por tarea)
 
-## Decisiones de producto (resumen)
+## Código canónico (fuente de verdad)
 
-- Identidad light fresca (canvas `#F4F7FB`, acento índigo `#4F5BD5`), atmósfera fría
-- Dark mode + `system` vía cookie `listae-theme` (sin `next-themes`)
-- Solo chrome oficial; perfiles `/u/[username]` fuera de alcance
-- Tokens primero → migrar pantallas → dark → toggle
-
-## Código como contexto (actualizar al cerrar tareas)
-
-| Área | Archivos canónicos |
-|------|-------------------|
-| Preferencia tema | `src/lib/theme-preference.ts` |
-| Tokens | `src/app/globals.css` (`:root` + `.dark`) |
-| SSR tema | `src/app/layout.tsx` |
-| Toggle | `src/components/theme-toggle.tsx` |
-| Header | `src/components/site-header.tsx` |
-| ADR | `docs/decisions/009-app-theme-preference.md` (Task 9) |
+| Área | Archivo |
+|------|---------|
+| Preferencia tema | `src/lib/theme-preference.ts` (`THEME_COOKIE_NAME=listae-theme`) |
+| Tokens light+dark | `src/app/globals.css` (`:root`, `.dark`, `.app-atmosphere`) |
+| SSR tema + atmósfera | `src/app/layout.tsx` *(Task 4+)* |
+| Toggle | `src/components/theme-toggle.tsx` *(Task 4+)* |
+| Header | `src/components/site-header.tsx` *(Task 5+)* |
 
 ## Progreso
 
-| Task | Estado | Commits |
-|------|--------|---------|
-| 1 theme-preference helpers | complete | `2f3bd9e` |
+| Task | Estado | Commit |
+|------|--------|--------|
+| 1 helpers | complete | `2f3bd9e` |
+| 2 light tokens | complete | `5022a8f` |
+| 3 dark tokens | complete | `95f0cf7` |
+| 4–9 | pending | — |
 
-Ledger scratch: `.superpowers/sdd/progress.md`. Commits reales en `git log feat/app-chrome-redesign`.
-
-### Código canónico tras Task 1
-
-- `src/lib/theme-preference.ts` — `THEME_COOKIE_NAME`, `parseThemePreference`, `resolveTheme`, `themeClassName`
-- Tests: `src/lib/theme-preference.test.ts`
+Ledger: `.superpowers/sdd/progress.md` (scratch). Briefs deben salir del plan actual — no reutilizar briefs del MVP.
