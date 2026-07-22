@@ -64,23 +64,23 @@ export default async function CustomizeProfilePage({
   });
 
   return (
-    <main className="flex-1 bg-[#f7f5f0] px-6 py-10 text-stone-950">
+    <main className="flex-1 bg-transparent px-6 py-10 text-foreground">
       <div className="mx-auto max-w-[96rem]">
-        <header className="mb-8 flex flex-col gap-5 border-b border-stone-300 pb-7 sm:flex-row sm:items-end sm:justify-between">
+        <header className="mb-8 flex flex-col gap-5 border-b border-border pb-7 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.25em] text-amber-700">
+            <p className="text-xs font-black uppercase tracking-[0.25em] text-accent">
               @{user.username}
             </p>
             <h1 className="mt-2 text-4xl font-black tracking-[-0.04em]">
               Customize profile
             </h1>
-            <p className="mt-2 max-w-2xl text-stone-600">
+            <p className="mt-2 max-w-2xl text-muted">
               Edit your safe HTML template and CSS, then review it in the
               script-free preview.
             </p>
           </div>
           <Link
-            className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 bg-white px-5 text-sm font-black hover:border-amber-700 hover:text-amber-700"
+            className="inline-flex h-11 items-center justify-center rounded-xl border border-border bg-surface px-5 text-sm font-black text-foreground hover:border-accent hover:text-accent"
             href={`/u/${user.username}`}
           >
             View public profile
