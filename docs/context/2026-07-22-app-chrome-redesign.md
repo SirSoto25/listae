@@ -27,4 +27,13 @@
 
 ## Progreso
 
-Ver ledger: `.superpowers/sdd/progress.md` (gitignored scratch). Commits reales en `git log feat/app-chrome-redesign`.
+| Task | Estado | Commits |
+|------|--------|---------|
+| 1 theme-preference helpers | complete | `2f3bd9e` |
+
+Ledger scratch: `.superpowers/sdd/progress.md`. Commits reales en `git log feat/app-chrome-redesign`.
+
+### Código canónico tras Task 1
+
+- `src/lib/theme-preference.ts` — `THEME_COOKIE_NAME`, `parseThemePreference`, `resolveTheme`, `themeClassName`
+- Tests: `src/lib/theme-preference.test.ts`
