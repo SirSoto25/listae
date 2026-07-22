@@ -69,3 +69,20 @@ body {
     radial-gradient(1000px 500px at 15% -15%, rgb(139 149 240 / 0.16), transparent 55%),
     radial-gradient(800px 420px at 90% 0%, rgb(36 48 68 / 0.9), transparent 50%);
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  .catalog-hit-enter {
+    animation: catalog-hit-enter 220ms ease-out both;
+  }
+
+  @keyframes catalog-hit-enter {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

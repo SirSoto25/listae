@@ -39,12 +39,12 @@ export default async function OnboardingPage({
   const { error } = await searchParams;
 
   return (
-    <main className="flex flex-1 items-center justify-center bg-zinc-50 px-6 py-16">
-      <section className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
-        <h1 className="text-2xl font-semibold text-zinc-950">
+    <main className="flex flex-1 items-center justify-center bg-transparent px-6 py-16">
+      <section className="w-full max-w-md rounded-[length:var(--radius-panel)] border border-border bg-surface p-8 shadow-sm">
+        <h1 className="text-2xl font-semibold text-foreground">
           Choose your username
         </h1>
-        <p className="mt-2 text-sm leading-6 text-zinc-600">
+        <p className="mt-2 text-sm leading-6 text-muted">
           This becomes your public Listae profile URL.
         </p>
 
@@ -83,10 +83,10 @@ export default async function OnboardingPage({
             redirect("/library");
           }}
         >
-          <label className="block text-sm font-medium text-zinc-800">
+          <label className="block text-sm font-medium text-foreground">
             Username
             <input
-              className="mt-2 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-950 outline-none focus:border-zinc-950"
+              className="mt-2 block w-full rounded-[length:var(--radius-control)] border border-border bg-surface px-3 py-2 text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
               type="text"
               name="username"
               autoComplete="username"
@@ -96,7 +96,7 @@ export default async function OnboardingPage({
               required
             />
           </label>
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-muted">
             3–32 lowercase letters, numbers, or underscores.
           </p>
           {error === "invalid" && (
@@ -108,7 +108,7 @@ export default async function OnboardingPage({
             </p>
           )}
           <button
-            className="w-full rounded-lg bg-zinc-950 px-4 py-2.5 font-medium text-white hover:bg-zinc-800"
+            className="w-full rounded-[length:var(--radius-control)] bg-primary px-4 py-2.5 font-medium text-primary-foreground hover:opacity-90"
             type="submit"
           >
             Save username
