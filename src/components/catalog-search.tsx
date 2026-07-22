@@ -38,11 +38,11 @@ export function CatalogSearch({
     <div className="grid gap-3 md:grid-cols-[1fr_12rem]">
       <label className="group relative block">
         <span className="sr-only">Search titles</span>
-        <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xl text-stone-400">
+        <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xl text-muted">
           ⌕
         </span>
         <input
-          className="h-14 w-full rounded-2xl border border-stone-300 bg-white pl-12 pr-4 text-base text-stone-950 shadow-sm outline-none transition focus:border-amber-600 focus:ring-4 focus:ring-amber-100"
+          className="h-14 w-full rounded-2xl border border-border bg-surface pl-12 pr-4 text-base text-foreground shadow-sm outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search a title, author, or series…"
@@ -52,7 +52,7 @@ export function CatalogSearch({
       <label>
         <span className="sr-only">Media type</span>
         <select
-          className="h-14 w-full rounded-2xl border border-stone-300 bg-white px-4 font-medium capitalize text-stone-800 shadow-sm outline-none focus:border-amber-600 focus:ring-4 focus:ring-amber-100"
+          className="h-14 w-full rounded-2xl border border-border bg-surface px-4 font-medium capitalize text-foreground shadow-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
           value={type}
           onChange={(event) =>
             setType(event.target.value as WorkType | "all")

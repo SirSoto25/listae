@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import Link from "next/link";
 
+import { ThemeToggle } from "@/components/theme-toggle";
 import { auth, signOut } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
@@ -20,51 +21,53 @@ export async function SiteHeader() {
   }
 
   return (
-    <header className="border-b border-stone-200 bg-[#f7f5f0] px-6">
+    <header className="border-b border-border bg-surface/80 px-6 backdrop-blur">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between">
         <Link
-          className="text-xl font-black tracking-[-0.05em] text-stone-950"
+          className="text-xl font-black tracking-[-0.05em] text-foreground"
           href="/"
         >
-          listae<span className="text-amber-700">.</span>
+          listae<span className="text-accent">.</span>
         </Link>
-        <div className="flex items-center gap-5 text-sm font-bold text-stone-600">
-          <Link className="hover:text-amber-700" href="/">
+        <div className="flex items-center gap-5 text-sm font-semibold text-muted">
+          <Link className="hover:text-accent" href="/">
             Search
           </Link>
           {email ? (
             <>
-              <Link className="hover:text-amber-700" href="/library">
+              <Link className="hover:text-accent" href="/library">
                 Library
               </Link>
               {username ? (
-                <Link className="hover:text-amber-700" href={`/u/${username}`}>
+                <Link className="hover:text-accent" href={`/u/${username}`}>
                   Profile
                 </Link>
               ) : (
-                <Link className="hover:text-amber-700" href="/onboarding">
+                <Link className="hover:text-accent" href="/onboarding">
                   Finish setup
                 </Link>
               )}
+            </>
+          ) : null}
+          <div className="flex items-center gap-4 border-l border-border pl-4">
+            <ThemeToggle />
+            {email ? (
               <form
                 action={async () => {
                   "use server";
                   await signOut({ redirectTo: "/" });
                 }}
               >
-                <button
-                  className="hover:text-amber-700"
-                  type="submit"
-                >
+                <button className="hover:text-accent" type="submit">
                   Log out
                 </button>
               </form>
-            </>
-          ) : (
-            <Link className="hover:text-amber-700" href="/login">
-              Sign in
-            </Link>
-          )}
+            ) : (
+              <Link className="hover:text-accent" href="/login">
+                Sign in
+              </Link>
+            )}
+          </div>
         </div>
       </nav>
     </header>

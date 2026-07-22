@@ -74,10 +74,10 @@ export function EntryForm({
         <input type="hidden" name="notes" value={entry?.notes ?? ""} />
       )}
 
-      <label className="block text-sm font-semibold text-stone-700">
+      <label className="block text-sm font-semibold text-muted">
         Status
         <select
-          className="mt-1.5 h-11 w-full rounded-xl border border-stone-300 bg-white px-3 font-normal text-stone-950 outline-none focus:border-amber-600"
+          className="mt-1.5 h-11 w-full rounded-xl border border-border bg-surface px-3 font-normal text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
           name="status"
           defaultValue={entry?.status ?? "plan"}
         >
@@ -89,10 +89,10 @@ export function EntryForm({
         </select>
       </label>
 
-      <label className="block text-sm font-semibold text-stone-700">
+      <label className="block text-sm font-semibold text-muted">
         Score
         <input
-          className="mt-1.5 h-11 w-full rounded-xl border border-stone-300 bg-white px-3 font-normal text-stone-950 outline-none focus:border-amber-600"
+          className="mt-1.5 h-11 w-full rounded-xl border border-border bg-surface px-3 font-normal text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
           type="number"
           name="score"
           min={1}
@@ -105,10 +105,10 @@ export function EntryForm({
 
       {hasProgress && (
         <div className={compact ? "grid grid-cols-2 gap-2" : "grid grid-cols-2 gap-3"}>
-          <label className="block text-sm font-semibold text-stone-700">
+          <label className="block text-sm font-semibold text-muted">
             Progress
             <input
-              className="mt-1.5 h-11 w-full rounded-xl border border-stone-300 bg-white px-3 font-normal text-stone-950 outline-none focus:border-amber-600"
+              className="mt-1.5 h-11 w-full rounded-xl border border-border bg-surface px-3 font-normal text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
               type="number"
               name="progressValue"
               min={0}
@@ -118,10 +118,10 @@ export function EntryForm({
             />
           </label>
           {isReading ? (
-            <label className="block text-sm font-semibold text-stone-700">
+            <label className="block text-sm font-semibold text-muted">
               Unit
               <select
-                className="mt-1.5 h-11 w-full rounded-xl border border-stone-300 bg-white px-2 font-normal text-stone-950 outline-none focus:border-amber-600"
+                className="mt-1.5 h-11 w-full rounded-xl border border-border bg-surface px-2 font-normal text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
                 name="progressUnit"
                 value={progressUnit}
                 onChange={(event) =>
@@ -133,7 +133,7 @@ export function EntryForm({
               </select>
             </label>
           ) : (
-            <div className="pt-8 text-sm text-stone-500">
+            <div className="pt-8 text-sm text-muted">
               {episodesTotal
                 ? `/ ${episodesTotal} episodes`
                 : "episodes"}
@@ -143,10 +143,10 @@ export function EntryForm({
       )}
 
       {!compact && (
-        <label className="block text-sm font-semibold text-stone-700">
+        <label className="block text-sm font-semibold text-muted">
           Notes
           <textarea
-            className="mt-1.5 min-h-24 w-full resize-y rounded-xl border border-stone-300 bg-white px-3 py-2 font-normal text-stone-950 outline-none focus:border-amber-600"
+            className="mt-1.5 min-h-24 w-full resize-y rounded-xl border border-border bg-surface px-3 py-2 font-normal text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
             name="notes"
             maxLength={500}
             defaultValue={entry?.notes ?? ""}
@@ -156,7 +156,7 @@ export function EntryForm({
       )}
 
       <button
-        className={`self-end rounded-xl bg-stone-950 px-5 font-semibold text-white transition hover:bg-amber-700 ${
+        className={`self-end rounded-xl bg-primary px-5 font-semibold text-primary-foreground transition hover:opacity-90 ${
           compact ? "h-11" : "h-12 w-full"
         }`}
         type="submit"

@@ -37,10 +37,10 @@ export default async function TitlePage({
   const { saved } = await searchParams;
 
   return (
-    <main className="flex-1 bg-[#f7f5f0] px-6 py-10 text-stone-950">
+    <main className="flex-1 bg-transparent px-6 py-10 text-foreground">
       <div className="mx-auto max-w-5xl">
         <Link
-          className="text-sm font-bold text-stone-600 hover:text-amber-700"
+          className="text-sm font-bold text-muted hover:text-accent"
           href="/"
         >
           ← Back to search
@@ -54,18 +54,18 @@ export default async function TitlePage({
           />
 
           <div>
-            <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-amber-700">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-accent">
               <span>{work.type}</span>
               {work.year && (
                 <>
-                  <span className="text-stone-300">/</span>
-                  <span className="text-stone-500">{work.year}</span>
+                  <span className="text-border">/</span>
+                  <span className="text-muted">{work.year}</span>
                 </>
               )}
               {work.externalSource && (
                 <>
-                  <span className="text-stone-300">/</span>
-                  <span className="text-stone-500">
+                  <span className="text-border">/</span>
+                  <span className="text-muted">
                     {work.externalSource}
                   </span>
                 </>
@@ -75,24 +75,24 @@ export default async function TitlePage({
               {work.title}
             </h1>
             {work.originalTitle && (
-              <p className="mt-2 text-lg text-stone-500">
+              <p className="mt-2 text-lg text-muted">
                 {work.originalTitle}
               </p>
             )}
             {work.synopsis ? (
-              <p className="mt-6 max-w-2xl leading-7 text-stone-700">
+              <p className="mt-6 max-w-2xl leading-7 text-muted">
                 {work.synopsis}
               </p>
             ) : (
-              <p className="mt-6 italic text-stone-500">
+              <p className="mt-6 italic text-muted">
                 No synopsis is available for this title yet.
               </p>
             )}
 
-            <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+            <section className="mt-10 rounded-[length:var(--radius-panel)] border border-border bg-surface p-6 shadow-sm sm:p-8">
               <div className="mb-6 flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-700">
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-accent">
                     My entry
                   </p>
                   <h2 className="mt-1 text-2xl font-black">
@@ -100,7 +100,7 @@ export default async function TitlePage({
                   </h2>
                 </div>
                 {entry?.score && (
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 text-xl font-black text-amber-900">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent/15 text-xl font-black text-accent">
                     {entry.score}
                   </div>
                 )}
@@ -123,7 +123,7 @@ export default async function TitlePage({
                 />
               ) : (
                 <Link
-                  className="flex h-12 items-center justify-center rounded-xl bg-stone-950 px-5 font-bold text-white hover:bg-amber-700"
+                  className="flex h-12 items-center justify-center rounded-xl bg-primary px-5 font-bold text-primary-foreground hover:opacity-90"
                   href="/login"
                 >
                   Sign in to track this title

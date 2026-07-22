@@ -73,30 +73,30 @@ export default async function LibraryPage({
   }).toString()}`;
 
   return (
-    <main className="flex-1 bg-[#f7f5f0] px-6 py-10 text-stone-950">
+    <main className="flex-1 bg-transparent px-6 py-10 text-foreground">
       <div className="mx-auto max-w-6xl">
-        <div className="flex flex-col gap-6 border-b border-stone-300 pb-8 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-6 border-b border-border pb-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.25em] text-amber-700">
+            <p className="text-xs font-black uppercase tracking-[0.25em] text-accent">
               {user.displayName ?? user.username}&apos;s collection
             </p>
             <h1 className="mt-2 text-4xl font-black tracking-[-0.04em] sm:text-5xl">
               My library
             </h1>
-            <p className="mt-3 text-stone-600">
+            <p className="mt-3 text-muted">
               {entries.length} {entries.length === 1 ? "title" : "titles"} in
               this view
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
-              className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 bg-white px-5 text-sm font-bold text-stone-800 hover:border-amber-700 hover:text-amber-700"
+              className="inline-flex h-11 items-center justify-center rounded-xl border border-border bg-surface px-5 text-sm font-bold text-foreground hover:border-accent hover:text-accent"
               href={`/u/${user.username}/customize`}
             >
               Customize profile
             </Link>
             <Link
-              className="inline-flex h-11 items-center justify-center rounded-xl bg-stone-950 px-5 text-sm font-bold text-white hover:bg-amber-700"
+              className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground hover:opacity-90"
               href="/"
             >
               + Find a title
@@ -115,13 +115,13 @@ export default async function LibraryPage({
         )}
 
         {entries.length === 0 ? (
-          <div className="mt-8 rounded-3xl border border-dashed border-stone-300 bg-white/70 p-12 text-center">
+          <div className="mt-8 rounded-3xl border border-dashed border-border bg-surface/70 p-12 text-center">
             <h2 className="text-2xl font-black">Nothing in this view yet.</h2>
-            <p className="mt-2 text-stone-600">
+            <p className="mt-2 text-muted">
               Change the filters or search for something worth tracking.
             </p>
             <Link
-              className="mt-6 inline-flex h-11 items-center rounded-xl bg-amber-700 px-5 text-sm font-bold text-white hover:bg-amber-800"
+              className="mt-6 inline-flex h-11 items-center rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground hover:opacity-90"
               href="/"
             >
               Search the catalog
@@ -133,7 +133,7 @@ export default async function LibraryPage({
               return (
                 <article
                   key={entry.id}
-                  className="grid gap-5 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm lg:grid-cols-[5rem_14rem_1fr] lg:items-center"
+                  className="grid gap-5 rounded-2xl border border-border bg-surface p-4 shadow-sm lg:grid-cols-[5rem_14rem_1fr] lg:items-center"
                 >
                   <WorkCover
                     className="hidden aspect-[2/3] rounded-xl lg:block"
@@ -141,16 +141,16 @@ export default async function LibraryPage({
                     alt=""
                   />
                   <div className="min-w-0">
-                    <div className="text-[11px] font-black uppercase tracking-widest text-amber-700">
+                    <div className="text-[11px] font-black uppercase tracking-widest text-accent">
                       {work.type}
                     </div>
                     <Link
-                      className="mt-1 block truncate text-lg font-black hover:text-amber-700"
+                      className="mt-1 block truncate text-lg font-black hover:text-accent"
                       href={`/title/${work.id}`}
                     >
                       {work.title}
                     </Link>
-                    <p className="mt-1 text-xs text-stone-500">
+                    <p className="mt-1 text-xs text-muted">
                       Updated{" "}
                       {new Intl.DateTimeFormat("en", {
                         dateStyle: "medium",

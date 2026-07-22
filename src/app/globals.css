@@ -1,19 +1,88 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #f7f5f0;
-  --foreground: #1c1917;
+  --background: #f4f7fb;
+  --surface: #ffffff;
+  --foreground: #0f172a;
+  --muted: #64748b;
+  --accent: #4f5bd5;
+  --border: #d8dee8;
+  --primary: #0f172a;
+  --primary-foreground: #f8fafc;
+  --radius-control: 0.75rem;
+  --radius-surface: 1rem;
+  --radius-panel: 1.5rem;
+  color-scheme: light;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --radius-control: var(--radius-control);
+  --radius-surface: var(--radius-surface);
+  --radius-panel: var(--radius-panel);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+.app-atmosphere {
+  background-image:
+    radial-gradient(1200px 600px at 10% -10%, rgb(79 91 213 / 0.14), transparent 60%),
+    radial-gradient(900px 500px at 90% 0%, rgb(100 116 139 / 0.12), transparent 55%);
+  background-attachment: fixed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-atmosphere {
+    background-attachment: scroll;
+  }
+}
+
+.dark {
+  --background: #0b1220;
+  --surface: #121a2b;
+  --foreground: #e8eef9;
+  --muted: #94a3b8;
+  --accent: #8b95f0;
+  --border: #243044;
+  --primary: #e8eef9;
+  --primary-foreground: #0b1220;
+  color-scheme: dark;
+}
+
+.dark .app-atmosphere {
+  background-image:
+    radial-gradient(1000px 500px at 15% -15%, rgb(139 149 240 / 0.16), transparent 55%),
+    radial-gradient(800px 420px at 90% 0%, rgb(36 48 68 / 0.9), transparent 50%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .catalog-hit-enter {
+    animation: catalog-hit-enter 220ms ease-out both;
+  }
+
+  @keyframes catalog-hit-enter {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
