@@ -144,7 +144,13 @@ describe("default theme", () => {
   it("provides placeholders and styles for grouped entry details", () => {
     expect(DEFAULT_HTML_TEMPLATE).toContain("{{displayName}}");
     expect(DEFAULT_HTML_TEMPLATE).toContain("{{username}}");
-    expect(DEFAULT_HTML_TEMPLATE).toContain("{{lists}}");
+    expect(DEFAULT_HTML_TEMPLATE).toContain("{{audiovisual_lists}}");
+    expect(DEFAULT_HTML_TEMPLATE).toContain("{{reading_lists}}");
+    expect(DEFAULT_HTML_TEMPLATE).not.toContain("{{lists}}");
+    expect(DEFAULT_CSS).toContain("/* listae:domain-vars:start */");
+    expect(DEFAULT_CSS).toContain(".listae-domain--audiovisual");
+    expect(DEFAULT_CSS).toContain(".listae-domain--reading");
+    expect(DEFAULT_CSS).toContain("var(--listae-domain-bg)");
     expect(DEFAULT_CSS).toContain(".listae-entry-cover");
     expect(DEFAULT_CSS).toContain(".listae-entry-score");
     expect(DEFAULT_CSS).toContain(".listae-entry-progress");
@@ -162,7 +168,13 @@ describe("default theme", () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.html).toContain('class="listae-profile-header"');
-      expect(result.html).toContain('class="listae-lists"');
+      expect(result.html).toContain('class="listae-domain-block"');
+      expect(result.html).toContain(
+        'class="listae-domain listae-domain--audiovisual"',
+      );
+      expect(result.html).toContain(
+        'class="listae-domain listae-domain--reading"',
+      );
     }
   });
 });
