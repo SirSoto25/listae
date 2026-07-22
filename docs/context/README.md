@@ -15,3 +15,4 @@ Notas vivas: alcance, glosario, estado del proyecto, resúmenes de sesión.
 | [2026-07-21-agents-skills-inventory.md](./2026-07-21-agents-skills-inventory.md) | Skills/agents/plugins útiles y gaps para Listae |
 | [2026-07-21-skills-created.md](./2026-07-21-skills-created.md) | Skills y rules creadas (global + proyecto) |
 | [2026-07-22-handoff-contexto.md](./2026-07-22-handoff-contexto.md) | Handoff de continuidad (limpieza de contexto) |
+| [2026-07-22-auth-access-notes.md](./2026-07-22-auth-access-notes.md) | Auth y acceso: verificación local, rutas protegidas y gaps UX |
