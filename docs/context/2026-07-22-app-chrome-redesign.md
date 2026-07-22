@@ -25,11 +25,15 @@
 | 2 light tokens | complete | `5022a8f` |
 | 3 dark tokens | complete | `95f0cf7` |
 | 4 layout SSR + ThemeToggle | complete | `641c05b` |
-| 5–9 | pending | — |
+| 5 header IA | complete | (see branch log) |
+| 6 library / chrome pages | complete | (see branch log) |
+| 7 search / hits motion | complete | (see branch log) |
+| 8 customize editor chrome | complete | (see branch log) |
+| 9 ADR + spec Approved + verify | complete | (this task) |
 
-### Tras Task 4
+### Notas
 
-- `src/app/layout.tsx` — cookie → `html.dark`, `app-atmosphere` on body
-- `src/components/theme-toggle.tsx` — listo; montaje en header = Task 5
+- Spec status: **Approved**. ADR 009 documenta cookie `listae-theme` sin `next-themes`.
+- Tasks 1–8 implementation landed on `feat/app-chrome-redesign`; Task 9 closes docs + verification.
 
 Ledger: `.superpowers/sdd/progress.md` (scratch). Briefs del plan actual.
