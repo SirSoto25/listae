@@ -2,17 +2,19 @@
 
 import { useState } from "react";
 
-import { normalizeUsername } from "@/lib/auth/validation";
+import {
+  normalizeUsername,
+  usernameMatchesEmailLocalPart,
+} from "@/lib/auth/validation";
 
 type UsernameFieldProps = {
-  emailLocalPart: string;
+  email: string;
 };
 
-export function UsernameField({ emailLocalPart }: UsernameFieldProps) {
+export function UsernameField({ email }: UsernameFieldProps) {
   const [username, setUsername] = useState("");
-  const localPart = emailLocalPart.trim().toLowerCase();
   const showWarning =
-    username.length > 0 && normalizeUsername(username) === localPart;
+    username.length > 0 && usernameMatchesEmailLocalPart(username, email);
 
   return (
     <>

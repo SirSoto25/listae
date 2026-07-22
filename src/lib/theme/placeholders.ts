@@ -120,6 +120,11 @@ export function buildDomainListsHtml(
   const domainEntries = entries.filter(
     (entry) => domainForWorkType(entry.type) === domain,
   );
+
+  if (domainEntries.length === 0) {
+    return "";
+  }
+
   const inner = buildListsHtml(domainEntries);
 
   return [

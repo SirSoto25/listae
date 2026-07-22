@@ -5,11 +5,7 @@ import { UsernameField } from "@/components/username-field";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
-import {
-  emailLocalPart,
-  normalizeUsername,
-  USERNAME_PATTERN,
-} from "@/lib/auth/validation";
+import { normalizeUsername, USERNAME_PATTERN } from "@/lib/auth/validation";
 
 type OnboardingPageProps = {
   searchParams: Promise<{ error?: string }>;
@@ -85,9 +81,7 @@ export default async function OnboardingPage({
             redirect("/library");
           }}
         >
-          <UsernameField
-            emailLocalPart={emailLocalPart(session.user.email)}
-          />
+          <UsernameField email={session.user.email} />
           {error === "invalid" && (
             <p className="text-sm text-red-600 dark:text-red-400">Enter a valid username.</p>
           )}

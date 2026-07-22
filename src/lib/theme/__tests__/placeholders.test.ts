@@ -86,6 +86,17 @@ describe("buildDomainListsHtml", () => {
     expect(html).not.toContain("Frieren");
     expect(html).toContain('data-status="completed"');
   });
+
+  it("returns empty string when the domain has no entries", () => {
+    expect(buildDomainListsHtml(entries, "audiovisual")).not.toBe("");
+    expect(buildDomainListsHtml([], "audiovisual")).toBe("");
+    expect(buildDomainListsHtml(entries, "reading")).not.toBe("");
+
+    const readingOnly: ProfileEntry[] = [
+      { ...entries[0], type: "book", status: "completed" },
+    ];
+    expect(buildDomainListsHtml(readingOnly, "audiovisual")).toBe("");
+  });
 });
 
 describe("renderProfileHtml", () => {
