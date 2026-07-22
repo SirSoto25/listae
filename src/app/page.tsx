@@ -107,14 +107,6 @@ export default async function Home({ searchParams }: HomeProps) {
                       name="externalId"
                       value={hit.externalId}
                     />
-                    <input type="hidden" name="type" value={hit.type} />
-                    <input type="hidden" name="title" value={hit.title} />
-                    <input type="hidden" name="year" value={hit.year ?? ""} />
-                    <input
-                      type="hidden"
-                      name="coverUrl"
-                      value={hit.coverUrl ?? ""}
-                    />
                     <button
                       className="w-full rounded-xl bg-stone-950 px-4 py-2.5 text-sm font-bold text-white transition group-hover:bg-amber-700"
                       type="submit"
