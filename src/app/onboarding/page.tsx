@@ -100,10 +100,10 @@ export default async function OnboardingPage({
             3–32 lowercase letters, numbers, or underscores.
           </p>
           {error === "invalid" && (
-            <p className="text-sm text-red-700">Enter a valid username.</p>
+            <p className="text-sm text-red-600 dark:text-red-400">Enter a valid username.</p>
           )}
           {error === "taken" && (
-            <p className="text-sm text-red-700">
+            <p className="text-sm text-red-600 dark:text-red-400">
               That username is already taken.
             </p>
           )}

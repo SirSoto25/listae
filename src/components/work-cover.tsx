@@ -9,7 +9,7 @@ type WorkCoverProps = {
 export function WorkCover({ src, alt, className = "" }: WorkCoverProps) {
   return (
     <div
-      className={`relative overflow-hidden bg-gradient-to-br from-border to-surface transition duration-180 hover:scale-[1.02] motion-reduce:transform-none motion-reduce:transition-none ${className}`}
+      className={`relative overflow-hidden bg-gradient-to-br from-border to-surface transition duration-[180ms] hover:scale-[1.02] motion-reduce:transform-none motion-reduce:transition-none ${className}`}
     >
       {src ? (
         <img
