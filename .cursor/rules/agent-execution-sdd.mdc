@@ -1,0 +1,12 @@
+---
+description: Listae always executes planned implementation via subagents (SDD)
+alwaysApply: true
+---
+
+# Agent execution preference
+
+When implementing features, bugfixes, or multi-step plans in this repo:
+
+1. **Default to Subagent-Driven Development** — dispatch a fresh implementer subagent per plan task, then a task reviewer; do not implement the whole plan inline in the parent session unless the user explicitly asks for inline execution for that run.
+2. Before context compaction, dump living decisions and progress to `docs/context/` (and `.superpowers/sdd/progress.md` when using SDD).
+3. See `docs/context/2026-07-22-agent-preferences.md` for the user-facing note.

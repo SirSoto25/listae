@@ -18,3 +18,4 @@ Notas vivas: alcance, glosario, estado del proyecto, resúmenes de sesión.
 | [2026-07-22-auth-access-notes.md](./2026-07-22-auth-access-notes.md) | Auth y acceso: verificación local, rutas protegidas y gaps UX |
 | [2026-07-22-app-chrome-redesign.md](./2026-07-22-app-chrome-redesign.md) | Redesign chrome + dark mode: spec/plan, mapa de código, progreso SDD |
 | [2026-07-22-library-domains.md](./2026-07-22-library-domains.md) | Split AV/lectura, picker CSS de dominio, displayName=username |
+| [2026-07-22-agent-preferences.md](./2026-07-22-agent-preferences.md) | Preferencia fija: implementar siempre vía subagentes (SDD) |
