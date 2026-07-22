@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-22  
 **Repo:** https://github.com/SirSoto25/listae  
-**Status:** Draft — awaiting user review before implementation plan  
+**Status:** Approved (2026-07-22) — proceed to implementation plan  
 **Related:** [2026-07-21-listae-design.md](./2026-07-21-listae-design.md), ADR 005 (profile HTML/CSS), ADR 009 (app theme — unrelated chrome)
 
 ## 1. Purpose

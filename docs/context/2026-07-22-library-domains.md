@@ -2,19 +2,15 @@
 
 ## Estado
 
-Diseño escrito: `docs/superpowers/specs/2026-07-22-library-domains-design.md`  
-**Status:** Draft — pendiente review del usuario antes del plan.  
-**No implementar** hasta aprobación de la spec.
+- Spec **Approved**: `docs/superpowers/specs/2026-07-22-library-domains-design.md`
+- Plan: `docs/superpowers/plans/2026-07-22-library-domains.md`
+- Branch: `feat/library-domains`
+- **No code yet** — awaiting execution choice (SDD vs inline)
 
-## Decisiones locked (resumen)
+## Locked summary
 
-| Tema | Elección |
-|------|----------|
-| Library | Tabs AV \| Lectura \| Todo; Todo mezclado; default `domain=all`; query params |
-| Perfil | `{{audiovisual_lists}}` / `{{reading_lists}}` + wrappers; `{{lists}}` compat |
-| Estilos | Picker escribe bloque `/* listae:domain-vars:… */` (vars CSS); CSS libre OK |
-| Display name | = username onboarding; no email; backfill; aviso si username = local-part email |
+Tabs AV/Lectura/Todo (default all); placeholders + CSS var picker; displayName=username; soft warning if username=email local-part.
 
 ## Antes de compactar
 
-Volcar progreso a este archivo + spec. No confiar solo en el chat.
+Actualizar este archivo + ledger SDD.
