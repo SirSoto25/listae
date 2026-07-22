@@ -24,6 +24,12 @@
 | 1 helpers | complete | `2f3bd9e` |
 | 2 light tokens | complete | `5022a8f` |
 | 3 dark tokens | complete | `95f0cf7` |
-| 4–9 | pending | — |
+| 4 layout SSR + ThemeToggle | complete | `641c05b` |
+| 5–9 | pending | — |
 
-Ledger: `.superpowers/sdd/progress.md` (scratch). Briefs deben salir del plan actual — no reutilizar briefs del MVP.
+### Tras Task 4
+
+- `src/app/layout.tsx` — cookie → `html.dark`, `app-atmosphere` on body
+- `src/components/theme-toggle.tsx` — listo; montaje en header = Task 5
+
+Ledger: `.superpowers/sdd/progress.md` (scratch). Briefs del plan actual.
