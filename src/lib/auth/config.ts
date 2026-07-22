@@ -22,7 +22,11 @@ export const authConfig = {
     verificationTokensTable: verificationTokens,
   }),
   session: { strategy: "database" },
-  pages: { signIn: "/login" },
+  pages: {
+    signIn: "/login",
+    verifyRequest: "/login/verify",
+    error: "/login",
+  },
   providers: [
     Nodemailer({
       server: process.env.EMAIL_SERVER ?? "smtp://localhost:1025",
@@ -70,10 +74,7 @@ export const authConfig = {
         return baseUrl;
       }
 
-      if (target.pathname === "/library") {
-        return `${baseUrl}/onboarding`;
-      }
-
+      // Library already sends users without a username to /onboarding.
       return target.toString();
     },
   },
