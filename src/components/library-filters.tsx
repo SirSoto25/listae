@@ -33,11 +33,11 @@ export function LibraryFilters({
   }
 
   const selectClass =
-    "h-11 rounded-xl border border-stone-300 bg-white px-3 text-sm font-medium text-stone-800 outline-none focus:border-amber-600";
+    "h-11 rounded-xl border border-border bg-surface px-3 text-sm font-medium text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20";
 
   return (
-    <div className="flex flex-wrap gap-3 rounded-2xl border border-stone-200 bg-stone-50 p-3">
-      <label className="grid gap-1 text-xs font-bold uppercase tracking-wider text-stone-500">
+    <div className="flex flex-wrap gap-3 rounded-2xl border border-border bg-background p-3">
+      <label className="grid gap-1 text-xs font-bold uppercase tracking-wider text-muted">
         Type
         <select
           className={selectClass}
@@ -52,7 +52,7 @@ export function LibraryFilters({
           ))}
         </select>
       </label>
-      <label className="grid gap-1 text-xs font-bold uppercase tracking-wider text-stone-500">
+      <label className="grid gap-1 text-xs font-bold uppercase tracking-wider text-muted">
         Status
         <select
           className={selectClass}
@@ -67,7 +67,7 @@ export function LibraryFilters({
           ))}
         </select>
       </label>
-      <label className="grid gap-1 text-xs font-bold uppercase tracking-wider text-stone-500">
+      <label className="grid gap-1 text-xs font-bold uppercase tracking-wider text-muted">
         Sort
         <select
           className={selectClass}

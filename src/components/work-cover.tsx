@@ -9,7 +9,7 @@ type WorkCoverProps = {
 export function WorkCover({ src, alt, className = "" }: WorkCoverProps) {
   return (
     <div
-      className={`relative overflow-hidden bg-[linear-gradient(145deg,#e7e5e4,#d6d3d1)] ${className}`}
+      className={`relative overflow-hidden bg-gradient-to-br from-border to-surface transition duration-180 hover:scale-[1.02] motion-reduce:transform-none motion-reduce:transition-none ${className}`}
     >
       {src ? (
         <img
@@ -20,7 +20,7 @@ export function WorkCover({ src, alt, className = "" }: WorkCoverProps) {
         />
       ) : (
         <div className="flex h-full items-end p-4">
-          <span className="text-xs font-bold uppercase tracking-[0.18em] text-stone-500">
+          <span className="text-xs font-bold uppercase tracking-[0.18em] text-muted">
             Listae
           </span>
         </div>
