@@ -27,6 +27,35 @@ type TmdbResponse = {
 
 let hasLoggedMissingKey = false;
 
+/** TMDB v4 read access tokens are JWTs; v3 API keys are short hex strings. */
+export function isTmdbBearerToken(credential: string): boolean {
+  return credential.startsWith("eyJ");
+}
+
+export function buildTmdbRequest(
+  path: string,
+  credential: string,
+  params: Record<string, string>,
+): { url: URL; headers: HeadersInit } {
+  const url = new URL(`${TMDB_BASE_URL}/${path}`);
+  for (const [key, value] of Object.entries(params)) {
+    url.searchParams.set(key, value);
+  }
+
+  if (isTmdbBearerToken(credential)) {
+    return {
+      url,
+      headers: {
+        Authorization: `Bearer ${credential}`,
+        Accept: "application/json",
+      },
+    };
+  }
+
+  url.searchParams.set("api_key", credential);
+  return { url, headers: { Accept: "application/json" } };
+}
+
 function yearFromDate(value?: string): number | undefined {
   if (!value) {
     return undefined;
@@ -97,13 +126,13 @@ export async function searchTmdb(
       : typeFilter === "movie"
         ? "search/movie"
         : "search/tv";
-  const url = new URL(`${TMDB_BASE_URL}/${endpoint}`);
-  url.searchParams.set("api_key", apiKey);
-  url.searchParams.set("query", query);
-  url.searchParams.set("include_adult", "false");
-  url.searchParams.set("page", "1");
+  const { url, headers } = buildTmdbRequest(endpoint, apiKey, {
+    query,
+    include_adult: "false",
+    page: "1",
+  });
 
-  const response = await fetch(url, { cache: "no-store" });
+  const response = await fetch(url, { cache: "no-store", headers });
   if (!response.ok) {
     throw new Error(`TMDB search failed with status ${response.status}`);
   }
@@ -126,9 +155,8 @@ export async function resolveTmdb(externalId: string): Promise<CatalogHit> {
   }
 
   const [, mediaType, id] = identity;
-  const url = new URL(`${TMDB_BASE_URL}/${mediaType}/${id}`);
-  url.searchParams.set("api_key", apiKey);
-  const response = await fetch(url, { cache: "no-store" });
+  const { url, headers } = buildTmdbRequest(`${mediaType}/${id}`, apiKey, {});
+  const response = await fetch(url, { cache: "no-store", headers });
   if (!response.ok) {
     throw new Error(`TMDB lookup failed with status ${response.status}`);
   }

@@ -62,6 +62,15 @@ export async function searchCatalog(
   }
 
   const settled = await Promise.allSettled(searches);
+  for (const result of settled) {
+    if (result.status === "rejected") {
+      console.warn(
+        "[listae catalog] provider failed:",
+        result.reason instanceof Error ? result.reason.message : result.reason,
+      );
+    }
+  }
+
   const successful = settled.filter(
     (result): result is PromiseFulfilledResult<CatalogHit[]> =>
       result.status === "fulfilled",
