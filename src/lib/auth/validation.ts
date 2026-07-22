@@ -4,6 +4,16 @@ export function normalizeUsername(value: string) {
   return value.trim().toLowerCase();
 }
 
-export function displayNameFromEmail(email: string) {
-  return email.split("@", 1)[0];
+export function emailLocalPart(email: string): string {
+  return email.split("@", 1)[0] ?? "";
+}
+
+export function usernameMatchesEmailLocalPart(
+  username: string,
+  email: string,
+): boolean {
+  return (
+    normalizeUsername(username) ===
+    emailLocalPart(email).trim().toLowerCase()
+  );
 }

@@ -1,5 +1,4 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { eq } from "drizzle-orm";
 import type { NextAuthConfig } from "next-auth";
 import Nodemailer from "next-auth/providers/nodemailer";
 
@@ -11,8 +10,6 @@ import {
   verificationTokens,
 } from "@/lib/db/schema";
 import { ensureProfileTheme } from "@/lib/theme/store";
-
-import { displayNameFromEmail } from "./validation";
 
 export const authConfig = {
   adapter: DrizzleAdapter(db, {
@@ -50,11 +47,7 @@ export const authConfig = {
   ],
   events: {
     async createUser({ user }) {
-      if (user.id && user.email) {
-        await db
-          .update(users)
-          .set({ displayName: displayNameFromEmail(user.email) })
-          .where(eq(users.id, user.id));
+      if (user.id) {
         await ensureProfileTheme(user.id);
       }
     },

@@ -7,6 +7,7 @@ import { LibraryDomainTabs } from "@/components/library-domain-tabs";
 import { LibraryFilters } from "@/components/library-filters";
 import { WorkCover } from "@/components/work-cover";
 import { auth } from "@/lib/auth";
+import { reconcileDisplayNameForUser } from "@/lib/auth/backfill-display-names";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { listLibraryEntries } from "@/lib/lists/entries";
@@ -62,7 +63,7 @@ export default async function LibraryPage({
   }
 
   const user = await db.query.users.findFirst({
-    columns: { id: true, username: true },
+    columns: { id: true, username: true, displayName: true },
     where: eq(users.email, session.user.email),
   });
   if (!user) {
@@ -71,6 +72,12 @@ export default async function LibraryPage({
   if (!user.username) {
     redirect("/onboarding");
   }
+
+  await reconcileDisplayNameForUser(
+    user.id,
+    user.username,
+    user.displayName,
+  );
 
   const params = await searchParams;
   const domain = parseLibraryDomain(params.domain);

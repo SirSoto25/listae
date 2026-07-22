@@ -1,16 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  displayNameFromEmail,
+  emailLocalPart,
   normalizeUsername,
   USERNAME_PATTERN,
+  usernameMatchesEmailLocalPart,
 } from "./validation";
 
 describe("auth profile helpers", () => {
-  it("derives a display name from the email local-part", () => {
-    expect(displayNameFromEmail("alex.soto@example.com")).toBe("alex.soto");
-  });
-
   it("normalizes usernames before validation", () => {
     expect(normalizeUsername("  Alex_Soto  ")).toBe("alex_soto");
   });
@@ -21,5 +18,22 @@ describe("auth profile helpers", () => {
     expect(USERNAME_PATTERN.test("ab")).toBe(false);
     expect(USERNAME_PATTERN.test("Alex-Soto")).toBe(false);
     expect(USERNAME_PATTERN.test("a".repeat(33))).toBe(false);
+  });
+
+  it("extracts the email local-part", () => {
+    expect(emailLocalPart("alex.soto@example.com")).toBe("alex.soto");
+    expect(emailLocalPart("user@domain@extra")).toBe("user");
+  });
+
+  it("detects when username matches the email local-part", () => {
+    expect(
+      usernameMatchesEmailLocalPart("alex_soto", "Alex_Soto@example.com"),
+    ).toBe(true);
+    expect(
+      usernameMatchesEmailLocalPart("  Alex_Soto  ", "alex_soto@example.com"),
+    ).toBe(true);
+    expect(
+      usernameMatchesEmailLocalPart("other_name", "alex_soto@example.com"),
+    ).toBe(false);
   });
 });
