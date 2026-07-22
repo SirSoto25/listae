@@ -1,12 +1,14 @@
 ---
-description: Listae always executes planned implementation via subagents (SDD)
+description: Listae always executes any change or task via subagents (SDD)
 alwaysApply: true
 ---
 
 # Agent execution preference
 
-When implementing features, bugfixes, or multi-step plans in this repo:
+**Hard default:** any change or task in this repo (features, bugfixes, docs, refactors, follow-ups) is done via **subagents**, not inline in the parent session.
 
-1. **Default to Subagent-Driven Development** — dispatch a fresh implementer subagent per plan task, then a task reviewer; do not implement the whole plan inline in the parent session unless the user explicitly asks for inline execution for that run.
-2. Before context compaction, dump living decisions and progress to `docs/context/` (and `.superpowers/sdd/progress.md` when using SDD).
-3. See `docs/context/2026-07-22-agent-preferences.md` for the user-facing note.
+1. **Subagent-Driven Development** — dispatch a fresh implementer subagent per task (or plan step), then a task reviewer when the work warrants it.
+2. Do **not** implement in the parent session unless the user **explicitly** asks for inline execution for that specific run.
+3. Before context compaction, dump living decisions and progress to `docs/context/` (and `.superpowers/sdd/progress.md` when using SDD).
+4. **Finish via Pull Request (default):** when a feature/fix branch is complete, **always** finish by pushing and creating a Pull Request (`git push -u origin HEAD` + `gh pr create`). Do **not** merge locally or discard by default. Only use another finish path (local merge, discard, etc.) if the user **explicitly** picks that option for that run. See the finishing-a-development-branch skill (option 2: PR).
+5. See `docs/context/2026-07-22-agent-preferences.md` for the user-facing note.
