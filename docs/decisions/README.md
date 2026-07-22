@@ -38,3 +38,4 @@ Implicaciones positivas y negativas.
 | 007 | Documentación continua en Markdown | aceptada |
 | 008 | Global template skills + Listae project skills | aceptada |
 | 009 | Preferencia de tema de la app (cookie) | aceptada |
+| 010 | Library domains, picker de dominio, displayName = username | aceptada |
