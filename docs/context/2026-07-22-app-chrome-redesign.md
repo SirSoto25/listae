@@ -2,38 +2,28 @@
 
 ## Estado
 
-- Spec: `docs/superpowers/specs/2026-07-22-app-chrome-redesign-dark-mode-design.md` (Approved)
-- Plan: `docs/superpowers/plans/2026-07-22-app-chrome-redesign-dark-mode.md`
-- Branch: `feat/app-chrome-redesign`
-- Ejecución: SDD (implementer + review por tarea)
+- Spec Approved + plan ejecutado (Tasks 1–9) en `feat/app-chrome-redesign`
+- Final review: Approve with nits → fix wave `37b911b`
+- Tests: 83/83 PASS
 
-## Código canónico (fuente de verdad)
+## Código canónico
 
 | Área | Archivo |
 |------|---------|
-| Preferencia tema | `src/lib/theme-preference.ts` (`THEME_COOKIE_NAME=listae-theme`) |
-| Tokens light+dark | `src/app/globals.css` (`:root`, `.dark`, `.app-atmosphere`) |
-| SSR tema + atmósfera | `src/app/layout.tsx` *(Task 4+)* |
-| Toggle | `src/components/theme-toggle.tsx` *(Task 4+)* |
-| Header | `src/components/site-header.tsx` *(Task 5+)* |
+| Preferencia | `src/lib/theme-preference.ts` (`listae-theme`) |
+| Tokens | `src/app/globals.css` |
+| SSR + atmósfera | `src/app/layout.tsx` |
+| Toggle | `src/components/theme-toggle.tsx` |
+| Header | `src/components/site-header.tsx` |
+| ADR | `docs/decisions/009-app-theme-preference.md` |
 
-## Progreso
+## Pendiente manual (browser)
 
-| Task | Estado | Commit |
-|------|--------|--------|
-| 1 helpers | complete | `2f3bd9e` |
-| 2 light tokens | complete | `5022a8f` |
-| 3 dark tokens | complete | `95f0cf7` |
-| 4 layout SSR + ThemeToggle | complete | `641c05b` |
-| 5 header IA | complete | (see branch log) |
-| 6 library / chrome pages | complete | (see branch log) |
-| 7 search / hits motion | complete | (see branch log) |
-| 8 customize editor chrome | complete | (see branch log) |
-| 9 ADR + spec Approved + verify | complete | (this task) |
+- FOUC / system vs OS
+- Contraste visual dark en banners emerald (fast-follow)
 
-### Notas
+## Fast-follow opcionales
 
-- Spec status: **Approved**. ADR 009 documenta cookie `listae-theme` sin `next-themes`.
-- Tasks 1–8 implementation landed on `feat/app-chrome-redesign`; Task 9 closes docs + verification.
-
-Ledger: `.superpowers/sdd/progress.md` (scratch). Briefs del plan actual.
+- Tokens success/danger
+- Pasar preferencia SSR al ThemeToggle (evitar label flash)
+- Comentar/quitar lectura `sec-ch-prefers-color-scheme` sin Accept-CH
