@@ -51,3 +51,21 @@ body {
     background-attachment: scroll;
   }
 }
+
+.dark {
+  --background: #0b1220;
+  --surface: #121a2b;
+  --foreground: #e8eef9;
+  --muted: #94a3b8;
+  --accent: #8b95f0;
+  --border: #243044;
+  --primary: #e8eef9;
+  --primary-foreground: #0b1220;
+  color-scheme: dark;
+}
+
+.dark .app-atmosphere {
+  background-image:
+    radial-gradient(1000px 500px at 15% -15%, rgb(139 149 240 / 0.16), transparent 55%),
+    radial-gradient(800px 420px at 90% 0%, rgb(36 48 68 / 0.9), transparent 50%);
+}
