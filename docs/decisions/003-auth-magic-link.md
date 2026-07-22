@@ -20,3 +20,4 @@ Varias cuentas (dueño + amigos), sin features sociales. Había que elegir mecan
 
 - Necesita proveedor de email (dev: Ethereal/Mailpit/consola; prod: Resend/etc. cuando toque).
 - Perfiles públicos `/u/[username]` siguen siendo legibles sin sesión.
+- UX de sesión: nav con Sign in / Library / Profile / Log out; página `/login/verify` tras enviar el link; errores Auth.js (`Verification`, etc.) se muestran en `/login` para reenviar.

@@ -38,11 +38,28 @@ it("allows sign-in before the adapter has inserted the new user", async () => {
   expect(result).toBe(true);
 });
 
-it("routes the post-login library callback through onboarding", async () => {
+it("keeps same-origin post-login callbacks intact", async () => {
   const result = await authConfig.callbacks.redirect({
     url: "http://localhost:3000/library",
     baseUrl: "http://localhost:3000",
   });
 
-  expect(result).toBe("http://localhost:3000/onboarding");
+  expect(result).toBe("http://localhost:3000/library");
+});
+
+it("rejects external redirect targets", async () => {
+  const result = await authConfig.callbacks.redirect({
+    url: "https://evil.example/phish",
+    baseUrl: "http://localhost:3000",
+  });
+
+  expect(result).toBe("http://localhost:3000");
+});
+
+it("points Auth.js at custom sign-in and verify pages", () => {
+  expect(authConfig.pages).toEqual({
+    signIn: "/login",
+    verifyRequest: "/login/verify",
+    error: "/login",
+  });
 });
