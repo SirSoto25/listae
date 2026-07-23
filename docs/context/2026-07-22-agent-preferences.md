@@ -15,6 +15,14 @@
 - **No** merge local por defecto ni descartar la rama sin que el usuario elija explícitamente otra opción para esa corrida.
 - Si piden guardar preferencias o docs de proceso, commitear solo esos archivos (p. ej. `.cursor/rules/` y `docs/context/`), no artefactos SDD en `.superpowers/` salvo que lo pidan.
 
+
+## Contexto de codigo (Graphify)
+
+- Graphify es la herramienta de grafo de codigo del repo: antes de grep masivo o muchos Read, consultar graphify-out/GRAPH_REPORT.md o graphify query / graphify path / graphify explain.
+- Regenerar (sin API key): graphify extract . --code-only y luego graphify cluster-only . --no-label.
+- Regla Cursor: .cursor/rules/graphify.mdc (alwaysApply: true). Salida local en graphify-out/ (gitignored).
+- MCP opcional: graphify-mcp viene con uv tool install graphifyy; anadir servidor MCP en Cursor si se quiere.
+
 ## Relacionado
 
 - Epic actual: `docs/context/2026-07-22-library-domains.md`
