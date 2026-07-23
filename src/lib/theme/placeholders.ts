@@ -1,5 +1,6 @@
 import {
   LIST_STATUSES,
+  domainForWorkType,
   type ListStatus,
   type WorkType,
 } from "@/types/domain";
@@ -112,6 +113,27 @@ export function buildListsHtml(entries: ProfileEntry[]): string {
   }).join("");
 }
 
+export function buildDomainListsHtml(
+  entries: ProfileEntry[],
+  domain: "audiovisual" | "reading",
+): string {
+  const domainEntries = entries.filter(
+    (entry) => domainForWorkType(entry.type) === domain,
+  );
+
+  if (domainEntries.length === 0) {
+    return "";
+  }
+
+  const inner = buildListsHtml(domainEntries);
+
+  return [
+    `<section class="listae-domain listae-domain--${domain}" data-domain="${domain}">`,
+    inner,
+    "</section>",
+  ].join("");
+}
+
 export function renderProfileHtml({
   template,
   username,
@@ -122,6 +144,8 @@ export function renderProfileHtml({
     "{{username}}": escapeHtml(username),
     "{{displayName}}": escapeHtml(displayName),
     "{{lists}}": buildListsHtml(entries),
+    "{{audiovisual_lists}}": buildDomainListsHtml(entries, "audiovisual"),
+    "{{reading_lists}}": buildDomainListsHtml(entries, "reading"),
   };
 
   return Object.entries(replacements).reduce(

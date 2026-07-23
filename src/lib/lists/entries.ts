@@ -1,11 +1,14 @@
 import { randomUUID } from "node:crypto";
 
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { listEntries, works } from "@/lib/db/schema";
 import {
   LIST_STATUSES,
+  parseLibraryDomain,
+  workTypesForDomain,
+  type LibraryDomain,
   type ListStatus,
   type ProgressUnit,
   type WorkType,
@@ -47,6 +50,7 @@ export type NormalizedEntryInput = {
 };
 
 export type LibraryFilters = {
+  domain?: LibraryDomain;
   type?: WorkType | "all";
   status?: ListStatus | "all";
   sort?: "updatedAt" | "score" | "title";
@@ -187,8 +191,19 @@ export async function listLibraryEntries(
   filters: LibraryFilters = {},
 ) {
   const conditions = [eq(listEntries.userId, userId)];
-  if (filters.type && filters.type !== "all") {
-    conditions.push(eq(works.type, filters.type));
+  const domain = parseLibraryDomain(filters.domain ?? "all");
+  const allowed = workTypesForDomain(domain);
+  const type =
+    filters.type &&
+    filters.type !== "all" &&
+    (allowed as readonly string[]).includes(filters.type)
+      ? filters.type
+      : "all";
+
+  if (type !== "all") {
+    conditions.push(eq(works.type, type));
+  } else if (domain !== "all") {
+    conditions.push(inArray(works.type, [...allowed]));
   }
   if (filters.status && filters.status !== "all") {
     conditions.push(eq(listEntries.status, filters.status));

@@ -28,9 +28,10 @@ Plan SDD completo (Tasks 1–9) + fixes de review:
 - Tests: **70** pasando (`pnpm test`); `pnpm build` OK en verificación Task 9
 - Final branch review: **Approve with nits**; Importants ya corregidos (multi-`@import` + test integración perfil)
 
-## Docs canónicos
+## Nota operativa (usuario)
 
-- Spec: `docs/superpowers/specs/2026-07-21-listae-design.md` (Approved)
+Antes de **compactar contexto** del chat, volcar estado vivo a `docs/context/` (y ledger SDD si aplica) para no perder decisiones. Ver también `2026-07-22-library-domains.md`.
+
 - Plan: `docs/superpowers/plans/2026-07-21-listae-mvp.md`
 - ADRs: `docs/decisions/` (001–008+)
 - Estado MVP: `docs/context/2026-07-21-mvp-impl-status.md`

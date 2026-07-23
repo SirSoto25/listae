@@ -3,21 +3,27 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { EntryForm } from "@/components/entry-form";
+import { LibraryDomainTabs } from "@/components/library-domain-tabs";
 import { LibraryFilters } from "@/components/library-filters";
 import { WorkCover } from "@/components/work-cover";
 import { auth } from "@/lib/auth";
+import { reconcileDisplayNameForUser } from "@/lib/auth/backfill-display-names";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { listLibraryEntries } from "@/lib/lists/entries";
 import {
   LIST_STATUSES,
   WORK_TYPES,
+  parseLibraryDomain,
+  workTypesForDomain,
+  type LibraryDomain,
   type ListStatus,
   type WorkType,
 } from "@/types/domain";
 
 type LibraryPageProps = {
   searchParams: Promise<{
+    domain?: string;
     type?: string;
     status?: string;
     sort?: string;
@@ -25,8 +31,15 @@ type LibraryPageProps = {
   }>;
 };
 
-function parseType(value?: string): WorkType | "all" {
-  return value && WORK_TYPES.includes(value as WorkType)
+function parseType(
+  value: string | undefined,
+  domain: LibraryDomain,
+): WorkType | "all" {
+  if (!value || !WORK_TYPES.includes(value as WorkType)) {
+    return "all";
+  }
+  const allowed = workTypesForDomain(domain);
+  return (allowed as readonly string[]).includes(value)
     ? (value as WorkType)
     : "all";
 }
@@ -60,12 +73,25 @@ export default async function LibraryPage({
     redirect("/onboarding");
   }
 
+  await reconcileDisplayNameForUser(
+    user.id,
+    user.username,
+    user.displayName,
+  );
+
   const params = await searchParams;
-  const type = parseType(params.type);
+  const domain = parseLibraryDomain(params.domain);
+  const type = parseType(params.type, domain);
   const status = parseStatus(params.status);
   const sort = parseSort(params.sort);
-  const entries = await listLibraryEntries(user.id, { type, status, sort });
+  const entries = await listLibraryEntries(user.id, {
+    domain,
+    type,
+    status,
+    sort,
+  });
   const returnPath = `/library?${new URLSearchParams({
+    domain,
     type,
     status,
     sort,
@@ -78,7 +104,7 @@ export default async function LibraryPage({
         <div className="flex flex-col gap-6 border-b border-border pb-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.25em] text-accent">
-              {user.displayName ?? user.username}&apos;s collection
+              {user.username}&apos;s collection
             </p>
             <h1 className="mt-2 text-4xl font-black tracking-[-0.04em] sm:text-5xl">
               My library
@@ -104,8 +130,14 @@ export default async function LibraryPage({
           </div>
         </div>
 
-        <div className="mt-6">
-          <LibraryFilters type={type} status={status} sort={sort} />
+        <div className="mt-6 space-y-4">
+          <LibraryDomainTabs domain={domain} status={status} sort={sort} />
+          <LibraryFilters
+            domain={domain}
+            type={type}
+            status={status}
+            sort={sort}
+          />
         </div>
 
         {params.saved === "1" && (

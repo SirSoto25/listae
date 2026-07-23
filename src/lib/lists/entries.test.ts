@@ -1,6 +1,75 @@
-import { describe, expect, it } from "vitest";
+import { sql } from "drizzle-orm";
+import { beforeAll, describe, expect, it } from "vitest";
 
-import { normalizeEntryInput, parseScore } from "./entries";
+let parseScore: typeof import("./entries").parseScore;
+let normalizeEntryInput: typeof import("./entries").normalizeEntryInput;
+let listLibraryEntries: typeof import("./entries").listLibraryEntries;
+let addListEntry: typeof import("./entries").addListEntry;
+let createManualWork: typeof import("@/lib/catalog/works").createManualWork;
+let database: typeof import("@/lib/db").db;
+
+beforeAll(async () => {
+  process.env.DATABASE_URL = "file::memory:";
+
+  const [entriesModule, dbModule, worksModule] = await Promise.all([
+    import("./entries"),
+    import("@/lib/db"),
+    import("@/lib/catalog/works"),
+  ]);
+
+  parseScore = entriesModule.parseScore;
+  normalizeEntryInput = entriesModule.normalizeEntryInput;
+  listLibraryEntries = entriesModule.listLibraryEntries;
+  addListEntry = entriesModule.addListEntry;
+  createManualWork = worksModule.createManualWork;
+  database = dbModule.db;
+
+  database.run(sql`
+    create table users (
+      id text primary key,
+      email text not null unique,
+      username text unique,
+      display_name text
+    )
+  `);
+  database.run(sql`
+    create table works (
+      id text primary key,
+      type text not null,
+      title text not null,
+      original_title text,
+      cover_url text,
+      year integer,
+      synopsis text,
+      external_source text,
+      external_id text,
+      episodes_total integer,
+      chapters_total integer,
+      pages_total integer,
+      created_at integer not null default (unixepoch())
+    )
+  `);
+  database.run(sql`
+    create table list_entries (
+      id text primary key,
+      user_id text not null references users(id) on delete cascade,
+      work_id text not null references works(id) on delete cascade,
+      status text not null,
+      score integer,
+      progress_value integer not null default 0,
+      progress_unit text,
+      notes text,
+      started_at integer,
+      finished_at integer,
+      updated_at integer not null default (unixepoch()),
+      unique(user_id, work_id)
+    )
+  `);
+  database.run(sql`
+    insert into users (id, email, username, display_name)
+    values ('user-domain', 'domain@example.com', 'domainuser', 'Domain User')
+  `);
+});
 
 describe("parseScore", () => {
   it.each(["", null, undefined])("returns null for %s", (raw) => {
@@ -114,5 +183,26 @@ describe("normalizeEntryInput", () => {
         totals,
       ),
     ).toMatchObject({ progressValue: 13, progressUnit: "pages" });
+  });
+});
+
+describe("listLibraryEntries domain filter", () => {
+  it('returns only audiovisual works when domain is "audiovisual"', async () => {
+    const movie = await createManualWork({ type: "movie", title: "AV Movie" });
+    const book = await createManualWork({ type: "book", title: "Reading Book" });
+
+    await addListEntry("user-domain", movie.id, { status: "plan" });
+    await addListEntry("user-domain", book.id, {
+      status: "plan",
+      progressValue: 0,
+      progressUnit: "pages",
+    });
+
+    const rows = await listLibraryEntries("user-domain", {
+      domain: "audiovisual",
+    });
+
+    expect(rows.map((row) => row.work.type)).toEqual(["movie"]);
+    expect(rows.map((row) => row.work.title)).toEqual(["AV Movie"]);
   });
 });

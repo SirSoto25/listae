@@ -6,9 +6,29 @@ import {
   saveThemeAction,
   type SaveThemeResult,
 } from "@/app/actions/theme";
+import { DomainThemePicker } from "@/components/domain-theme-picker";
+import { DEFAULT_CSS } from "@/lib/theme/defaults";
+import {
+  parseDomainVarsBlock,
+  upsertDomainVarsBlock,
+  type DomainVarsInput,
+} from "@/lib/theme/domain-vars";
 import type { ProfileEntry } from "@/lib/theme/placeholders";
 import { renderTheme } from "@/lib/theme/render";
 import { buildThemeDocument } from "@/lib/theme/save";
+
+const FALLBACK_DOMAIN_VARS: DomainVarsInput = {
+  audiovisual: { bg: "#1a2238", accent: "#6b7ae8", fg: "#e8eef9" },
+  reading: { bg: "#1c222c", accent: "#7a8a9a", fg: "#e8eef0" },
+};
+
+function domainVarsFromCss(css: string): DomainVarsInput {
+  return (
+    parseDomainVarsBlock(css) ??
+    parseDomainVarsBlock(DEFAULT_CSS) ??
+    FALLBACK_DOMAIN_VARS
+  );
+}
 
 type ThemeEditorProps = {
   username: string;
@@ -31,6 +51,9 @@ export function ThemeEditor({
 }: ThemeEditorProps) {
   const [htmlTemplate, setHtmlTemplate] = useState(initialHtmlTemplate);
   const [customCss, setCustomCss] = useState(initialCustomCss);
+  const [domainVars, setDomainVars] = useState(() =>
+    domainVarsFromCss(initialCustomCss),
+  );
   const [result, setResult] = useState<SaveThemeResult | null>(null);
   const [isPending, startTransition] = useTransition();
   const preview = useMemo(
@@ -54,7 +77,25 @@ export function ThemeEditor({
   function restoreDefaults() {
     setHtmlTemplate(defaultHtmlTemplate);
     setCustomCss(defaultCustomCss);
+    setDomainVars(domainVarsFromCss(defaultCustomCss));
     setResult(null);
+  }
+
+  function applyDomainColors() {
+    try {
+      setCustomCss((css) => upsertDomainVarsBlock(css, domainVars));
+      setResult(null);
+    } catch {
+      setResult({
+        ok: false,
+        errors: [
+          {
+            message:
+              "Domain colors must be valid #RRGGBB hex values before applying.",
+          },
+        ],
+      });
+    }
   }
 
   function saveTheme() {
@@ -86,7 +127,8 @@ export function ThemeEditor({
           </span>
           <span className="mt-1 block text-xs text-muted">
             Supported placeholders: {"{{displayName}}"}, {"{{username}}"},{" "}
-            and {"{{lists}}"}.
+            {"{{audiovisual_lists}}"}, {"{{reading_lists}}"}, and{" "}
+            {"{{lists}}"}.
           </span>
           <textarea
             className="mt-3 min-h-72 w-full rounded-[length:var(--radius-panel)] border border-border bg-primary p-4 font-mono text-sm leading-6 text-primary-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
@@ -97,12 +139,20 @@ export function ThemeEditor({
           />
         </label>
 
+        <DomainThemePicker
+          value={domainVars}
+          onChange={setDomainVars}
+          onApply={applyDomainColors}
+        />
+
         <label className="block">
           <span className="text-sm font-black text-foreground">
             Custom CSS
           </span>
           <span className="mt-1 block text-xs text-muted">
             HTTPS Google Fonts imports are allowed. JavaScript is never run.
+            Domain picker rewrites the marked /* listae:domain-vars */ block
+            only.
           </span>
           <textarea
             className="mt-3 min-h-96 w-full rounded-[length:var(--radius-panel)] border border-border bg-primary p-4 font-mono text-sm leading-6 text-primary-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"

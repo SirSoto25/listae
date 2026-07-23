@@ -1,13 +1,11 @@
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
+import { UsernameField } from "@/components/username-field";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
-import {
-  normalizeUsername,
-  USERNAME_PATTERN,
-} from "@/lib/auth/validation";
+import { normalizeUsername, USERNAME_PATTERN } from "@/lib/auth/validation";
 
 type OnboardingPageProps = {
   searchParams: Promise<{ error?: string }>;
@@ -77,28 +75,13 @@ export default async function OnboardingPage({
 
             await db
               .update(users)
-              .set({ username })
+              .set({ username, displayName: username })
               .where(eq(users.email, currentSession.user.email));
 
             redirect("/library");
           }}
         >
-          <label className="block text-sm font-medium text-foreground">
-            Username
-            <input
-              className="mt-2 block w-full rounded-[length:var(--radius-control)] border border-border bg-surface px-3 py-2 text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
-              type="text"
-              name="username"
-              autoComplete="username"
-              minLength={3}
-              maxLength={32}
-              pattern="[a-z0-9_]{3,32}"
-              required
-            />
-          </label>
-          <p className="text-xs text-muted">
-            3–32 lowercase letters, numbers, or underscores.
-          </p>
+          <UsernameField email={session.user.email} />
           {error === "invalid" && (
             <p className="text-sm text-red-600 dark:text-red-400">Enter a valid username.</p>
           )}
