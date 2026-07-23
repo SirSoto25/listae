@@ -47,3 +47,6 @@ data/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# graphify code graph (local AST)
+graphify-out/
