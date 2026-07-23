@@ -3,9 +3,8 @@ import { notFound } from "next/navigation";
 
 import { db } from "@/lib/db";
 import { profileThemes, users } from "@/lib/db/schema";
-import { listLibraryEntries } from "@/lib/lists/entries";
+import { listLibraryEntries, rowsToProfileEntries } from "@/lib/lists/entries";
 import { DEFAULT_CSS, DEFAULT_HTML_TEMPLATE } from "@/lib/theme/defaults";
-import type { ProfileEntry } from "@/lib/theme/placeholders";
 import { renderTheme } from "@/lib/theme/render";
 import { buildThemeDocument } from "@/lib/theme/save";
 
@@ -31,30 +30,7 @@ export default async function PublicProfilePage({
       where: eq(profileThemes.userId, user.id),
     }),
   ]);
-  const entries: ProfileEntry[] = rows.map(({ entry, work }) => {
-    const total =
-      work.type === "anime" || work.type === "series"
-        ? work.episodesTotal
-        : entry.progressUnit === "chapters"
-          ? work.chaptersTotal
-          : entry.progressUnit === "pages"
-            ? work.pagesTotal
-            : null;
-    const progress =
-      work.type === "movie"
-        ? "No progress tracking"
-        : `${entry.progressValue}${total ? ` / ${total}` : ""} ${entry.progressUnit ?? "items"}`;
-
-    return {
-      title: work.title,
-      type: work.type,
-      status: entry.status,
-      score: entry.score,
-      progress,
-      cover: work.coverUrl,
-      url: `/title/${work.id}`,
-    };
-  });
+  const entries = rowsToProfileEntries(rows);
   const activeTheme = storedTheme ?? {
     htmlTemplate: DEFAULT_HTML_TEMPLATE,
     customCss: DEFAULT_CSS,
@@ -90,3 +66,4 @@ export default async function PublicProfilePage({
     </main>
   );
 }
+

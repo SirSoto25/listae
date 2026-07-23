@@ -9,6 +9,10 @@ export type ThemeSaveInput = {
   customCss: string;
 };
 
+export type PreparedThemeContent =
+  | { ok: true; template: string; css: string }
+  | { ok: false; errors: ThemeCssError[] };
+
 export type PreparedTheme =
   | {
       ok: true;
@@ -19,19 +23,35 @@ export type PreparedTheme =
       errors: ThemeCssError[];
     };
 
-export function prepareThemeForSave(
-  input: ThemeSaveInput,
-): PreparedTheme {
-  const cssResult = validateThemeCss(input.customCss);
+export function prepareThemeContent(
+  template: string,
+  css: string,
+): PreparedThemeContent {
+  const cssResult = validateThemeCss(css);
   if (!cssResult.ok) {
     return cssResult;
   }
 
   return {
     ok: true,
+    template: sanitizeThemeHtml(template),
+    css: cssResult.css,
+  };
+}
+
+export function prepareThemeForSave(
+  input: ThemeSaveInput,
+): PreparedTheme {
+  const prepared = prepareThemeContent(input.htmlTemplate, input.customCss);
+  if (!prepared.ok) {
+    return prepared;
+  }
+
+  return {
+    ok: true,
     theme: {
-      htmlTemplate: sanitizeThemeHtml(input.htmlTemplate),
-      customCss: cssResult.css,
+      htmlTemplate: prepared.template,
+      customCss: prepared.css,
     },
   };
 }

@@ -4,6 +4,7 @@ import { and, asc, desc, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { listEntries, works } from "@/lib/db/schema";
+import type { ProfileEntry } from "@/lib/theme/placeholders";
 import {
   LIST_STATUSES,
   parseLibraryDomain,
@@ -180,12 +181,6 @@ export async function updateListEntry(
   return addListEntry(userId, workId, input);
 }
 
-export async function deleteListEntry(userId: string, workId: string) {
-  await db
-    .delete(listEntries)
-    .where(and(eq(listEntries.userId, userId), eq(listEntries.workId, workId)));
-}
-
 export async function listLibraryEntries(
   userId: string,
   filters: LibraryFilters = {},
@@ -223,3 +218,32 @@ export async function listLibraryEntries(
     .where(and(...conditions))
     .orderBy(sort);
 }
+export function rowsToProfileEntries(
+  rows: Awaited<ReturnType<typeof listLibraryEntries>>,
+): ProfileEntry[] {
+  return rows.map(({ entry, work }) => {
+    const total =
+      work.type === "anime" || work.type === "series"
+        ? work.episodesTotal
+        : entry.progressUnit === "chapters"
+          ? work.chaptersTotal
+          : entry.progressUnit === "pages"
+            ? work.pagesTotal
+            : null;
+    const progress =
+      work.type === "movie"
+        ? "No progress tracking"
+        : `${entry.progressValue}${total ? ` / ${total}` : ""} ${entry.progressUnit ?? "items"}`;
+
+    return {
+      title: work.title,
+      type: work.type,
+      status: entry.status,
+      score: entry.score,
+      progress,
+      cover: work.coverUrl,
+      url: `/title/${work.id}`,
+    };
+  });
+}
+

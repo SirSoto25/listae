@@ -1,6 +1,6 @@
 # Preferencias de proceso (agente)
 
-**Actualizado:** 2026-07-22
+**Actualizado:** 2026-07-23
 
 ## Ejecución
 
@@ -23,7 +23,13 @@
 - Regla Cursor: .cursor/rules/graphify.mdc (alwaysApply: true). Salida local en graphify-out/ (gitignored).
 - MCP opcional: graphify-mcp viene con uv tool install graphifyy; anadir servidor MCP en Cursor si se quiere.
 
+
+## Ponytail (code hygiene)
+
+- Skill: `.agents/skills/ponytail/SKILL.md`; Cursor rule: `.cursor/rules/ponytail.mdc`.
+- **Wave 1 in progress** on branch `chore/ponytail-wave-1` (dead code removal + small dedupes).
 ## Relacionado
 
 - Epic actual: `docs/context/2026-07-22-library-domains.md`
 - Plan: `docs/superpowers/plans/2026-07-22-library-domains.md`
+

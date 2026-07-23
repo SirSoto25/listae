@@ -17,17 +17,13 @@ import type { ProfileEntry } from "@/lib/theme/placeholders";
 import { renderTheme } from "@/lib/theme/render";
 import { buildThemeDocument } from "@/lib/theme/save";
 
-const FALLBACK_DOMAIN_VARS: DomainVarsInput = {
-  audiovisual: { bg: "#1a2238", accent: "#6b7ae8", fg: "#e8eef9" },
-  reading: { bg: "#1c222c", accent: "#7a8a9a", fg: "#e8eef0" },
-};
-
 function domainVarsFromCss(css: string): DomainVarsInput {
-  return (
-    parseDomainVarsBlock(css) ??
-    parseDomainVarsBlock(DEFAULT_CSS) ??
-    FALLBACK_DOMAIN_VARS
-  );
+  const parsed =
+    parseDomainVarsBlock(css) ?? parseDomainVarsBlock(DEFAULT_CSS);
+  if (!parsed) {
+    throw new Error("DEFAULT_CSS must define domain theme variables");
+  }
+  return parsed;
 }
 
 type ThemeEditorProps = {
@@ -232,3 +228,4 @@ export function ThemeEditor({
     </div>
   );
 }
+
