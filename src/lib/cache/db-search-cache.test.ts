@@ -1,9 +1,7 @@
 import { sql } from "drizzle-orm";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import type { SearchCacheStore } from "./types";
-
-let cache: SearchCacheStore;
+let cache: ReturnType<typeof import("./db-search-cache").createDbSearchCacheStore>;
 let database: typeof import("@/lib/db").db;
 
 beforeAll(async () => {

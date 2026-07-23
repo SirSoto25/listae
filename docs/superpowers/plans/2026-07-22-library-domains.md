@@ -415,15 +415,7 @@ export function usernameMatchesEmailLocalPart(
 - Remove or stop using `displayNameFromEmail` in config; update/remove its tests accordingly
 - Modify: `src/app/onboarding/page.tsx` — on success `.set({ username, displayName: username })`; client soft warning when match (pass email local-part flag from server via comparing session email — use a small client input listener or server-rendered note based on form… simplest: client component warning that receives `emailLocalPart` as prop from server page)
 - Modify library eyebrow to `username` (not stale displayName) until backfill runs
-- Create `src/lib/auth/backfill-display-names.ts`:
-
-```ts
-export async function backfillDisplayNamesFromUsernames(): Promise<number> {
-  // UPDATE users SET display_name = username WHERE username IS NOT NULL AND (display_name IS NULL OR display_name != username)
-}
-```
-
-- Call once from onboarding after save **and/or** from library page lazily (idempotent). Prefer explicit function invoked at start of `library/page.tsx` once per request is heavy — better: call in onboarding + document `pnpm` one-liner; also run backfill inside `library/page.tsx` only when `displayName !== username` for that user (single-row fix, cheap).
+- Create `src/lib/auth/backfill-display-names.ts` with `reconcileDisplayNameForUser` (single-row fix when `displayName !== username`).
 
 - [ ] **Step 1: validation tests for match helper**
 

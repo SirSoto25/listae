@@ -1,9 +1,6 @@
 import { renderProfileHtml, type ProfileEntry } from "./placeholders";
-import { sanitizeThemeHtml } from "./sanitize-html";
-import {
-  validateThemeCss,
-  type ThemeCssError,
-} from "./validate-css";
+import { prepareThemeContent } from "./save";
+import { type ThemeCssError } from "./validate-css";
 
 export type RenderThemeArgs = {
   template: string;
@@ -24,18 +21,17 @@ export function renderTheme({
   displayName,
   entries,
 }: RenderThemeArgs): RenderThemeResult {
-  const cssResult = validateThemeCss(css);
-  if (!cssResult.ok) {
-    return cssResult;
+  const prepared = prepareThemeContent(template, css);
+  if (!prepared.ok) {
+    return prepared;
   }
 
-  const sanitizedTemplate = sanitizeThemeHtml(template);
   const html = renderProfileHtml({
-    template: sanitizedTemplate,
+    template: prepared.template,
     username,
     displayName,
     entries,
   });
 
-  return { ok: true, html, css: cssResult.css };
+  return { ok: true, html, css: prepared.css };
 }

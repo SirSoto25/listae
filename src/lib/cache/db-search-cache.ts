@@ -3,8 +3,6 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { searchCache } from "@/lib/db/schema";
 
-import type { SearchCacheStore } from "./types";
-
 const nowInSeconds = () => Math.floor(Date.now() / 1000);
 
 export function buildSearchCacheKey(
@@ -16,7 +14,11 @@ export function buildSearchCacheKey(
   return `catalog:${normalizedType}:${normalizedQuery}`;
 }
 
-export function createDbSearchCacheStore(): SearchCacheStore {
+export function createDbSearchCacheStore(): {
+  get(key: string, allowStale?: boolean): Promise<string | null>;
+  set(key: string, payload: string, ttlSeconds: number): Promise<void>;
+  invalidate(key?: string): Promise<void>;
+} {
   return {
     async get(key, allowStale = false) {
       const row = db

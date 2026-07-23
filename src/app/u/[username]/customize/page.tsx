@@ -6,9 +6,8 @@ import { ThemeEditor } from "@/components/theme-editor";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
-import { listLibraryEntries } from "@/lib/lists/entries";
+import { listLibraryEntries, rowsToProfileEntries } from "@/lib/lists/entries";
 import { DEFAULT_CSS, DEFAULT_HTML_TEMPLATE } from "@/lib/theme/defaults";
-import type { ProfileEntry } from "@/lib/theme/placeholders";
 import { ensureProfileTheme } from "@/lib/theme/store";
 
 type CustomizeProfilePageProps = {
@@ -39,29 +38,7 @@ export default async function CustomizeProfilePage({
     ensureProfileTheme(user.id),
     listLibraryEntries(user.id),
   ]);
-  const entries: ProfileEntry[] = rows.map(({ entry, work }) => {
-    const total =
-      work.type === "anime" || work.type === "series"
-        ? work.episodesTotal
-        : entry.progressUnit === "chapters"
-          ? work.chaptersTotal
-          : entry.progressUnit === "pages"
-            ? work.pagesTotal
-            : null;
-
-    return {
-      title: work.title,
-      type: work.type,
-      status: entry.status,
-      score: entry.score,
-      progress:
-        work.type === "movie"
-          ? "No progress tracking"
-          : `${entry.progressValue}${total ? ` / ${total}` : ""} ${entry.progressUnit ?? "items"}`,
-      cover: work.coverUrl,
-      url: `/title/${work.id}`,
-    };
-  });
+  const entries = rowsToProfileEntries(rows);
 
   return (
     <main className="flex-1 bg-transparent px-6 py-10 text-foreground">
@@ -100,3 +77,4 @@ export default async function CustomizeProfilePage({
     </main>
   );
 }
+
