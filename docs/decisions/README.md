@@ -39,3 +39,4 @@ Implicaciones positivas y negativas.
 | 008 | Global template skills + Listae project skills | aceptada |
 | 009 | Preferencia de tema de la app (cookie) | aceptada |
 | 010 | Library domains, picker de dominio, displayName = username | aceptada |
+| 011 | URL locales (es/en), i18n casero, perfiles sin prefijo | aceptada |
