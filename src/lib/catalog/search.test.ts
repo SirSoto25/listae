@@ -9,8 +9,8 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/cache/db-search-cache", () => ({
-  buildSearchCacheKey: (query: string, type: string) =>
-    `catalog:${type}:${query.trim().toLowerCase().replace(/\s+/g, " ")}`,
+  buildSearchCacheKey: (query: string, type: string, locale: string) =>
+    `catalog:${locale}:${type}:${query.trim().toLowerCase().replace(/\s+/g, " ")}`,
   createDbSearchCacheStore: () => ({
     get: mocks.get,
     set: mocks.set,
@@ -45,7 +45,7 @@ describe("searchCatalog", () => {
     ];
     mocks.get.mockResolvedValue(JSON.stringify(cached));
 
-    await expect(searchCatalog(" Dune ", "all")).resolves.toEqual(cached);
+    await expect(searchCatalog(" Dune ", "all", "es")).resolves.toEqual(cached);
     expect(mocks.searchTmdb).not.toHaveBeenCalled();
     expect(mocks.searchOpenLibrary).not.toHaveBeenCalled();
   });
@@ -66,12 +66,16 @@ describe("searchCatalog", () => {
     mocks.searchTmdb.mockResolvedValue([movie]);
     mocks.searchOpenLibrary.mockResolvedValue([book]);
 
-    await expect(searchCatalog("Dune", "all")).resolves.toEqual([movie, book]);
+    await expect(searchCatalog("Dune", "all", "en")).resolves.toEqual([
+      movie,
+      book,
+    ]);
     expect(mocks.set).toHaveBeenCalledWith(
-      "catalog:all:dune",
+      "catalog:en:all:dune",
       JSON.stringify([movie, book]),
       1800,
     );
+    expect(mocks.searchTmdb).toHaveBeenCalledWith("Dune", "all", "en");
   });
 
   it("returns stale cache hits when all providers fail", async () => {
@@ -91,6 +95,6 @@ describe("searchCatalog", () => {
       new Error("Open Library unavailable"),
     );
 
-    await expect(searchCatalog("Dune", "all")).resolves.toEqual(stale);
+    await expect(searchCatalog("Dune", "all", "es")).resolves.toEqual(stale);
   });
 });

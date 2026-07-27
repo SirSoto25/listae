@@ -29,7 +29,8 @@ beforeAll(async () => {
       id text primary key,
       email text not null unique,
       username text unique,
-      display_name text
+      display_name text,
+      profile_locale text not null default 'es'
     )
   `);
   database.run(sql`
@@ -37,10 +38,14 @@ beforeAll(async () => {
       id text primary key,
       type text not null,
       title text not null,
+      title_es text,
+      title_en text,
       original_title text,
       cover_url text,
       year integer,
       synopsis text,
+      synopsis_es text,
+      synopsis_en text,
       external_source text,
       external_id text,
       episodes_total integer,

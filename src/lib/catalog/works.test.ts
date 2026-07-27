@@ -29,10 +29,14 @@ beforeAll(async () => {
       id text primary key,
       type text not null,
       title text not null,
+      title_es text,
+      title_en text,
       original_title text,
       cover_url text,
       year integer,
       synopsis text,
+      synopsis_es text,
+      synopsis_en text,
       external_source text,
       external_id text,
       episodes_total integer,
@@ -55,11 +59,16 @@ describe("work helpers", () => {
       externalId: "438631",
       type: "movie" as const,
       title: "Dune",
+      titleEn: "Dune",
       year: 2021,
     };
 
     const first = await upsertWorkFromHit(hit);
-    const second = await upsertWorkFromHit({ ...hit, title: "Dune: Part One" });
+    const second = await upsertWorkFromHit({
+      ...hit,
+      title: "Dune: Part One",
+      titleEn: "Dune: Part One",
+    });
 
     expect(second.id).toBe(first.id);
     expect(
@@ -67,6 +76,40 @@ describe("work helpers", () => {
         sql`select title from works where id = ${first.id}`,
       )?.title,
     ).toBe("Dune");
+  });
+
+  it("persists bilingual fields on first import", async () => {
+    const hit = {
+      source: "tmdb" as const,
+      externalId: "movie:438631",
+      type: "movie" as const,
+      title: "Dune",
+      titleEs: "Duna",
+      titleEn: "Dune",
+      synopsisEs: "Sinopsis ES",
+      synopsisEn: "Synopsis EN",
+      synopsis: "Synopsis EN",
+      year: 2021,
+    };
+
+    const inserted = await upsertWorkFromHit(hit);
+
+    expect(
+      database.get<{
+        title: string;
+        titleEs: string | null;
+        titleEn: string | null;
+        synopsisEn: string | null;
+      }>(
+        sql`select title, title_es as titleEs, title_en as titleEn, synopsis_en as synopsisEn
+            from works where id = ${inserted.id}`,
+      ),
+    ).toEqual({
+      title: "Dune",
+      titleEs: "Duna",
+      titleEn: "Dune",
+      synopsisEn: "Synopsis EN",
+    });
   });
 
   it("creates independent manual works", async () => {
@@ -82,6 +125,8 @@ describe("work helpers", () => {
       externalId: "OL123W",
       type: "book",
       title: "Canonical title",
+      titleEn: "Canonical title",
+      titleEs: "Título canónico",
       year: 2024,
       pagesTotal: 250,
     });
@@ -95,14 +140,16 @@ describe("work helpers", () => {
     expect(
       database.get<{
         title: string;
+        titleEs: string | null;
         year: number;
         pagesTotal: number;
       }>(
-        sql`select title, year, pages_total as pagesTotal
+        sql`select title, title_es as titleEs, year, pages_total as pagesTotal
             from works where id = ${imported.id}`,
       ),
     ).toEqual({
       title: "Canonical title",
+      titleEs: "Título canónico",
       year: 2024,
       pagesTotal: 250,
     });

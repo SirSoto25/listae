@@ -13,16 +13,46 @@ type OpenLibraryDocument = {
   subject?: string[];
 };
 
+type OpenLibraryDescription =
+  | string
+  | {
+      type?: string;
+      value?: string;
+    };
+
 type OpenLibraryWork = {
   title?: string;
   first_publish_date?: string;
   covers?: number[];
   subjects?: string[];
+  description?: OpenLibraryDescription;
+};
+
+type OpenLibraryEdition = {
+  title?: string;
+  languages?: Array<{ key?: string }>;
+  description?: OpenLibraryDescription;
+};
+
+type OpenLibraryEditionsResponse = {
+  entries?: OpenLibraryEdition[];
 };
 
 type OpenLibraryResponse = {
   docs?: OpenLibraryDocument[];
 };
+
+function descriptionText(
+  value: OpenLibraryDescription | undefined,
+): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+  if (typeof value === "string") {
+    return value.trim() || undefined;
+  }
+  return value.value?.trim() || undefined;
+}
 
 function inferType(
   document: OpenLibraryDocument,
@@ -101,7 +131,32 @@ export async function searchOpenLibrary(
   });
 }
 
-export async function resolveOpenLibrary(
+async function fetchSpanishEdition(
+  externalId: string,
+): Promise<{ title?: string; synopsis?: string } | null> {
+  const response = await fetch(
+    `https://openlibrary.org/works/${externalId}/editions.json?limit=50`,
+    { cache: "no-store" },
+  );
+  if (!response.ok) {
+    return null;
+  }
+
+  const data = (await response.json()) as OpenLibraryEditionsResponse;
+  const spanishEdition = (data.entries ?? []).find((edition) =>
+    edition.languages?.some((language) => language.key === "/languages/spa"),
+  );
+  if (!spanishEdition) {
+    return null;
+  }
+
+  return {
+    title: spanishEdition.title?.trim() || undefined,
+    synopsis: descriptionText(spanishEdition.description),
+  };
+}
+
+export async function resolveOpenLibraryBilingual(
   externalId: string,
 ): Promise<CatalogHit> {
   if (!/^OL\d+W$/.test(externalId)) {
@@ -127,15 +182,29 @@ export async function resolveOpenLibrary(
     ? Number.parseInt(work.first_publish_date.slice(0, 4), 10)
     : undefined;
   const cover = work.covers?.find((id) => id > 0);
+  const titleEn = work.title.trim();
+  const synopsisEn = descriptionText(work.description);
+  const spanish = await fetchSpanishEdition(externalId);
 
   return {
     source: "openlibrary",
     externalId,
     type: inferType({ subject: work.subjects }, "all"),
-    title: work.title,
+    title: titleEn,
+    titleEn,
+    titleEs: spanish?.title,
+    synopsisEn,
+    synopsisEs: spanish?.synopsis,
+    synopsis: synopsisEn ?? spanish?.synopsis,
     ...(Number.isInteger(year) ? { year } : {}),
     ...(cover === undefined
       ? {}
       : { coverUrl: `${OPEN_LIBRARY_COVER_URL}/${cover}-M.jpg` }),
   };
+}
+
+export async function resolveOpenLibrary(
+  externalId: string,
+): Promise<CatalogHit> {
+  return resolveOpenLibraryBilingual(externalId);
 }

@@ -28,16 +28,24 @@ describe("buildSearchCacheKey", () => {
   it("normalizes case and repeated whitespace", async () => {
     const { buildSearchCacheKey } = await import("./db-search-cache");
 
-    expect(buildSearchCacheKey("  The   Lord OF the Rings  ", "book")).toBe(
-      "catalog:book:the lord of the rings",
-    );
+    expect(
+      buildSearchCacheKey("  The   Lord OF the Rings  ", "book", "es"),
+    ).toBe("catalog:es:book:the lord of the rings");
   });
 
   it("normalizes the type segment", async () => {
     const { buildSearchCacheKey } = await import("./db-search-cache");
 
-    expect(buildSearchCacheKey("Dune", " Movie ")).toBe(
-      "catalog:movie:dune",
+    expect(buildSearchCacheKey("Dune", " Movie ", "en")).toBe(
+      "catalog:en:movie:dune",
+    );
+  });
+
+  it("includes locale in cache key", async () => {
+    const { buildSearchCacheKey } = await import("./db-search-cache");
+
+    expect(buildSearchCacheKey("Dune", "all", "es")).toBe(
+      "catalog:es:all:dune",
     );
   });
 });

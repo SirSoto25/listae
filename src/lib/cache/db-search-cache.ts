@@ -1,3 +1,5 @@
+import type { Locale } from "@/lib/i18n/config";
+
 import { eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";
@@ -8,10 +10,11 @@ const nowInSeconds = () => Math.floor(Date.now() / 1000);
 export function buildSearchCacheKey(
   query: string,
   typeFilter: string | "all",
+  locale: Locale,
 ): string {
   const normalizedQuery = query.trim().toLowerCase().replace(/\s+/g, " ");
   const normalizedType = typeFilter.trim().toLowerCase();
-  return `catalog:${normalizedType}:${normalizedQuery}`;
+  return `catalog:${locale}:${normalizedType}:${normalizedQuery}`;
 }
 
 export function createDbSearchCacheStore(): {

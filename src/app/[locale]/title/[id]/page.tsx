@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { EntryForm } from "@/components/entry-form";
 import { LocaleLink } from "@/components/locale-link";
 import { WorkCover } from "@/components/work-cover";
+import { fillMissingWorkLocale } from "@/lib/catalog/works";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users, works } from "@/lib/db/schema";
@@ -12,6 +13,7 @@ import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { entryFormLabels } from "@/lib/i18n/labels";
 import { localePath } from "@/lib/i18n/path";
 import { createTranslator } from "@/lib/i18n/t";
+import { workSynopsis, workTitle } from "@/lib/i18n/work-text";
 import { getEntry } from "@/lib/lists/entries";
 
 type TitlePageProps = {
@@ -29,12 +31,27 @@ export default async function TitlePage({
   const dict = await getDictionary(locale);
   const t = createTranslator(dict);
 
-  const work = await db.query.works.findFirst({
+  let work = await db.query.works.findFirst({
     where: eq(works.id, id),
   });
   if (!work) {
     notFound();
   }
+
+  const missingLocaleText =
+    locale === "es" ? !work.titleEs?.trim() : !work.titleEn?.trim();
+  if (missingLocaleText) {
+    const filled = await fillMissingWorkLocale(work.id, locale);
+    if (filled) {
+      work =
+        (await db.query.works.findFirst({
+          where: eq(works.id, id),
+        })) ?? work;
+    }
+  }
+
+  const displayTitle = workTitle(work, locale);
+  const displaySynopsis = workSynopsis(work, locale);
 
   const session = await auth();
   const user = session?.user?.email
@@ -61,7 +78,7 @@ export default async function TitlePage({
           <WorkCover
             className="aspect-[2/3] w-full rounded-3xl shadow-xl"
             src={work.coverUrl}
-            alt={t("titlePage.coverAlt", { title: work.title })}
+            alt={t("titlePage.coverAlt", { title: displayTitle })}
           />
 
           <div>
@@ -83,16 +100,16 @@ export default async function TitlePage({
               )}
             </div>
             <h1 className="mt-4 text-4xl font-black leading-tight tracking-[-0.035em] sm:text-5xl">
-              {work.title}
+              {displayTitle}
             </h1>
             {work.originalTitle && (
               <p className="mt-2 text-lg text-muted">
                 {work.originalTitle}
               </p>
             )}
-            {work.synopsis ? (
+            {displaySynopsis ? (
               <p className="mt-6 max-w-2xl leading-7 text-muted">
-                {work.synopsis}
+                {displaySynopsis}
               </p>
             ) : (
               <p className="mt-6 italic text-muted">

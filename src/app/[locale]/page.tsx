@@ -10,6 +10,7 @@ import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { catalogSearchLabels } from "@/lib/i18n/labels";
 import { createTranslator } from "@/lib/i18n/t";
+import { workTitle } from "@/lib/i18n/work-text";
 import { WORK_TYPES, type WorkType } from "@/types/domain";
 import { notFound } from "next/navigation";
 
@@ -34,7 +35,7 @@ export default async function Home({ params, searchParams }: HomeProps) {
   const sp = await searchParams;
   const query = sp.q?.trim() ?? "";
   const type = validType(sp.type);
-  const results = query ? await searchCatalog(query, type) : [];
+  const results = query ? await searchCatalog(query, type, locale) : [];
 
   return (
     <main className="flex-1 bg-transparent text-foreground">
@@ -109,7 +110,7 @@ export default async function Home({ params, searchParams }: HomeProps) {
                     <span className="text-muted">{hit.source}</span>
                   </div>
                   <h3 className="line-clamp-2 text-lg font-bold leading-6">
-                    {hit.title}
+                    {workTitle(hit, locale)}
                   </h3>
                   <p className="mt-1 text-sm text-muted">
                     {hit.year ?? t("common.yearUnknown")}
