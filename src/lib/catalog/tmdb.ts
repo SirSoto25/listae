@@ -205,7 +205,12 @@ export async function resolveTmdbBilingual(
     throw new Error("TMDB_API_KEY is not configured");
   }
 
-  const [, mediaType, id] = identity as [string, "movie" | "tv", string];
+  const mediaType = identity[1];
+  const id = identity[2];
+  if (mediaType !== "movie" && mediaType !== "tv") {
+    throw new Error("invalid TMDB identity");
+  }
+
   const [esDetails, enDetails] = await Promise.all([
     fetchTmdbDetails(mediaType, id, apiKey, "es-ES"),
     fetchTmdbDetails(mediaType, id, apiKey, "en-US"),

@@ -1,6 +1,6 @@
 # Preferencias de proceso (agente)
 
-**Actualizado:** 2026-07-23
+**Actualizado:** 2026-07-27
 
 ## Ejecución
 
@@ -30,6 +30,6 @@
 - **Wave 1 in progress** on branch `chore/ponytail-wave-1` (dead code removal + small dedupes).
 ## Relacionado
 
-- Epic actual: `docs/context/2026-07-22-library-domains.md`
-- Plan: `docs/superpowers/plans/2026-07-22-library-domains.md`
+- Epic i18n: `docs/context/2026-07-27-i18n.md` — plan `docs/superpowers/plans/2026-07-27-i18n.md`
+- Epic library domains: `docs/context/2026-07-22-library-domains.md` — plan `docs/superpowers/plans/2026-07-22-library-domains.md`
 
