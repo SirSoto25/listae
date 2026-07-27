@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { cookies, headers } from "next/headers";
 
-import { SiteHeader } from "@/components/site-header";
 import {
   THEME_COOKIE_NAME,
   parseThemePreference,
@@ -46,7 +45,6 @@ export default async function RootLayout({
 
   return (
     <html
-      lang="en"
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${darkClass} h-full antialiased`}
     >
@@ -59,10 +57,7 @@ export default async function RootLayout({
           />
         ) : null}
       </head>
-      <body className="app-atmosphere flex min-h-full flex-col">
-        <SiteHeader />
-        {children}
-      </body>
+      <body className="app-atmosphere flex min-h-full flex-col">{children}</body>
     </html>
   );
 }
