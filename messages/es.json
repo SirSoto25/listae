@@ -1,0 +1,14 @@
+{
+  "nav": {
+    "search": "Buscar",
+    "library": "Biblioteca",
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión"
+  },
+  "auth": {
+    "loginTitle": "Iniciar sesión"
+  },
+  "library": {
+    "title": "Mi biblioteca"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "nav": {
+    "search": "Search",
+    "library": "Library",
+    "login": "Sign in",
+    "logout": "Sign out"
+  },
+  "auth": {
+    "loginTitle": "Sign in"
+  },
+  "library": {
+    "title": "My library"
+  }
+}
