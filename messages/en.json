@@ -77,7 +77,28 @@
     "verifyBody": "Open the email and click the sign-in link. It works once and usually expires within about 24 hours.",
     "verifyDevHint": "In local development, the link is printed in the Next.js server console as [listae magic link].",
     "differentEmail": "Use a different email",
-    "backToSearch": "Back to search"
+    "backToSearch": "Back to search",
+    "magicLinkSubject": "Sign in to Listae",
+    "magicLinkBody": "Sign in to Listae:\n{url}\n",
+    "errorVerification": "That sign-in link is no longer valid. It may have expired or already been used. Request a new one below.",
+    "errorConfiguration": "Sign-in is temporarily unavailable. Try again in a moment.",
+    "errorAccessDenied": "You do not have permission to sign in.",
+    "errorDefault": "Something went wrong signing in. Request a new magic link below."
+  },
+  "profile": {
+    "status": {
+      "plan": "Plan to watch/read",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "on_hold": "On hold",
+      "dropped": "Dropped"
+    },
+    "notScored": "Not scored",
+    "score": "Score: {score}",
+    "emptyStatus": "No entries yet.",
+    "noProgressTracking": "No progress tracking",
+    "profileLocaleLabel": "Public profile language",
+    "profileLocaleHint": "Status labels and profile chrome shown to visitors."
   },
   "onboarding": {
     "title": "Choose your username",

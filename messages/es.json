@@ -77,7 +77,28 @@
     "verifyBody": "Abre el correo y haz clic en el enlace de acceso. Solo funciona una vez y suele caducar en unas 24 horas.",
     "verifyDevHint": "En desarrollo local, el enlace se imprime en la consola del servidor Next.js como [listae magic link].",
     "differentEmail": "Usar otro correo",
-    "backToSearch": "Volver a buscar"
+    "backToSearch": "Volver a buscar",
+    "magicLinkSubject": "Accede a Listae",
+    "magicLinkBody": "Accede a Listae con este enlace:\n{url}\n",
+    "errorVerification": "Ese enlace de acceso ya no es válido. Puede haber caducado o ya haberse usado. Solicita uno nuevo abajo.",
+    "errorConfiguration": "El acceso no está disponible temporalmente. Inténtalo de nuevo en un momento.",
+    "errorAccessDenied": "No tienes permiso para iniciar sesión.",
+    "errorDefault": "Algo falló al iniciar sesión. Solicita un nuevo enlace mágico abajo."
+  },
+  "profile": {
+    "status": {
+      "plan": "Por ver/leer",
+      "in_progress": "En curso",
+      "completed": "Completado",
+      "on_hold": "En pausa",
+      "dropped": "Abandonado"
+    },
+    "notScored": "Sin puntuación",
+    "score": "Puntuación: {score}",
+    "emptyStatus": "Aún no hay entradas.",
+    "noProgressTracking": "Sin seguimiento de progreso",
+    "profileLocaleLabel": "Idioma del perfil público",
+    "profileLocaleHint": "Etiquetas de estado y textos del perfil para visitantes."
   },
   "onboarding": {
     "title": "Elige tu nombre de usuario",

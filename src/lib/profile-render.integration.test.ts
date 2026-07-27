@@ -7,6 +7,7 @@ let addListEntry: typeof import("@/lib/lists/entries").addListEntry;
 let listLibraryEntries: typeof import("@/lib/lists/entries").listLibraryEntries;
 let renderTheme: typeof import("@/lib/theme/render").renderTheme;
 let buildThemeDocument: typeof import("@/lib/theme/save").buildThemeDocument;
+let syncTranslator: typeof import("@/lib/i18n/sync-dictionary").syncTranslator;
 
 beforeAll(async () => {
   process.env.DATABASE_URL = "file::memory:";
@@ -16,6 +17,7 @@ beforeAll(async () => {
   ({ addListEntry, listLibraryEntries } = await import("@/lib/lists/entries"));
   ({ renderTheme } = await import("@/lib/theme/render"));
   ({ buildThemeDocument } = await import("@/lib/theme/save"));
+  ({ syncTranslator } = await import("@/lib/i18n/sync-dictionary"));
 
   database.run(sql`
     create table users (
@@ -123,6 +125,7 @@ describe("manual work to themed profile render", () => {
         cover: savedWork.coverUrl,
         url: `/title/${savedWork.id}`,
       })),
+      t: syncTranslator("en"),
     });
 
     expect(rendered.ok).toBe(true);
@@ -140,6 +143,7 @@ describe("manual work to themed profile render", () => {
       username: "reader",
       displayName: "Reader One",
       entries: [],
+      t: syncTranslator("en"),
     });
     expect(invalid).toMatchObject({
       ok: false,

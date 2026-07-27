@@ -88,7 +88,11 @@ export default async function OnboardingPage({
 
             await db
               .update(users)
-              .set({ username, displayName: username })
+              .set({
+                username,
+                displayName: username,
+                profileLocale: locale,
+              })
               .where(eq(users.email, currentSession.user.email));
 
             redirect(localePath(locale, "/library"));

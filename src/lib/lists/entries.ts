@@ -4,6 +4,9 @@ import { and, asc, desc, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { listEntries, works } from "@/lib/db/schema";
+import type { Locale } from "@/lib/i18n/config";
+import { syncTranslator } from "@/lib/i18n/sync-dictionary";
+import { workTitle } from "@/lib/i18n/work-text";
 import type { ProfileEntry } from "@/lib/theme/placeholders";
 import {
   LIST_STATUSES,
@@ -220,7 +223,10 @@ export async function listLibraryEntries(
 }
 export function rowsToProfileEntries(
   rows: Awaited<ReturnType<typeof listLibraryEntries>>,
+  locale: Locale,
 ): ProfileEntry[] {
+  const t = syncTranslator(locale);
+
   return rows.map(({ entry, work }) => {
     const total =
       work.type === "anime" || work.type === "series"
@@ -232,11 +238,11 @@ export function rowsToProfileEntries(
             : null;
     const progress =
       work.type === "movie"
-        ? "No progress tracking"
+        ? t("profile.noProgressTracking")
         : `${entry.progressValue}${total ? ` / ${total}` : ""} ${entry.progressUnit ?? "items"}`;
 
     return {
-      title: work.title,
+      title: workTitle(work, locale),
       type: work.type,
       status: entry.status,
       score: entry.score,

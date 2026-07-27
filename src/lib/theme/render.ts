@@ -1,4 +1,4 @@
-import { renderProfileHtml, type ProfileEntry } from "./placeholders";
+import { renderProfileHtml, type ProfileEntry, type ProfileTranslator } from "./placeholders";
 import { prepareThemeContent } from "./save";
 import { type ThemeCssError } from "./validate-css";
 
@@ -8,6 +8,7 @@ export type RenderThemeArgs = {
   username: string;
   displayName: string;
   entries: ProfileEntry[];
+  t: ProfileTranslator;
 };
 
 export type RenderThemeResult =
@@ -20,6 +21,7 @@ export function renderTheme({
   username,
   displayName,
   entries,
+  t,
 }: RenderThemeArgs): RenderThemeResult {
   const prepared = prepareThemeContent(template, css);
   if (!prepared.ok) {
@@ -31,6 +33,7 @@ export function renderTheme({
     username,
     displayName,
     entries,
+    t,
   });
 
   return { ok: true, html, css: prepared.css };

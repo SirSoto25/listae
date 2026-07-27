@@ -27,7 +27,7 @@ export default async function LoginPage({
 
   const session = await auth();
   const { error } = await searchParams;
-  const errorMessage = loginErrorMessage(error);
+  const errorMessage = loginErrorMessage(error, locale);
 
   if (session?.user?.email) {
     const [profile] = await db

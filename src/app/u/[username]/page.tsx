@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 
 import { db } from "@/lib/db";
 import { profileThemes, users } from "@/lib/db/schema";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { createTranslator } from "@/lib/i18n/t";
 import { listLibraryEntries, rowsToProfileEntries } from "@/lib/lists/entries";
 import { DEFAULT_CSS, DEFAULT_HTML_TEMPLATE } from "@/lib/theme/defaults";
 import { renderTheme } from "@/lib/theme/render";
@@ -17,12 +20,23 @@ export default async function PublicProfilePage({
 }: PublicProfilePageProps) {
   const { username } = await params;
   const user = await db.query.users.findFirst({
-    columns: { id: true, username: true, displayName: true },
+    columns: {
+      id: true,
+      username: true,
+      displayName: true,
+      profileLocale: true,
+    },
     where: eq(users.username, username),
   });
   if (!user?.username) {
     notFound();
   }
+
+  const profileLocale: Locale = isLocale(user.profileLocale)
+    ? user.profileLocale
+    : "es";
+  const dict = await getDictionary(profileLocale);
+  const t = createTranslator(dict);
 
   const [rows, storedTheme] = await Promise.all([
     listLibraryEntries(user.id),
@@ -30,7 +44,7 @@ export default async function PublicProfilePage({
       where: eq(profileThemes.userId, user.id),
     }),
   ]);
-  const entries = rowsToProfileEntries(rows);
+  const entries = rowsToProfileEntries(rows, profileLocale);
   const activeTheme = storedTheme ?? {
     htmlTemplate: DEFAULT_HTML_TEMPLATE,
     customCss: DEFAULT_CSS,
@@ -41,6 +55,7 @@ export default async function PublicProfilePage({
     username: user.username,
     displayName: user.displayName ?? user.username,
     entries,
+    t,
   });
   if (!rendered.ok) {
     rendered = renderTheme({
@@ -49,6 +64,7 @@ export default async function PublicProfilePage({
       username: user.username,
       displayName: user.displayName ?? user.username,
       entries,
+      t,
     });
   }
   if (!rendered.ok) {
@@ -66,4 +82,3 @@ export default async function PublicProfilePage({
     </main>
   );
 }
-
