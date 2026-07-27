@@ -25,6 +25,9 @@ export const users = sqliteTable(
     image: text("image"),
     username: text("username"),
     displayName: text("display_name"),
+    profileLocale: text("profile_locale", { enum: ["es", "en"] })
+      .notNull()
+      .default("es"),
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .default(sql`(unixepoch())`),
@@ -99,10 +102,14 @@ export const works = sqliteTable(
     id: text("id").primaryKey(),
     type: text("type", { enum: WORK_TYPES }).notNull(),
     title: text("title").notNull(),
+    titleEs: text("title_es"),
+    titleEn: text("title_en"),
     originalTitle: text("original_title"),
     coverUrl: text("cover_url"),
     year: integer("year"),
     synopsis: text("synopsis"),
+    synopsisEs: text("synopsis_es"),
+    synopsisEn: text("synopsis_en"),
     externalSource: text("external_source", { enum: EXTERNAL_SOURCES }),
     externalId: text("external_id"),
     episodesTotal: integer("episodes_total"),
