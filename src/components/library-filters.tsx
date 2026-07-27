@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 
+import type { Locale } from "@/lib/i18n/config";
+import { localePath } from "@/lib/i18n/path";
 import {
   LIST_STATUSES,
   workTypesForDomain,
@@ -11,6 +13,7 @@ import {
 } from "@/types/domain";
 
 type LibraryFiltersProps = {
+  locale: Locale;
   domain: LibraryDomain;
   type: WorkType | "all";
   status: ListStatus | "all";
@@ -18,6 +21,7 @@ type LibraryFiltersProps = {
 };
 
 export function LibraryFilters({
+  locale,
   domain,
   type,
   status,
@@ -34,7 +38,7 @@ export function LibraryFilters({
       sort,
       [name]: value,
     });
-    router.replace(`/library?${params.toString()}`);
+    router.replace(`${localePath(locale, "/library")}?${params.toString()}`);
   }
 
   const selectClass =

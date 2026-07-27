@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { LocaleLink } from "@/components/locale-link";
 import {
   createManualWorkAction,
   importHitAction,
@@ -7,9 +6,12 @@ import {
 import { CatalogSearch } from "@/components/catalog-search";
 import { WorkCover } from "@/components/work-cover";
 import { searchCatalog } from "@/lib/catalog/search";
+import { isLocale, type Locale } from "@/lib/i18n/config";
 import { WORK_TYPES, type WorkType } from "@/types/domain";
+import { notFound } from "next/navigation";
 
 type HomeProps = {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ q?: string; type?: string }>;
 };
 
@@ -19,10 +21,14 @@ function validType(value?: string): WorkType | "all" {
     : "all";
 }
 
-export default async function Home({ searchParams }: HomeProps) {
-  const params = await searchParams;
-  const query = params.q?.trim() ?? "";
-  const type = validType(params.type);
+export default async function Home({ params, searchParams }: HomeProps) {
+  const { locale: raw } = await params;
+  if (!isLocale(raw)) notFound();
+  const locale = raw as Locale;
+
+  const sp = await searchParams;
+  const query = sp.q?.trim() ?? "";
+  const type = validType(sp.type);
   const results = query ? await searchCatalog(query, type) : [];
 
   return (
@@ -42,15 +48,20 @@ export default async function Home({ searchParams }: HomeProps) {
                 keep your progress without the noise.
               </p>
             </div>
-            <Link
+            <LocaleLink
               className="justify-self-start border-b-2 border-foreground pb-1 text-sm font-bold hover:border-accent hover:text-accent lg:justify-self-end"
               href="/library"
+              locale={locale}
             >
               Open my library →
-            </Link>
+            </LocaleLink>
           </div>
           <div className="mt-10">
-            <CatalogSearch initialQuery={query} initialType={type} />
+            <CatalogSearch
+              locale={locale}
+              initialQuery={query}
+              initialType={type}
+            />
           </div>
         </div>
       </section>

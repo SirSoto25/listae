@@ -1,16 +1,18 @@
 import { eq } from "drizzle-orm";
-import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { EntryForm } from "@/components/entry-form";
+import { LocaleLink } from "@/components/locale-link";
 import { WorkCover } from "@/components/work-cover";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users, works } from "@/lib/db/schema";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+import { localePath } from "@/lib/i18n/path";
 import { getEntry } from "@/lib/lists/entries";
 
 type TitlePageProps = {
-  params: Promise<{ id: string }>;
+  params: Promise<{ locale: string; id: string }>;
   searchParams: Promise<{ saved?: string }>;
 };
 
@@ -18,7 +20,10 @@ export default async function TitlePage({
   params,
   searchParams,
 }: TitlePageProps) {
-  const { id } = await params;
+  const { locale: raw, id } = await params;
+  if (!isLocale(raw)) notFound();
+  const locale = raw as Locale;
+
   const work = await db.query.works.findFirst({
     where: eq(works.id, id),
   });
@@ -39,12 +44,13 @@ export default async function TitlePage({
   return (
     <main className="flex-1 bg-transparent px-6 py-10 text-foreground">
       <div className="mx-auto max-w-5xl">
-        <Link
+        <LocaleLink
           className="text-sm font-bold text-muted hover:text-accent"
           href="/"
+          locale={locale}
         >
           ← Back to search
-        </Link>
+        </LocaleLink>
 
         <div className="mt-6 grid gap-8 lg:grid-cols-[18rem_1fr]">
           <WorkCover
@@ -114,20 +120,23 @@ export default async function TitlePage({
 
               {user ? (
                 <EntryForm
+                  locale={locale}
                   workId={work.id}
                   workType={work.type}
                   episodesTotal={work.episodesTotal}
                   chaptersTotal={work.chaptersTotal}
                   pagesTotal={work.pagesTotal}
                   entry={entry}
+                  returnPath={localePath(locale, `/title/${work.id}?saved=1`)}
                 />
               ) : (
-                <Link
+                <LocaleLink
                   className="flex h-12 items-center justify-center rounded-xl bg-primary px-5 font-bold text-primary-foreground hover:opacity-90"
                   href="/login"
+                  locale={locale}
                 >
                   Sign in to track this title
-                </Link>
+                </LocaleLink>
               )}
             </section>
           </div>

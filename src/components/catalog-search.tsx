@@ -3,14 +3,18 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import type { Locale } from "@/lib/i18n/config";
+import { localePath } from "@/lib/i18n/path";
 import { WORK_TYPES, type WorkType } from "@/types/domain";
 
 type CatalogSearchProps = {
+  locale: Locale;
   initialQuery: string;
   initialType: WorkType | "all";
 };
 
 export function CatalogSearch({
+  locale,
   initialQuery,
   initialType,
 }: CatalogSearchProps) {
@@ -28,11 +32,12 @@ export function CatalogSearch({
         params.set("type", type);
       }
       const suffix = params.toString();
-      router.replace(suffix ? `/?${suffix}` : "/", { scroll: false });
+      const base = localePath(locale, "/");
+      router.replace(suffix ? `${base}?${suffix}` : base, { scroll: false });
     }, 300);
 
     return () => window.clearTimeout(timeout);
-  }, [query, router, type]);
+  }, [locale, query, router, type]);
 
   return (
     <div className="grid gap-3 md:grid-cols-[1fr_12rem]">

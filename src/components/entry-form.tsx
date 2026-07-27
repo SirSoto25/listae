@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { addToList, updateEntry } from "@/app/actions/entries";
+import type { Locale } from "@/lib/i18n/config";
 import {
   LIST_STATUSES,
   type ListStatus,
@@ -11,6 +12,7 @@ import {
 } from "@/types/domain";
 
 type EntryFormProps = {
+  locale: Locale;
   workId: string;
   workType: WorkType;
   episodesTotal?: number | null;
@@ -36,6 +38,7 @@ const statusLabels: Record<ListStatus, string> = {
 };
 
 export function EntryForm({
+  locale,
   workId,
   workType,
   episodesTotal,
@@ -67,6 +70,7 @@ export function EntryForm({
       }
     >
       <input type="hidden" name="workId" value={workId} />
+      <input type="hidden" name="locale" value={locale} />
       {returnPath && (
         <input type="hidden" name="returnPath" value={returnPath} />
       )}

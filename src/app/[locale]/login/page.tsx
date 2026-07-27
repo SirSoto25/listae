@@ -1,16 +1,26 @@
-import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
+import { notFound, redirect } from "next/navigation";
 
 import { auth, signIn } from "@/lib/auth";
 import { loginErrorMessage } from "@/lib/auth/login-messages";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+import { localePath } from "@/lib/i18n/path";
 
 type LoginPageProps = {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ error?: string | string[] }>;
 };
 
-export default async function LoginPage({ searchParams }: LoginPageProps) {
+export default async function LoginPage({
+  params,
+  searchParams,
+}: LoginPageProps) {
+  const { locale: raw } = await params;
+  if (!isLocale(raw)) notFound();
+  const locale = raw as Locale;
+
   const session = await auth();
   const { error } = await searchParams;
   const errorMessage = loginErrorMessage(error);
@@ -22,7 +32,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       .where(eq(users.email, session.user.email))
       .limit(1);
 
-    redirect(profile?.username ? "/library" : "/onboarding");
+    redirect(
+      localePath(locale, profile?.username ? "/library" : "/onboarding"),
+    );
   }
 
   return (
@@ -52,7 +64,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
             await signIn("nodemailer", {
               email: formData.get("email"),
-              callbackUrl: "/library",
+              callbackUrl: localePath(locale, "/library"),
             });
           }}
         >

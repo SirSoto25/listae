@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 
+import type { Locale } from "@/lib/i18n/config";
+import { localePath } from "@/lib/i18n/path";
 import {
   LIBRARY_DOMAINS,
   type LibraryDomain,
@@ -15,12 +17,14 @@ const DOMAIN_LABELS: Record<LibraryDomain, string> = {
 };
 
 type LibraryDomainTabsProps = {
+  locale: Locale;
   domain: LibraryDomain;
   status: ListStatus | "all";
   sort: "updatedAt" | "score" | "title";
 };
 
 export function LibraryDomainTabs({
+  locale,
   domain,
   status,
   sort,
@@ -34,7 +38,7 @@ export function LibraryDomainTabs({
       status,
       sort,
     });
-    router.replace(`/library?${params.toString()}`);
+    router.replace(`${localePath(locale, "/library")}?${params.toString()}`);
   }
 
   return (

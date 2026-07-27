@@ -1,6 +1,19 @@
-import Link from "next/link";
+import { notFound } from "next/navigation";
 
-export default function LoginVerifyPage() {
+import { LocaleLink } from "@/components/locale-link";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+
+type LoginVerifyPageProps = {
+  params: Promise<{ locale: string }>;
+};
+
+export default async function LoginVerifyPage({
+  params,
+}: LoginVerifyPageProps) {
+  const { locale: raw } = await params;
+  if (!isLocale(raw)) notFound();
+  const locale = raw as Locale;
+
   return (
     <main className="flex flex-1 items-center justify-center bg-transparent px-6 py-16">
       <section className="w-full max-w-md rounded-[length:var(--radius-panel)] border border-border bg-surface p-8">
@@ -23,12 +36,20 @@ export default function LoginVerifyPage() {
           .
         </p>
         <div className="mt-8 flex flex-col gap-3 text-sm font-bold">
-          <Link className="text-accent hover:opacity-90" href="/login">
+          <LocaleLink
+            className="text-accent hover:opacity-90"
+            href="/login"
+            locale={locale}
+          >
             Use a different email
-          </Link>
-          <Link className="text-muted hover:text-foreground" href="/">
+          </LocaleLink>
+          <LocaleLink
+            className="text-muted hover:text-foreground"
+            href="/"
+            locale={locale}
+          >
             Back to search
-          </Link>
+          </LocaleLink>
         </div>
       </section>
     </main>

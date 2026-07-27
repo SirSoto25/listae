@@ -1,15 +1,17 @@
 import { eq } from "drizzle-orm";
-import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { EntryForm } from "@/components/entry-form";
 import { LibraryDomainTabs } from "@/components/library-domain-tabs";
 import { LibraryFilters } from "@/components/library-filters";
+import { LocaleLink } from "@/components/locale-link";
 import { WorkCover } from "@/components/work-cover";
 import { auth } from "@/lib/auth";
 import { reconcileDisplayNameForUser } from "@/lib/auth/backfill-display-names";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+import { localePath } from "@/lib/i18n/path";
 import { listLibraryEntries } from "@/lib/lists/entries";
 import {
   LIST_STATUSES,
@@ -22,6 +24,7 @@ import {
 } from "@/types/domain";
 
 type LibraryPageProps = {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{
     domain?: string;
     type?: string;
@@ -55,11 +58,16 @@ function parseSort(value?: string): "updatedAt" | "score" | "title" {
 }
 
 export default async function LibraryPage({
+  params,
   searchParams,
 }: LibraryPageProps) {
+  const { locale: raw } = await params;
+  if (!isLocale(raw)) notFound();
+  const locale = raw as Locale;
+
   const session = await auth();
   if (!session?.user?.email) {
-    redirect("/login");
+    redirect(localePath(locale, "/login"));
   }
 
   const user = await db.query.users.findFirst({
@@ -67,10 +75,10 @@ export default async function LibraryPage({
     where: eq(users.email, session.user.email),
   });
   if (!user) {
-    redirect("/login");
+    redirect(localePath(locale, "/login"));
   }
   if (!user.username) {
-    redirect("/onboarding");
+    redirect(localePath(locale, "/onboarding"));
   }
 
   await reconcileDisplayNameForUser(
@@ -79,18 +87,18 @@ export default async function LibraryPage({
     user.displayName,
   );
 
-  const params = await searchParams;
-  const domain = parseLibraryDomain(params.domain);
-  const type = parseType(params.type, domain);
-  const status = parseStatus(params.status);
-  const sort = parseSort(params.sort);
+  const sp = await searchParams;
+  const domain = parseLibraryDomain(sp.domain);
+  const type = parseType(sp.type, domain);
+  const status = parseStatus(sp.status);
+  const sort = parseSort(sp.sort);
   const entries = await listLibraryEntries(user.id, {
     domain,
     type,
     status,
     sort,
   });
-  const returnPath = `/library?${new URLSearchParams({
+  const returnPath = `${localePath(locale, "/library")}?${new URLSearchParams({
     domain,
     type,
     status,
@@ -115,24 +123,32 @@ export default async function LibraryPage({
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link
+            <LocaleLink
               className="inline-flex h-11 items-center justify-center rounded-xl border border-border bg-surface px-5 text-sm font-bold text-foreground hover:border-accent hover:text-accent"
               href={`/u/${user.username}/customize`}
+              locale={locale}
             >
               Customize profile
-            </Link>
-            <Link
+            </LocaleLink>
+            <LocaleLink
               className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground hover:opacity-90"
               href="/"
+              locale={locale}
             >
               + Find a title
-            </Link>
+            </LocaleLink>
           </div>
         </div>
 
         <div className="mt-6 space-y-4">
-          <LibraryDomainTabs domain={domain} status={status} sort={sort} />
+          <LibraryDomainTabs
+            locale={locale}
+            domain={domain}
+            status={status}
+            sort={sort}
+          />
           <LibraryFilters
+            locale={locale}
             domain={domain}
             type={type}
             status={status}
@@ -140,7 +156,7 @@ export default async function LibraryPage({
           />
         </div>
 
-        {params.saved === "1" && (
+        {sp.saved === "1" && (
           <p className="mt-5 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
             Entry updated.
           </p>
@@ -152,12 +168,13 @@ export default async function LibraryPage({
             <p className="mt-2 text-muted">
               Change the filters or search for something worth tracking.
             </p>
-            <Link
+            <LocaleLink
               className="mt-6 inline-flex h-11 items-center rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground hover:opacity-90"
               href="/"
+              locale={locale}
             >
               Search the catalog
-            </Link>
+            </LocaleLink>
           </div>
         ) : (
           <div className="mt-8 space-y-4">
@@ -176,21 +193,23 @@ export default async function LibraryPage({
                     <div className="text-[11px] font-black uppercase tracking-widest text-accent">
                       {work.type}
                     </div>
-                    <Link
+                    <LocaleLink
                       className="mt-1 block truncate text-lg font-black hover:text-accent"
                       href={`/title/${work.id}`}
+                      locale={locale}
                     >
                       {work.title}
-                    </Link>
+                    </LocaleLink>
                     <p className="mt-1 text-xs text-muted">
                       Updated{" "}
-                      {new Intl.DateTimeFormat("en", {
+                      {new Intl.DateTimeFormat(locale, {
                         dateStyle: "medium",
                       }).format(entry.updatedAt)}
                     </p>
                   </div>
                   <EntryForm
                     compact
+                    locale={locale}
                     workId={work.id}
                     workType={work.type}
                     episodesTotal={work.episodesTotal}

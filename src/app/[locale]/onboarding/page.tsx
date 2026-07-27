@@ -1,23 +1,31 @@
 import { eq } from "drizzle-orm";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { UsernameField } from "@/components/username-field";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { normalizeUsername, USERNAME_PATTERN } from "@/lib/auth/validation";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+import { localePath } from "@/lib/i18n/path";
 
 type OnboardingPageProps = {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ error?: string }>;
 };
 
 export default async function OnboardingPage({
+  params,
   searchParams,
 }: OnboardingPageProps) {
+  const { locale: raw } = await params;
+  if (!isLocale(raw)) notFound();
+  const locale = raw as Locale;
+
   const session = await auth();
 
   if (!session?.user?.email) {
-    redirect("/login");
+    redirect(localePath(locale, "/login"));
   }
 
   const [profile] = await db
@@ -27,11 +35,11 @@ export default async function OnboardingPage({
     .limit(1);
 
   if (!profile) {
-    redirect("/login");
+    redirect(localePath(locale, "/login"));
   }
 
   if (profile.username) {
-    redirect("/library");
+    redirect(localePath(locale, "/library"));
   }
 
   const { error } = await searchParams;
@@ -53,14 +61,14 @@ export default async function OnboardingPage({
 
             const currentSession = await auth();
             if (!currentSession?.user?.email) {
-              redirect("/login");
+              redirect(localePath(locale, "/login"));
             }
 
             const username = normalizeUsername(
               String(formData.get("username") ?? ""),
             );
             if (!USERNAME_PATTERN.test(username)) {
-              redirect("/onboarding?error=invalid");
+              redirect(localePath(locale, "/onboarding?error=invalid"));
             }
 
             const [taken] = await db
@@ -70,7 +78,7 @@ export default async function OnboardingPage({
               .limit(1);
 
             if (taken) {
-              redirect("/onboarding?error=taken");
+              redirect(localePath(locale, "/onboarding?error=taken"));
             }
 
             await db
@@ -78,7 +86,7 @@ export default async function OnboardingPage({
               .set({ username, displayName: username })
               .where(eq(users.email, currentSession.user.email));
 
-            redirect("/library");
+            redirect(localePath(locale, "/library"));
           }}
         >
           <UsernameField email={session.user.email} />
