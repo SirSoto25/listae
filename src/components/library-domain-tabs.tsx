@@ -10,14 +10,25 @@ import {
   type ListStatus,
 } from "@/types/domain";
 
-const DOMAIN_LABELS: Record<LibraryDomain, string> = {
-  audiovisual: "Audiovisual",
-  reading: "Reading",
-  all: "All",
+export type LibraryDomainTabsLabels = {
+  audiovisual: string;
+  reading: string;
+  all: string;
+  aria: string;
+};
+
+const DOMAIN_LABEL_KEYS: Record<
+  LibraryDomain,
+  keyof LibraryDomainTabsLabels
+> = {
+  audiovisual: "audiovisual",
+  reading: "reading",
+  all: "all",
 };
 
 type LibraryDomainTabsProps = {
   locale: Locale;
+  labels: LibraryDomainTabsLabels;
   domain: LibraryDomain;
   status: ListStatus | "all";
   sort: "updatedAt" | "score" | "title";
@@ -25,6 +36,7 @@ type LibraryDomainTabsProps = {
 
 export function LibraryDomainTabs({
   locale,
+  labels,
   domain,
   status,
   sort,
@@ -45,7 +57,7 @@ export function LibraryDomainTabs({
     <div
       className="flex flex-wrap gap-2"
       role="tablist"
-      aria-label="Library domain"
+      aria-label={labels.aria}
     >
       {LIBRARY_DOMAINS.map((value) => {
         const active = value === domain;
@@ -62,7 +74,7 @@ export function LibraryDomainTabs({
             }
             onClick={() => selectDomain(value)}
           >
-            {DOMAIN_LABELS[value]}
+            {labels[DOMAIN_LABEL_KEYS[value]]}
           </button>
         );
       })}

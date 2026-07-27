@@ -7,11 +7,18 @@ import {
   usernameMatchesEmailLocalPart,
 } from "@/lib/auth/validation";
 
-type UsernameFieldProps = {
-  email: string;
+export type UsernameFieldLabels = {
+  label: string;
+  hint: string;
+  warning: string;
 };
 
-export function UsernameField({ email }: UsernameFieldProps) {
+type UsernameFieldProps = {
+  email: string;
+  labels: UsernameFieldLabels;
+};
+
+export function UsernameField({ email, labels }: UsernameFieldProps) {
   const [username, setUsername] = useState("");
   const showWarning =
     username.length > 0 && usernameMatchesEmailLocalPart(username, email);
@@ -19,7 +26,7 @@ export function UsernameField({ email }: UsernameFieldProps) {
   return (
     <>
       <label className="block text-sm font-medium text-foreground">
-        Username
+        {labels.label}
         <input
           className="mt-2 block w-full rounded-[length:var(--radius-control)] border border-border bg-surface px-3 py-2 text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
           type="text"
@@ -35,13 +42,10 @@ export function UsernameField({ email }: UsernameFieldProps) {
           }
         />
       </label>
-      <p className="text-xs text-muted">
-        3–32 lowercase letters, numbers, or underscores.
-      </p>
+      <p className="text-xs text-muted">{labels.hint}</p>
       {showWarning && (
         <p className="text-sm text-amber-700 dark:text-amber-400">
-          This matches the start of your sign-in email; it will appear on your
-          public profile.
+          {labels.warning}
         </p>
       )}
     </>

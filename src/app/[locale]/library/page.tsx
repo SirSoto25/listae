@@ -11,7 +11,14 @@ import { reconcileDisplayNameForUser } from "@/lib/auth/backfill-display-names";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { isLocale, type Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import {
+  entryFormLabels,
+  libraryDomainTabsLabels,
+  libraryFiltersLabels,
+} from "@/lib/i18n/labels";
 import { localePath } from "@/lib/i18n/path";
+import { createTranslator } from "@/lib/i18n/t";
 import { listLibraryEntries } from "@/lib/lists/entries";
 import {
   LIST_STATUSES,
@@ -64,6 +71,8 @@ export default async function LibraryPage({
   const { locale: raw } = await params;
   if (!isLocale(raw)) notFound();
   const locale = raw as Locale;
+  const dict = await getDictionary(locale);
+  const t = createTranslator(dict);
 
   const session = await auth();
   if (!session?.user?.email) {
@@ -105,6 +114,8 @@ export default async function LibraryPage({
     sort,
     saved: "1",
   }).toString()}`;
+  const countLabel =
+    entries.length === 1 ? t("library.countOne") : t("library.countMany");
 
   return (
     <main className="flex-1 bg-transparent px-6 py-10 text-foreground">
@@ -112,14 +123,16 @@ export default async function LibraryPage({
         <div className="flex flex-col gap-6 border-b border-border pb-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.25em] text-accent">
-              {user.username}&apos;s collection
+              {t("library.collection", { username: user.username })}
             </p>
             <h1 className="mt-2 text-4xl font-black tracking-[-0.04em] sm:text-5xl">
-              My library
+              {t("library.title")}
             </h1>
             <p className="mt-3 text-muted">
-              {entries.length} {entries.length === 1 ? "title" : "titles"} in
-              this view
+              {t("library.countInView", {
+                count: entries.length,
+                label: countLabel,
+              })}
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -128,14 +141,14 @@ export default async function LibraryPage({
               href={`/u/${user.username}/customize`}
               locale={locale}
             >
-              Customize profile
+              {t("library.customizeProfile")}
             </LocaleLink>
             <LocaleLink
               className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground hover:opacity-90"
               href="/"
               locale={locale}
             >
-              + Find a title
+              {t("library.findTitle")}
             </LocaleLink>
           </div>
         </div>
@@ -143,12 +156,14 @@ export default async function LibraryPage({
         <div className="mt-6 space-y-4">
           <LibraryDomainTabs
             locale={locale}
+            labels={libraryDomainTabsLabels(t)}
             domain={domain}
             status={status}
             sort={sort}
           />
           <LibraryFilters
             locale={locale}
+            labels={libraryFiltersLabels(t)}
             domain={domain}
             type={type}
             status={status}
@@ -158,22 +173,20 @@ export default async function LibraryPage({
 
         {sp.saved === "1" && (
           <p className="mt-5 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
-            Entry updated.
+            {t("library.entryUpdated")}
           </p>
         )}
 
         {entries.length === 0 ? (
           <div className="mt-8 rounded-3xl border border-dashed border-border bg-surface/70 p-12 text-center">
-            <h2 className="text-2xl font-black">Nothing in this view yet.</h2>
-            <p className="mt-2 text-muted">
-              Change the filters or search for something worth tracking.
-            </p>
+            <h2 className="text-2xl font-black">{t("library.emptyTitle")}</h2>
+            <p className="mt-2 text-muted">{t("library.emptySubtitle")}</p>
             <LocaleLink
               className="mt-6 inline-flex h-11 items-center rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground hover:opacity-90"
               href="/"
               locale={locale}
             >
-              Search the catalog
+              {t("library.searchCatalog")}
             </LocaleLink>
           </div>
         ) : (
@@ -201,7 +214,7 @@ export default async function LibraryPage({
                       {work.title}
                     </LocaleLink>
                     <p className="mt-1 text-xs text-muted">
-                      Updated{" "}
+                      {t("library.updated")}{" "}
                       {new Intl.DateTimeFormat(locale, {
                         dateStyle: "medium",
                       }).format(entry.updatedAt)}
@@ -210,6 +223,7 @@ export default async function LibraryPage({
                   <EntryForm
                     compact
                     locale={locale}
+                    labels={entryFormLabels(t)}
                     workId={work.id}
                     workType={work.type}
                     episodesTotal={work.episodesTotal}

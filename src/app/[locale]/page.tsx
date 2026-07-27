@@ -7,6 +7,9 @@ import { CatalogSearch } from "@/components/catalog-search";
 import { WorkCover } from "@/components/work-cover";
 import { searchCatalog } from "@/lib/catalog/search";
 import { isLocale, type Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { catalogSearchLabels } from "@/lib/i18n/labels";
+import { createTranslator } from "@/lib/i18n/t";
 import { WORK_TYPES, type WorkType } from "@/types/domain";
 import { notFound } from "next/navigation";
 
@@ -25,6 +28,8 @@ export default async function Home({ params, searchParams }: HomeProps) {
   const { locale: raw } = await params;
   if (!isLocale(raw)) notFound();
   const locale = raw as Locale;
+  const dict = await getDictionary(locale);
+  const t = createTranslator(dict);
 
   const sp = await searchParams;
   const query = sp.q?.trim() ?? "";
@@ -36,16 +41,15 @@ export default async function Home({ params, searchParams }: HomeProps) {
       <section className="border-b border-border px-6 py-14 sm:py-20">
         <div className="mx-auto max-w-5xl">
           <p className="mb-4 text-xs font-black uppercase tracking-[0.28em] text-accent">
-            Your media, one place
+            {t("home.tagline")}
           </p>
           <div className="grid gap-8 lg:grid-cols-[1fr_18rem] lg:items-end">
             <div>
               <h1 className="max-w-3xl text-4xl font-black leading-[1.05] tracking-[-0.04em] sm:text-6xl">
-                Find it. Track it. Remember it.
+                {t("home.title")}
               </h1>
               <p className="mt-5 max-w-2xl text-lg leading-8 text-muted">
-                Search films, series, anime, books, manga, and comics—then
-                keep your progress without the noise.
+                {t("home.subtitle")}
               </p>
             </div>
             <LocaleLink
@@ -53,12 +57,13 @@ export default async function Home({ params, searchParams }: HomeProps) {
               href="/library"
               locale={locale}
             >
-              Open my library →
+              {t("home.openLibrary")}
             </LocaleLink>
           </div>
           <div className="mt-10">
             <CatalogSearch
               locale={locale}
+              labels={catalogSearchLabels(t)}
               initialQuery={query}
               initialType={type}
             />
@@ -69,20 +74,18 @@ export default async function Home({ params, searchParams }: HomeProps) {
       <section className="mx-auto max-w-5xl px-6 py-10">
         {!query && (
           <div className="rounded-3xl border border-dashed border-border bg-surface/70 p-10 text-center">
-            <p className="text-2xl font-bold">What are you into lately?</p>
-            <p className="mt-2 text-muted">
-              Start typing above to search the shared catalog.
-            </p>
+            <p className="text-2xl font-bold">{t("home.emptyTitle")}</p>
+            <p className="mt-2 text-muted">{t("home.emptySubtitle")}</p>
           </div>
         )}
 
         {query && (
           <div className="mb-6 flex items-baseline justify-between gap-4">
             <h2 className="text-2xl font-black tracking-tight">
-              Results for “{query}”
+              {t("home.resultsFor", { query })}
             </h2>
             <span className="text-sm text-muted">
-              {results.length} found
+              {t("home.foundCount", { count: results.length })}
             </span>
           </div>
         )}
@@ -109,7 +112,7 @@ export default async function Home({ params, searchParams }: HomeProps) {
                     {hit.title}
                   </h3>
                   <p className="mt-1 text-sm text-muted">
-                    {hit.year ?? "Year unknown"}
+                    {hit.year ?? t("common.yearUnknown")}
                   </p>
                   <form className="mt-auto pt-5" action={importHitAction}>
                     <input type="hidden" name="source" value={hit.source} />
@@ -122,7 +125,7 @@ export default async function Home({ params, searchParams }: HomeProps) {
                       className="w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground transition hover:opacity-90 group-hover:opacity-90"
                       type="submit"
                     >
-                      Track this title
+                      {t("catalog.trackTitle")}
                     </button>
                   </form>
                 </div>
@@ -133,24 +136,22 @@ export default async function Home({ params, searchParams }: HomeProps) {
 
         {query && results.length === 0 && (
           <div className="rounded-3xl border border-border bg-surface p-8 text-center">
-            <h2 className="text-xl font-bold">No exact match surfaced.</h2>
-            <p className="mt-2 text-muted">
-              External catalogs can miss niche or newly released titles.
-            </p>
+            <h2 className="text-xl font-bold">{t("home.noMatchTitle")}</h2>
+            <p className="mt-2 text-muted">{t("home.noMatchSubtitle")}</p>
           </div>
         )}
 
         {query && (
           <details className="mt-8 rounded-2xl border border-border bg-surface p-5 open:shadow-sm">
             <summary className="cursor-pointer font-bold text-foreground">
-              Can&apos;t find it? Create a manual title
+              {t("home.manualTitle")}
             </summary>
             <form
               className="mt-6 grid gap-4 sm:grid-cols-2"
               action={createManualWorkAction}
             >
               <label className="grid gap-1.5 text-sm font-semibold">
-                Title
+                {t("home.fieldTitle")}
                 <input
                   className="h-11 rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
                   name="title"
@@ -159,7 +160,7 @@ export default async function Home({ params, searchParams }: HomeProps) {
                 />
               </label>
               <label className="grid gap-1.5 text-sm font-semibold">
-                Type
+                {t("home.fieldType")}
                 <select
                   className="h-11 rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
                   name="type"
@@ -173,14 +174,14 @@ export default async function Home({ params, searchParams }: HomeProps) {
                 </select>
               </label>
               <label className="grid gap-1.5 text-sm font-semibold">
-                Original title
+                {t("home.fieldOriginalTitle")}
                 <input
                   className="h-11 rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
                   name="originalTitle"
                 />
               </label>
               <label className="grid gap-1.5 text-sm font-semibold">
-                Year
+                {t("home.fieldYear")}
                 <input
                   className="h-11 rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
                   type="number"
@@ -189,7 +190,7 @@ export default async function Home({ params, searchParams }: HomeProps) {
                 />
               </label>
               <label className="grid gap-1.5 text-sm font-semibold sm:col-span-2">
-                Cover URL
+                {t("home.fieldCoverUrl")}
                 <input
                   className="h-11 rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
                   type="url"
@@ -198,18 +199,20 @@ export default async function Home({ params, searchParams }: HomeProps) {
                 />
               </label>
               <label className="grid gap-1.5 text-sm font-semibold sm:col-span-2">
-                Synopsis
+                {t("home.fieldSynopsis")}
                 <textarea
                   className="min-h-24 rounded-xl border border-border bg-surface px-3 py-2 outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
                   name="synopsis"
                 />
               </label>
               <div className="grid grid-cols-3 gap-3 sm:col-span-2">
-                {[
-                  ["episodesTotal", "Episodes"],
-                  ["chaptersTotal", "Chapters"],
-                  ["pagesTotal", "Pages"],
-                ].map(([name, label]) => (
+                {(
+                  [
+                    ["episodesTotal", t("home.fieldEpisodes")],
+                    ["chaptersTotal", t("home.fieldChapters")],
+                    ["pagesTotal", t("home.fieldPages")],
+                  ] as const
+                ).map(([name, label]) => (
                   <label
                     key={name}
                     className="grid gap-1.5 text-sm font-semibold"
@@ -228,7 +231,7 @@ export default async function Home({ params, searchParams }: HomeProps) {
                 className="h-12 rounded-xl bg-primary px-5 font-bold text-primary-foreground hover:opacity-90 sm:col-span-2"
                 type="submit"
               >
-                Create title
+                {t("home.createTitle")}
               </button>
             </form>
           </details>

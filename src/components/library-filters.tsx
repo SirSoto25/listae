@@ -12,8 +12,33 @@ import {
   type WorkType,
 } from "@/types/domain";
 
+export type LibraryFiltersLabels = {
+  type: string;
+  allTypes: string;
+  status: string;
+  allStatuses: string;
+  sort: string;
+  sortUpdated: string;
+  sortScore: string;
+  sortTitle: string;
+  statusPlan: string;
+  statusInProgress: string;
+  statusCompleted: string;
+  statusOnHold: string;
+  statusDropped: string;
+};
+
+const STATUS_LABEL_KEYS: Record<ListStatus, keyof LibraryFiltersLabels> = {
+  plan: "statusPlan",
+  in_progress: "statusInProgress",
+  completed: "statusCompleted",
+  on_hold: "statusOnHold",
+  dropped: "statusDropped",
+};
+
 type LibraryFiltersProps = {
   locale: Locale;
+  labels: LibraryFiltersLabels;
   domain: LibraryDomain;
   type: WorkType | "all";
   status: ListStatus | "all";
@@ -22,6 +47,7 @@ type LibraryFiltersProps = {
 
 export function LibraryFilters({
   locale,
+  labels,
   domain,
   type,
   status,
@@ -47,13 +73,13 @@ export function LibraryFilters({
   return (
     <div className="flex flex-wrap gap-3 rounded-2xl border border-border bg-background p-3">
       <label className="grid gap-1 text-xs font-bold uppercase tracking-wider text-muted">
-        Type
+        {labels.type}
         <select
           className={selectClass}
           value={type}
           onChange={(event) => update("type", event.target.value)}
         >
-          <option value="all">All types</option>
+          <option value="all">{labels.allTypes}</option>
           {typeOptions.map((workType) => (
             <option key={workType} value={workType}>
               {workType}
@@ -62,30 +88,30 @@ export function LibraryFilters({
         </select>
       </label>
       <label className="grid gap-1 text-xs font-bold uppercase tracking-wider text-muted">
-        Status
+        {labels.status}
         <select
           className={selectClass}
           value={status}
           onChange={(event) => update("status", event.target.value)}
         >
-          <option value="all">All statuses</option>
+          <option value="all">{labels.allStatuses}</option>
           {LIST_STATUSES.map((listStatus) => (
             <option key={listStatus} value={listStatus}>
-              {listStatus.replace("_", " ")}
+              {labels[STATUS_LABEL_KEYS[listStatus]]}
             </option>
           ))}
         </select>
       </label>
       <label className="grid gap-1 text-xs font-bold uppercase tracking-wider text-muted">
-        Sort
+        {labels.sort}
         <select
           className={selectClass}
           value={sort}
           onChange={(event) => update("sort", event.target.value)}
         >
-          <option value="updatedAt">Recently updated</option>
-          <option value="score">Highest score</option>
-          <option value="title">Title A–Z</option>
+          <option value="updatedAt">{labels.sortUpdated}</option>
+          <option value="score">{labels.sortScore}</option>
+          <option value="title">{labels.sortTitle}</option>
         </select>
       </label>
     </div>

@@ -11,8 +11,30 @@ import {
   type WorkType,
 } from "@/types/domain";
 
+export type EntryFormLabels = {
+  status: string;
+  score: string;
+  scorePlaceholder: string;
+  progress: string;
+  unit: string;
+  chapters: string;
+  pages: string;
+  episodesSuffix: string;
+  episodes: string;
+  notes: string;
+  notesPlaceholder: string;
+  save: string;
+  addToLibrary: string;
+  statusPlan: string;
+  statusInProgress: string;
+  statusCompleted: string;
+  statusOnHold: string;
+  statusDropped: string;
+};
+
 type EntryFormProps = {
   locale: Locale;
+  labels: EntryFormLabels;
   workId: string;
   workType: WorkType;
   episodesTotal?: number | null;
@@ -29,16 +51,17 @@ type EntryFormProps = {
   returnPath?: string;
 };
 
-const statusLabels: Record<ListStatus, string> = {
-  plan: "Plan",
-  in_progress: "In progress",
-  completed: "Completed",
-  on_hold: "On hold",
-  dropped: "Dropped",
+const STATUS_KEYS: Record<ListStatus, keyof EntryFormLabels> = {
+  plan: "statusPlan",
+  in_progress: "statusInProgress",
+  completed: "statusCompleted",
+  on_hold: "statusOnHold",
+  dropped: "statusDropped",
 };
 
 export function EntryForm({
   locale,
+  labels,
   workId,
   workType,
   episodesTotal,
@@ -79,7 +102,7 @@ export function EntryForm({
       )}
 
       <label className="block text-sm font-semibold text-muted">
-        Status
+        {labels.status}
         <select
           className="mt-1.5 h-11 w-full rounded-xl border border-border bg-surface px-3 font-normal text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
           name="status"
@@ -87,14 +110,14 @@ export function EntryForm({
         >
           {LIST_STATUSES.map((status) => (
             <option key={status} value={status}>
-              {statusLabels[status]}
+              {labels[STATUS_KEYS[status]]}
             </option>
           ))}
         </select>
       </label>
 
       <label className="block text-sm font-semibold text-muted">
-        Score
+        {labels.score}
         <input
           className="mt-1.5 h-11 w-full rounded-xl border border-border bg-surface px-3 font-normal text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
           type="number"
@@ -103,14 +126,14 @@ export function EntryForm({
           max={10}
           step={1}
           defaultValue={entry?.score ?? ""}
-          placeholder="— / 10"
+          placeholder={labels.scorePlaceholder}
         />
       </label>
 
       {hasProgress && (
         <div className={compact ? "grid grid-cols-2 gap-2" : "grid grid-cols-2 gap-3"}>
           <label className="block text-sm font-semibold text-muted">
-            Progress
+            {labels.progress}
             <input
               className="mt-1.5 h-11 w-full rounded-xl border border-border bg-surface px-3 font-normal text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
               type="number"
@@ -123,7 +146,7 @@ export function EntryForm({
           </label>
           {isReading ? (
             <label className="block text-sm font-semibold text-muted">
-              Unit
+              {labels.unit}
               <select
                 className="mt-1.5 h-11 w-full rounded-xl border border-border bg-surface px-2 font-normal text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
                 name="progressUnit"
@@ -132,15 +155,15 @@ export function EntryForm({
                   setProgressUnit(event.target.value as "chapters" | "pages")
                 }
               >
-                <option value="chapters">Chapters</option>
-                <option value="pages">Pages</option>
+                <option value="chapters">{labels.chapters}</option>
+                <option value="pages">{labels.pages}</option>
               </select>
             </label>
           ) : (
             <div className="pt-8 text-sm text-muted">
               {episodesTotal
-                ? `/ ${episodesTotal} episodes`
-                : "episodes"}
+                ? labels.episodesSuffix.replace("{total}", String(episodesTotal))
+                : labels.episodes}
             </div>
           )}
         </div>
@@ -148,13 +171,13 @@ export function EntryForm({
 
       {!compact && (
         <label className="block text-sm font-semibold text-muted">
-          Notes
+          {labels.notes}
           <textarea
             className="mt-1.5 min-h-24 w-full resize-y rounded-xl border border-border bg-surface px-3 py-2 font-normal text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
             name="notes"
             maxLength={500}
             defaultValue={entry?.notes ?? ""}
-            placeholder="A short note for yourself"
+            placeholder={labels.notesPlaceholder}
           />
         </label>
       )}
@@ -165,7 +188,7 @@ export function EntryForm({
         }`}
         type="submit"
       >
-        {entry ? "Save" : "Add to library"}
+        {entry ? labels.save : labels.addToLibrary}
       </button>
     </form>
   );

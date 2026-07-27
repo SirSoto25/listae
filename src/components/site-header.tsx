@@ -9,6 +9,7 @@ import { users } from "@/lib/db/schema";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/get-dictionary";
 import { localePath } from "@/lib/i18n/path";
+import { createTranslator } from "@/lib/i18n/t";
 
 type SiteHeaderProps = {
   locale: Locale;
@@ -16,7 +17,7 @@ type SiteHeaderProps = {
 };
 
 export async function SiteHeader({ locale, dict }: SiteHeaderProps) {
-  void dict;
+  const t = createTranslator(dict);
   const session = await auth();
   const email = session?.user?.email;
 
@@ -42,7 +43,7 @@ export async function SiteHeader({ locale, dict }: SiteHeaderProps) {
         </LocaleLink>
         <div className="flex items-center gap-5 text-sm font-semibold text-muted">
           <LocaleLink className="hover:text-accent" href="/" locale={locale}>
-            Search
+            {t("nav.search")}
           </LocaleLink>
           {email ? (
             <>
@@ -51,7 +52,7 @@ export async function SiteHeader({ locale, dict }: SiteHeaderProps) {
                 href="/library"
                 locale={locale}
               >
-                Library
+                {t("nav.library")}
               </LocaleLink>
               {username ? (
                 <LocaleLink
@@ -59,7 +60,7 @@ export async function SiteHeader({ locale, dict }: SiteHeaderProps) {
                   href={`/u/${username}`}
                   locale={locale}
                 >
-                  Profile
+                  {t("nav.profile")}
                 </LocaleLink>
               ) : (
                 <LocaleLink
@@ -67,7 +68,7 @@ export async function SiteHeader({ locale, dict }: SiteHeaderProps) {
                   href="/onboarding"
                   locale={locale}
                 >
-                  Finish setup
+                  {t("nav.finishSetup")}
                 </LocaleLink>
               )}
             </>
@@ -83,7 +84,7 @@ export async function SiteHeader({ locale, dict }: SiteHeaderProps) {
                 }}
               >
                 <button className="hover:text-accent" type="submit">
-                  Log out
+                  {t("nav.logout")}
                 </button>
               </form>
             ) : (
@@ -92,7 +93,7 @@ export async function SiteHeader({ locale, dict }: SiteHeaderProps) {
                 href="/login"
                 locale={locale}
               >
-                Sign in
+                {t("nav.login")}
               </LocaleLink>
             )}
           </div>

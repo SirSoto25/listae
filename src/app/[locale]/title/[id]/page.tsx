@@ -8,7 +8,10 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users, works } from "@/lib/db/schema";
 import { isLocale, type Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { entryFormLabels } from "@/lib/i18n/labels";
 import { localePath } from "@/lib/i18n/path";
+import { createTranslator } from "@/lib/i18n/t";
 import { getEntry } from "@/lib/lists/entries";
 
 type TitlePageProps = {
@@ -23,6 +26,8 @@ export default async function TitlePage({
   const { locale: raw, id } = await params;
   if (!isLocale(raw)) notFound();
   const locale = raw as Locale;
+  const dict = await getDictionary(locale);
+  const t = createTranslator(dict);
 
   const work = await db.query.works.findFirst({
     where: eq(works.id, id),
@@ -49,14 +54,14 @@ export default async function TitlePage({
           href="/"
           locale={locale}
         >
-          ← Back to search
+          {t("common.backToSearch")}
         </LocaleLink>
 
         <div className="mt-6 grid gap-8 lg:grid-cols-[18rem_1fr]">
           <WorkCover
             className="aspect-[2/3] w-full rounded-3xl shadow-xl"
             src={work.coverUrl}
-            alt={`Cover of ${work.title}`}
+            alt={t("titlePage.coverAlt", { title: work.title })}
           />
 
           <div>
@@ -91,7 +96,7 @@ export default async function TitlePage({
               </p>
             ) : (
               <p className="mt-6 italic text-muted">
-                No synopsis is available for this title yet.
+                {t("titlePage.noSynopsis")}
               </p>
             )}
 
@@ -99,10 +104,12 @@ export default async function TitlePage({
               <div className="mb-6 flex items-center justify-between gap-4">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.2em] text-accent">
-                    My entry
+                    {t("titlePage.myEntry")}
                   </p>
                   <h2 className="mt-1 text-2xl font-black">
-                    {entry ? "Update your progress" : "Add to your library"}
+                    {entry
+                      ? t("titlePage.updateProgress")
+                      : t("titlePage.addToLibrary")}
                   </h2>
                 </div>
                 {entry?.score && (
@@ -114,13 +121,14 @@ export default async function TitlePage({
 
               {saved === "1" && (
                 <p className="mb-5 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
-                  Your library entry was saved.
+                  {t("titlePage.saved")}
                 </p>
               )}
 
               {user ? (
                 <EntryForm
                   locale={locale}
+                  labels={entryFormLabels(t)}
                   workId={work.id}
                   workType={work.type}
                   episodesTotal={work.episodesTotal}
@@ -135,7 +143,7 @@ export default async function TitlePage({
                   href="/login"
                   locale={locale}
                 >
-                  Sign in to track this title
+                  {t("titlePage.signInToTrack")}
                 </LocaleLink>
               )}
             </section>
