@@ -3,6 +3,15 @@
 **Date:** 2026-07-29  
 **Branch:** `chore/security-skills`
 
+## Audit reports (`docs/security/`)
+
+Exhaustive AppSec outputs from the skills below (2026-07-29):
+
+- [README — executive summary](../security/README.md)
+- [OWASP / Next.js audit](../security/2026-07-29-owasp-nextjs-audit.md)
+- [API audit](../security/2026-07-29-api-audit.md)
+- [Dependency audit](../security/2026-07-29-dependency-audit.md)
+
 ## Project skills (`.agents/skills/`)
 
 | Skill | Source | Use when |
@@ -14,7 +23,7 @@
 
 ## Cursor rules (`.cursor/rules/`)
 
-- `owasp-audit.mdc`, `api-audit.mdc`, `dependency-audit.mdc` — `alwaysApply: false`; loaded when auditing.
+- `owasp-audit.mdc`, `api-audit.mdc`, `dependency-audit.mdc` - `alwaysApply: false`; loaded when auditing.
 
 ## Global copies
 
@@ -22,4 +31,4 @@ Mirrored under `C:\Users\aleja\.cursor\skills\` for Cursor discovery.
 
 ## Not installed
 
-- **cyberaudit-skill** (`npx cyberaudit-skill install --agent cursor --project`) — failed on Windows: CLI rejects `--project` (2026-07-29). Retry when upstream fixes flags or use manual install docs.
+- **cyberaudit-skill** (`npx cyberaudit-skill install --agent cursor --project`) - failed on Windows: CLI rejects `--project` (2026-07-29). Retry when upstream fixes flags or use manual install docs.
