@@ -1,16 +1,23 @@
 import { eq } from "drizzle-orm";
-import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { EntryForm } from "@/components/entry-form";
+import { LocaleLink } from "@/components/locale-link";
 import { WorkCover } from "@/components/work-cover";
+import { fillMissingWorkLocale } from "@/lib/catalog/works";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users, works } from "@/lib/db/schema";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { entryFormLabels } from "@/lib/i18n/labels";
+import { localePath } from "@/lib/i18n/path";
+import { createTranslator } from "@/lib/i18n/t";
+import { workSynopsis, workTitle } from "@/lib/i18n/work-text";
 import { getEntry } from "@/lib/lists/entries";
 
 type TitlePageProps = {
-  params: Promise<{ id: string }>;
+  params: Promise<{ locale: string; id: string }>;
   searchParams: Promise<{ saved?: string }>;
 };
 
@@ -18,13 +25,33 @@ export default async function TitlePage({
   params,
   searchParams,
 }: TitlePageProps) {
-  const { id } = await params;
-  const work = await db.query.works.findFirst({
+  const { locale: raw, id } = await params;
+  if (!isLocale(raw)) notFound();
+  const locale = raw as Locale;
+  const dict = await getDictionary(locale);
+  const t = createTranslator(dict);
+
+  let work = await db.query.works.findFirst({
     where: eq(works.id, id),
   });
   if (!work) {
     notFound();
   }
+
+  const missingLocaleText =
+    locale === "es" ? !work.titleEs?.trim() : !work.titleEn?.trim();
+  if (missingLocaleText) {
+    const filled = await fillMissingWorkLocale(work.id, locale);
+    if (filled) {
+      work =
+        (await db.query.works.findFirst({
+          where: eq(works.id, id),
+        })) ?? work;
+    }
+  }
+
+  const displayTitle = workTitle(work, locale);
+  const displaySynopsis = workSynopsis(work, locale);
 
   const session = await auth();
   const user = session?.user?.email
@@ -39,18 +66,19 @@ export default async function TitlePage({
   return (
     <main className="flex-1 bg-transparent px-6 py-10 text-foreground">
       <div className="mx-auto max-w-5xl">
-        <Link
+        <LocaleLink
           className="text-sm font-bold text-muted hover:text-accent"
           href="/"
+          locale={locale}
         >
-          ← Back to search
-        </Link>
+          {t("common.backToSearch")}
+        </LocaleLink>
 
         <div className="mt-6 grid gap-8 lg:grid-cols-[18rem_1fr]">
           <WorkCover
             className="aspect-[2/3] w-full rounded-3xl shadow-xl"
             src={work.coverUrl}
-            alt={`Cover of ${work.title}`}
+            alt={t("titlePage.coverAlt", { title: displayTitle })}
           />
 
           <div>
@@ -72,20 +100,20 @@ export default async function TitlePage({
               )}
             </div>
             <h1 className="mt-4 text-4xl font-black leading-tight tracking-[-0.035em] sm:text-5xl">
-              {work.title}
+              {displayTitle}
             </h1>
             {work.originalTitle && (
               <p className="mt-2 text-lg text-muted">
                 {work.originalTitle}
               </p>
             )}
-            {work.synopsis ? (
+            {displaySynopsis ? (
               <p className="mt-6 max-w-2xl leading-7 text-muted">
-                {work.synopsis}
+                {displaySynopsis}
               </p>
             ) : (
               <p className="mt-6 italic text-muted">
-                No synopsis is available for this title yet.
+                {t("titlePage.noSynopsis")}
               </p>
             )}
 
@@ -93,10 +121,12 @@ export default async function TitlePage({
               <div className="mb-6 flex items-center justify-between gap-4">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.2em] text-accent">
-                    My entry
+                    {t("titlePage.myEntry")}
                   </p>
                   <h2 className="mt-1 text-2xl font-black">
-                    {entry ? "Update your progress" : "Add to your library"}
+                    {entry
+                      ? t("titlePage.updateProgress")
+                      : t("titlePage.addToLibrary")}
                   </h2>
                 </div>
                 {entry?.score && (
@@ -108,26 +138,30 @@ export default async function TitlePage({
 
               {saved === "1" && (
                 <p className="mb-5 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
-                  Your library entry was saved.
+                  {t("titlePage.saved")}
                 </p>
               )}
 
               {user ? (
                 <EntryForm
+                  locale={locale}
+                  labels={entryFormLabels(t)}
                   workId={work.id}
                   workType={work.type}
                   episodesTotal={work.episodesTotal}
                   chaptersTotal={work.chaptersTotal}
                   pagesTotal={work.pagesTotal}
                   entry={entry}
+                  returnPath={localePath(locale, `/title/${work.id}?saved=1`)}
                 />
               ) : (
-                <Link
+                <LocaleLink
                   className="flex h-12 items-center justify-center rounded-xl bg-primary px-5 font-bold text-primary-foreground hover:opacity-90"
                   href="/login"
+                  locale={locale}
                 >
-                  Sign in to track this title
-                </Link>
+                  {t("titlePage.signInToTrack")}
+                </LocaleLink>
               )}
             </section>
           </div>

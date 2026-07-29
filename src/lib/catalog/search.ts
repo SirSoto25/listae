@@ -2,10 +2,11 @@ import {
   buildSearchCacheKey,
   createDbSearchCacheStore,
 } from "@/lib/cache/db-search-cache";
+import type { Locale } from "@/lib/i18n/config";
 import type { WorkType } from "@/types/domain";
 
-import { resolveOpenLibrary, searchOpenLibrary } from "./openlibrary";
-import { resolveTmdb, searchTmdb } from "./tmdb";
+import { resolveOpenLibraryBilingual, searchOpenLibrary } from "./openlibrary";
+import { resolveTmdbBilingual, searchTmdb } from "./tmdb";
 import type { CatalogHit } from "./types";
 
 const SEARCH_CACHE_TTL_SECONDS = 1800;
@@ -15,8 +16,8 @@ export async function resolveCatalogHit(
   externalId: string,
 ): Promise<CatalogHit> {
   return source === "tmdb"
-    ? resolveTmdb(externalId)
-    : resolveOpenLibrary(externalId);
+    ? resolveTmdbBilingual(externalId)
+    : resolveOpenLibraryBilingual(externalId);
 }
 
 function parseCachedHits(payload: string): CatalogHit[] | null {
@@ -31,6 +32,7 @@ function parseCachedHits(payload: string): CatalogHit[] | null {
 export async function searchCatalog(
   query: string,
   typeFilter: WorkType | "all",
+  locale: Locale,
 ): Promise<CatalogHit[]> {
   const normalizedQuery = query.trim().replace(/\s+/g, " ");
   if (!normalizedQuery) {
@@ -38,7 +40,7 @@ export async function searchCatalog(
   }
 
   const cache = createDbSearchCacheStore();
-  const key = buildSearchCacheKey(normalizedQuery, typeFilter);
+  const key = buildSearchCacheKey(normalizedQuery, typeFilter, locale);
   const cachedPayload = await cache.get(key);
   const cachedHits =
     cachedPayload === null ? null : parseCachedHits(cachedPayload);
@@ -55,7 +57,7 @@ export async function searchCatalog(
 
   const searches: Promise<CatalogHit[]>[] = [];
   if (["all", "anime", "series", "movie"].includes(typeFilter)) {
-    searches.push(searchTmdb(normalizedQuery, typeFilter));
+    searches.push(searchTmdb(normalizedQuery, typeFilter, locale));
   }
   if (["all", "book", "manga", "comic"].includes(typeFilter)) {
     searches.push(searchOpenLibrary(normalizedQuery, typeFilter));

@@ -66,4 +66,28 @@ describe("database schema", () => {
     const result = db.get<{ foreign_keys: number }>(sql`PRAGMA foreign_keys`);
     expect(result?.foreign_keys).toBe(1);
   });
+
+  it("declares profileLocale on users with es default", () => {
+    const usersConfig = getTableConfig(users);
+    const profileLocale = usersConfig.columns.find(
+      (column) => column.name === "profile_locale",
+    );
+
+    expect(profileLocale).toBeDefined();
+    expect(profileLocale?.default).toBe("es");
+  });
+
+  it("declares bilingual text columns on works", () => {
+    const worksConfig = getTableConfig(works);
+    const columnNames = worksConfig.columns.map((column) => column.name);
+
+    expect(columnNames).toEqual(
+      expect.arrayContaining([
+        "title_es",
+        "title_en",
+        "synopsis_es",
+        "synopsis_en",
+      ]),
+    );
+  });
 });

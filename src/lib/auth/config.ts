@@ -2,6 +2,7 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import type { NextAuthConfig } from "next-auth";
 import Nodemailer from "next-auth/providers/nodemailer";
 
+import { resolveLocaleFromAuthUrl } from "@/lib/auth/locale-from-url";
 import { db } from "@/lib/db";
 import {
   accounts,
@@ -9,6 +10,8 @@ import {
   users,
   verificationTokens,
 } from "@/lib/db/schema";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { createTranslator } from "@/lib/i18n/t";
 import { ensureProfileTheme } from "@/lib/theme/store";
 
 export const authConfig = {
@@ -29,6 +32,10 @@ export const authConfig = {
       server: process.env.EMAIL_SERVER ?? "smtp://localhost:1025",
       from: process.env.EMAIL_FROM ?? "Listae <noreply@localhost>",
       async sendVerificationRequest({ identifier, url }) {
+        const locale = resolveLocaleFromAuthUrl(url);
+        const dict = await getDictionary(locale);
+        const t = createTranslator(dict);
+
         if (!process.env.EMAIL_SERVER) {
           console.log(`[listae magic link] ${identifier} -> ${url}`);
           return;
@@ -39,8 +46,8 @@ export const authConfig = {
         await transport.sendMail({
           to: identifier,
           from: process.env.EMAIL_FROM ?? "Listae <noreply@localhost>",
-          subject: "Sign in to Listae",
-          text: `Sign in to Listae:\n${url}\n`,
+          subject: t("auth.magicLinkSubject"),
+          text: t("auth.magicLinkBody", { url }),
         });
       },
     }),

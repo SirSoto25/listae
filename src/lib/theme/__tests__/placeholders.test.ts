@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { syncTranslator } from "@/lib/i18n/sync-dictionary";
+
 import { DEFAULT_CSS, DEFAULT_HTML_TEMPLATE } from "../defaults";
 import {
   buildDomainListsHtml,
@@ -8,6 +10,8 @@ import {
   type ProfileEntry,
 } from "../placeholders";
 import { renderTheme } from "../render";
+
+const t = syncTranslator("en");
 
 const entries: ProfileEntry[] = [
   {
@@ -32,7 +36,7 @@ const entries: ProfileEntry[] = [
 
 describe("buildListsHtml", () => {
   it("groups entries by status and renders all entry fields", () => {
-    const html = buildListsHtml(entries);
+    const html = buildListsHtml(entries, t);
 
     expect(html.indexOf("In progress")).toBeLessThan(
       html.indexOf("Completed"),
@@ -47,14 +51,17 @@ describe("buildListsHtml", () => {
   });
 
   it("escapes entry content and rejects unsafe URLs", () => {
-    const html = buildListsHtml([
-      {
-        ...entries[0],
-        title: `<script>alert("x")</script>`,
-        cover: "javascript:alert(1)",
-        url: 'javascript:alert("x")',
-      },
-    ]);
+    const html = buildListsHtml(
+      [
+        {
+          ...entries[0],
+          title: `<script>alert("x")</script>`,
+          cover: "javascript:alert(1)",
+          url: 'javascript:alert("x")',
+        },
+      ],
+      t,
+    );
 
     expect(html).toContain("&lt;script&gt;");
     expect(html).not.toContain("<script>");
@@ -64,7 +71,7 @@ describe("buildListsHtml", () => {
 
 describe("buildDomainListsHtml", () => {
   it("wraps audiovisual entries in a domain section", () => {
-    const html = buildDomainListsHtml(entries, "audiovisual");
+    const html = buildDomainListsHtml(entries, "audiovisual", t);
 
     expect(html).toContain(
       'class="listae-domain listae-domain--audiovisual"',
@@ -76,7 +83,7 @@ describe("buildDomainListsHtml", () => {
   });
 
   it("wraps reading entries in a domain section", () => {
-    const html = buildDomainListsHtml(entries, "reading");
+    const html = buildDomainListsHtml(entries, "reading", t);
 
     expect(html).toContain(
       'class="listae-domain listae-domain--reading"',
@@ -88,14 +95,14 @@ describe("buildDomainListsHtml", () => {
   });
 
   it("returns empty string when the domain has no entries", () => {
-    expect(buildDomainListsHtml(entries, "audiovisual")).not.toBe("");
-    expect(buildDomainListsHtml([], "audiovisual")).toBe("");
-    expect(buildDomainListsHtml(entries, "reading")).not.toBe("");
+    expect(buildDomainListsHtml(entries, "audiovisual", t)).not.toBe("");
+    expect(buildDomainListsHtml([], "audiovisual", t)).toBe("");
+    expect(buildDomainListsHtml(entries, "reading", t)).not.toBe("");
 
     const readingOnly: ProfileEntry[] = [
       { ...entries[0], type: "book", status: "completed" },
     ];
-    expect(buildDomainListsHtml(readingOnly, "audiovisual")).toBe("");
+    expect(buildDomainListsHtml(readingOnly, "audiovisual", t)).toBe("");
   });
 });
 
@@ -107,6 +114,7 @@ describe("renderProfileHtml", () => {
       username: "alex",
       displayName: "Alex",
       entries,
+      t,
     });
 
     expect(html).toContain("<h1>Alex</h1>");
@@ -122,6 +130,7 @@ describe("renderProfileHtml", () => {
       username: "alex",
       displayName: "Alex",
       entries,
+      t,
     });
 
     expect(html).toContain(
@@ -143,6 +152,7 @@ describe("renderProfileHtml", () => {
       username: `<img src=x onerror=alert("x")>`,
       displayName: "<script>alert(1)</script>",
       entries: [],
+      t,
     });
 
     expect(html).not.toContain("<script>");
@@ -174,6 +184,7 @@ describe("default theme", () => {
       username: "alex",
       displayName: "Alex",
       entries,
+      t,
     });
 
     expect(result.ok).toBe(true);
@@ -199,6 +210,7 @@ describe("renderTheme", () => {
       username: "alex",
       displayName: "Alex",
       entries,
+      t,
     });
 
     expect(result).toEqual({
@@ -219,6 +231,7 @@ describe("renderTheme", () => {
       username: "alex",
       displayName: "Alex",
       entries,
+      t,
     });
 
     expect(result.ok).toBe(false);

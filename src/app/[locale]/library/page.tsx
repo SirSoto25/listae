@@ -1,15 +1,24 @@
 import { eq } from "drizzle-orm";
-import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { EntryForm } from "@/components/entry-form";
 import { LibraryDomainTabs } from "@/components/library-domain-tabs";
 import { LibraryFilters } from "@/components/library-filters";
+import { LocaleLink } from "@/components/locale-link";
 import { WorkCover } from "@/components/work-cover";
 import { auth } from "@/lib/auth";
 import { reconcileDisplayNameForUser } from "@/lib/auth/backfill-display-names";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import {
+  entryFormLabels,
+  libraryDomainTabsLabels,
+  libraryFiltersLabels,
+} from "@/lib/i18n/labels";
+import { localePath } from "@/lib/i18n/path";
+import { createTranslator } from "@/lib/i18n/t";
 import { listLibraryEntries } from "@/lib/lists/entries";
 import {
   LIST_STATUSES,
@@ -22,6 +31,7 @@ import {
 } from "@/types/domain";
 
 type LibraryPageProps = {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{
     domain?: string;
     type?: string;
@@ -55,11 +65,18 @@ function parseSort(value?: string): "updatedAt" | "score" | "title" {
 }
 
 export default async function LibraryPage({
+  params,
   searchParams,
 }: LibraryPageProps) {
+  const { locale: raw } = await params;
+  if (!isLocale(raw)) notFound();
+  const locale = raw as Locale;
+  const dict = await getDictionary(locale);
+  const t = createTranslator(dict);
+
   const session = await auth();
   if (!session?.user?.email) {
-    redirect("/login");
+    redirect(localePath(locale, "/login"));
   }
 
   const user = await db.query.users.findFirst({
@@ -67,10 +84,10 @@ export default async function LibraryPage({
     where: eq(users.email, session.user.email),
   });
   if (!user) {
-    redirect("/login");
+    redirect(localePath(locale, "/login"));
   }
   if (!user.username) {
-    redirect("/onboarding");
+    redirect(localePath(locale, "/onboarding"));
   }
 
   await reconcileDisplayNameForUser(
@@ -79,24 +96,26 @@ export default async function LibraryPage({
     user.displayName,
   );
 
-  const params = await searchParams;
-  const domain = parseLibraryDomain(params.domain);
-  const type = parseType(params.type, domain);
-  const status = parseStatus(params.status);
-  const sort = parseSort(params.sort);
+  const sp = await searchParams;
+  const domain = parseLibraryDomain(sp.domain);
+  const type = parseType(sp.type, domain);
+  const status = parseStatus(sp.status);
+  const sort = parseSort(sp.sort);
   const entries = await listLibraryEntries(user.id, {
     domain,
     type,
     status,
     sort,
   });
-  const returnPath = `/library?${new URLSearchParams({
+  const returnPath = `${localePath(locale, "/library")}?${new URLSearchParams({
     domain,
     type,
     status,
     sort,
     saved: "1",
   }).toString()}`;
+  const countLabel =
+    entries.length === 1 ? t("library.countOne") : t("library.countMany");
 
   return (
     <main className="flex-1 bg-transparent px-6 py-10 text-foreground">
@@ -104,35 +123,47 @@ export default async function LibraryPage({
         <div className="flex flex-col gap-6 border-b border-border pb-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.25em] text-accent">
-              {user.username}&apos;s collection
+              {t("library.collection", { username: user.username })}
             </p>
             <h1 className="mt-2 text-4xl font-black tracking-[-0.04em] sm:text-5xl">
-              My library
+              {t("library.title")}
             </h1>
             <p className="mt-3 text-muted">
-              {entries.length} {entries.length === 1 ? "title" : "titles"} in
-              this view
+              {t("library.countInView", {
+                count: entries.length,
+                label: countLabel,
+              })}
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link
+            <LocaleLink
               className="inline-flex h-11 items-center justify-center rounded-xl border border-border bg-surface px-5 text-sm font-bold text-foreground hover:border-accent hover:text-accent"
               href={`/u/${user.username}/customize`}
+              locale={locale}
             >
-              Customize profile
-            </Link>
-            <Link
+              {t("library.customizeProfile")}
+            </LocaleLink>
+            <LocaleLink
               className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground hover:opacity-90"
               href="/"
+              locale={locale}
             >
-              + Find a title
-            </Link>
+              {t("library.findTitle")}
+            </LocaleLink>
           </div>
         </div>
 
         <div className="mt-6 space-y-4">
-          <LibraryDomainTabs domain={domain} status={status} sort={sort} />
+          <LibraryDomainTabs
+            locale={locale}
+            labels={libraryDomainTabsLabels(t)}
+            domain={domain}
+            status={status}
+            sort={sort}
+          />
           <LibraryFilters
+            locale={locale}
+            labels={libraryFiltersLabels(t)}
             domain={domain}
             type={type}
             status={status}
@@ -140,24 +171,23 @@ export default async function LibraryPage({
           />
         </div>
 
-        {params.saved === "1" && (
+        {sp.saved === "1" && (
           <p className="mt-5 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
-            Entry updated.
+            {t("library.entryUpdated")}
           </p>
         )}
 
         {entries.length === 0 ? (
           <div className="mt-8 rounded-3xl border border-dashed border-border bg-surface/70 p-12 text-center">
-            <h2 className="text-2xl font-black">Nothing in this view yet.</h2>
-            <p className="mt-2 text-muted">
-              Change the filters or search for something worth tracking.
-            </p>
-            <Link
+            <h2 className="text-2xl font-black">{t("library.emptyTitle")}</h2>
+            <p className="mt-2 text-muted">{t("library.emptySubtitle")}</p>
+            <LocaleLink
               className="mt-6 inline-flex h-11 items-center rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground hover:opacity-90"
               href="/"
+              locale={locale}
             >
-              Search the catalog
-            </Link>
+              {t("library.searchCatalog")}
+            </LocaleLink>
           </div>
         ) : (
           <div className="mt-8 space-y-4">
@@ -176,21 +206,24 @@ export default async function LibraryPage({
                     <div className="text-[11px] font-black uppercase tracking-widest text-accent">
                       {work.type}
                     </div>
-                    <Link
+                    <LocaleLink
                       className="mt-1 block truncate text-lg font-black hover:text-accent"
                       href={`/title/${work.id}`}
+                      locale={locale}
                     >
                       {work.title}
-                    </Link>
+                    </LocaleLink>
                     <p className="mt-1 text-xs text-muted">
-                      Updated{" "}
-                      {new Intl.DateTimeFormat("en", {
+                      {t("library.updated")}{" "}
+                      {new Intl.DateTimeFormat(locale, {
                         dateStyle: "medium",
                       }).format(entry.updatedAt)}
                     </p>
                   </div>
                   <EntryForm
                     compact
+                    locale={locale}
+                    labels={entryFormLabels(t)}
                     workId={work.id}
                     workType={work.type}
                     episodesTotal={work.episodesTotal}

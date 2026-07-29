@@ -5,6 +5,11 @@ export type CatalogHit = {
   externalId: string;
   type: WorkType;
   title: string;
+  titleEs?: string;
+  titleEn?: string;
+  synopsis?: string;
+  synopsisEs?: string;
+  synopsisEn?: string;
   year?: number;
   coverUrl?: string;
   episodesTotal?: number;

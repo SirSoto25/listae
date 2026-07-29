@@ -4,6 +4,7 @@ import {
   type ListStatus,
   type WorkType,
 } from "@/types/domain";
+import type { createTranslator } from "@/lib/i18n/t";
 
 export type ProfileEntry = {
   title: string;
@@ -15,20 +16,22 @@ export type ProfileEntry = {
   url: string;
 };
 
+export type ProfileTranslator = ReturnType<typeof createTranslator>;
+
 export type RenderProfileHtmlArgs = {
   template: string;
   username: string;
   displayName: string;
   entries: ProfileEntry[];
+  t: ProfileTranslator;
 };
 
-const STATUS_LABELS: Record<ListStatus, string> = {
-  plan: "Plan to watch/read",
-  in_progress: "In progress",
-  completed: "Completed",
-  on_hold: "On hold",
-  dropped: "Dropped",
-};
+export function statusLabel(
+  status: ListStatus,
+  t: ProfileTranslator,
+): string {
+  return t(`profile.status.${status}`);
+}
 
 function escapeHtml(value: string): string {
   return value.replace(
@@ -70,7 +73,7 @@ function safeCoverUrl(url: string | null): string | null {
   }
 }
 
-function buildEntryHtml(entry: ProfileEntry): string {
+function buildEntryHtml(entry: ProfileEntry, t: ProfileTranslator): string {
   const href = safeHref(entry.url);
   const cover = safeCoverUrl(entry.cover);
   const title = escapeHtml(entry.title);
@@ -81,7 +84,9 @@ function buildEntryHtml(entry: ProfileEntry): string {
     ? `<img class="listae-entry-cover" src="${escapeHtml(cover)}" alt="" loading="lazy" />`
     : "";
   const score =
-    entry.score === null ? "Not scored" : `Score: ${entry.score}`;
+    entry.score === null
+      ? t("profile.notScored")
+      : t("profile.score", { score: entry.score });
 
   return [
     `<div class="listae-entry" data-type="${escapeHtml(entry.type)}">`,
@@ -96,17 +101,20 @@ function buildEntryHtml(entry: ProfileEntry): string {
   ].join("");
 }
 
-export function buildListsHtml(entries: ProfileEntry[]): string {
+export function buildListsHtml(
+  entries: ProfileEntry[],
+  t: ProfileTranslator,
+): string {
   return LIST_STATUSES.map((status) => {
     const statusEntries = entries.filter((entry) => entry.status === status);
     const contents =
       statusEntries.length > 0
-        ? statusEntries.map(buildEntryHtml).join("")
-        : `<p class="listae-status-empty">No entries yet.</p>`;
+        ? statusEntries.map((entry) => buildEntryHtml(entry, t)).join("")
+        : `<p class="listae-status-empty">${escapeHtml(t("profile.emptyStatus"))}</p>`;
 
     return [
       `<section class="listae-status" data-status="${status}">`,
-      `<h2 class="listae-status-title">${STATUS_LABELS[status]}</h2>`,
+      `<h2 class="listae-status-title">${escapeHtml(statusLabel(status, t))}</h2>`,
       `<div class="listae-status-entries">${contents}</div>`,
       "</section>",
     ].join("");
@@ -116,6 +124,7 @@ export function buildListsHtml(entries: ProfileEntry[]): string {
 export function buildDomainListsHtml(
   entries: ProfileEntry[],
   domain: "audiovisual" | "reading",
+  t: ProfileTranslator,
 ): string {
   const domainEntries = entries.filter(
     (entry) => domainForWorkType(entry.type) === domain,
@@ -125,7 +134,7 @@ export function buildDomainListsHtml(
     return "";
   }
 
-  const inner = buildListsHtml(domainEntries);
+  const inner = buildListsHtml(domainEntries, t);
 
   return [
     `<section class="listae-domain listae-domain--${domain}" data-domain="${domain}">`,
@@ -139,13 +148,14 @@ export function renderProfileHtml({
   username,
   displayName,
   entries,
+  t,
 }: RenderProfileHtmlArgs): string {
   const replacements: Record<string, string> = {
     "{{username}}": escapeHtml(username),
     "{{displayName}}": escapeHtml(displayName),
-    "{{lists}}": buildListsHtml(entries),
-    "{{audiovisual_lists}}": buildDomainListsHtml(entries, "audiovisual"),
-    "{{reading_lists}}": buildDomainListsHtml(entries, "reading"),
+    "{{lists}}": buildListsHtml(entries, t),
+    "{{audiovisual_lists}}": buildDomainListsHtml(entries, "audiovisual", t),
+    "{{reading_lists}}": buildDomainListsHtml(entries, "reading", t),
   };
 
   return Object.entries(replacements).reduce(

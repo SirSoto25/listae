@@ -16,6 +16,8 @@ import {
 import type { ProfileEntry } from "@/lib/theme/placeholders";
 import { renderTheme } from "@/lib/theme/render";
 import { buildThemeDocument } from "@/lib/theme/save";
+import type { Locale } from "@/lib/i18n/config";
+import { syncTranslator } from "@/lib/i18n/sync-dictionary";
 
 function domainVarsFromCss(css: string): DomainVarsInput {
   const parsed =
@@ -30,6 +32,7 @@ type ThemeEditorProps = {
   username: string;
   displayName: string;
   entries: ProfileEntry[];
+  profileLocale: Locale;
   initialHtmlTemplate: string;
   initialCustomCss: string;
   defaultHtmlTemplate: string;
@@ -40,6 +43,7 @@ export function ThemeEditor({
   username,
   displayName,
   entries,
+  profileLocale,
   initialHtmlTemplate,
   initialCustomCss,
   defaultHtmlTemplate,
@@ -60,8 +64,9 @@ export function ThemeEditor({
         username,
         displayName,
         entries,
+        t: syncTranslator(profileLocale),
       }),
-    [customCss, displayName, entries, htmlTemplate, username],
+    [customCss, displayName, entries, htmlTemplate, profileLocale, username],
   );
   const previewDoc = preview.ok
     ? buildThemeDocument(preview.html, preview.css)

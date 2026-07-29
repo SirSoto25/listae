@@ -1,4 +1,5 @@
 import type { WorkType } from "@/types/domain";
+import type { Locale } from "@/lib/i18n/config";
 
 import type { CatalogHit } from "./types";
 
@@ -19,6 +20,7 @@ type TmdbDetails = TmdbResult & {
   genres?: Array<{ id: number }>;
   number_of_episodes?: number;
   original_language?: string;
+  overview?: string;
 };
 
 type TmdbResponse = {
@@ -26,6 +28,10 @@ type TmdbResponse = {
 };
 
 let hasLoggedMissingKey = false;
+
+function tmdbLanguageForLocale(locale: Locale): string {
+  return locale === "es" ? "es-ES" : "en-US";
+}
 
 /** TMDB v4 read access tokens are JWTs; v3 API keys are short hex strings. */
 export function isTmdbBearerToken(credential: string): boolean {
@@ -63,6 +69,10 @@ function yearFromDate(value?: string): number | undefined {
 
   const year = Number.parseInt(value.slice(0, 4), 10);
   return Number.isInteger(year) ? year : undefined;
+}
+
+function localizedTitle(details: TmdbDetails, mediaType: "movie" | "tv"): string | undefined {
+  return mediaType === "movie" ? details.title : details.name;
 }
 
 function mapResult(
@@ -103,9 +113,29 @@ function mapResult(
   };
 }
 
+async function fetchTmdbDetails(
+  mediaType: "movie" | "tv",
+  id: string,
+  apiKey: string,
+  language?: string,
+): Promise<TmdbDetails> {
+  const params: Record<string, string> = {};
+  if (language) {
+    params.language = language;
+  }
+  const { url, headers } = buildTmdbRequest(`${mediaType}/${id}`, apiKey, params);
+  const response = await fetch(url, { cache: "no-store", headers });
+  if (!response.ok) {
+    throw new Error(`TMDB lookup failed with status ${response.status}`);
+  }
+
+  return (await response.json()) as TmdbDetails;
+}
+
 export async function searchTmdb(
   query: string,
   typeFilter: WorkType | "all",
+  locale: Locale = "es",
 ): Promise<CatalogHit[]> {
   if (!["all", "anime", "series", "movie"].includes(typeFilter)) {
     return [];
@@ -130,6 +160,7 @@ export async function searchTmdb(
     query,
     include_adult: "false",
     page: "1",
+    language: tmdbLanguageForLocale(locale),
   });
 
   const response = await fetch(url, { cache: "no-store", headers });
@@ -143,33 +174,11 @@ export async function searchTmdb(
     .filter((hit): hit is CatalogHit => hit !== null);
 }
 
-export async function resolveTmdb(externalId: string): Promise<CatalogHit> {
-  const identity = /^(movie|tv):(\d+)$/.exec(externalId);
-  if (!identity) {
-    throw new Error("invalid TMDB identity");
-  }
-
-  const apiKey = process.env.TMDB_API_KEY;
-  if (!apiKey) {
-    throw new Error("TMDB_API_KEY is not configured");
-  }
-
-  const [, mediaType, id] = identity;
-  const { url, headers } = buildTmdbRequest(`${mediaType}/${id}`, apiKey, {});
-  const response = await fetch(url, { cache: "no-store", headers });
-  if (!response.ok) {
-    throw new Error(`TMDB lookup failed with status ${response.status}`);
-  }
-
-  const details = (await response.json()) as TmdbDetails;
-  const hit = mapResult(
-    { ...details, id: Number(id), media_type: mediaType as "movie" | "tv" },
-    "all",
-  );
-  if (!hit) {
-    throw new Error("TMDB record is invalid");
-  }
-
+function applyTmdbStructuralFields(
+  hit: CatalogHit,
+  mediaType: "movie" | "tv",
+  details: TmdbDetails,
+): CatalogHit {
   if (
     mediaType === "tv" &&
     details.original_language === "ja" &&
@@ -181,4 +190,63 @@ export async function resolveTmdb(externalId: string): Promise<CatalogHit> {
     hit.episodesTotal = details.number_of_episodes;
   }
   return hit;
+}
+
+export async function resolveTmdbBilingual(
+  externalId: string,
+): Promise<CatalogHit> {
+  const identity = /^(movie|tv):(\d+)$/.exec(externalId);
+  if (!identity) {
+    throw new Error("invalid TMDB identity");
+  }
+
+  const apiKey = process.env.TMDB_API_KEY;
+  if (!apiKey) {
+    throw new Error("TMDB_API_KEY is not configured");
+  }
+
+  const mediaType = identity[1];
+  const id = identity[2];
+  if (mediaType !== "movie" && mediaType !== "tv") {
+    throw new Error("invalid TMDB identity");
+  }
+
+  const [esDetails, enDetails] = await Promise.all([
+    fetchTmdbDetails(mediaType, id, apiKey, "es-ES"),
+    fetchTmdbDetails(mediaType, id, apiKey, "en-US"),
+  ]);
+
+  const structural = enDetails.id ? enDetails : esDetails;
+  const hit = mapResult(
+    {
+      ...structural,
+      id: Number(id),
+      media_type: mediaType,
+    },
+    "all",
+  );
+  if (!hit) {
+    throw new Error("TMDB record is invalid");
+  }
+
+  const titleEs = localizedTitle(esDetails, mediaType)?.trim();
+  const titleEn = localizedTitle(enDetails, mediaType)?.trim();
+  const synopsisEs = esDetails.overview?.trim() || undefined;
+  const synopsisEn = enDetails.overview?.trim() || undefined;
+
+  applyTmdbStructuralFields(hit, mediaType, enDetails);
+
+  return {
+    ...hit,
+    titleEs,
+    titleEn,
+    synopsisEs,
+    synopsisEn,
+    title: titleEn ?? titleEs ?? hit.title,
+    synopsis: synopsisEn ?? synopsisEs,
+  };
+}
+
+export async function resolveTmdb(externalId: string): Promise<CatalogHit> {
+  return resolveTmdbBilingual(externalId);
 }
