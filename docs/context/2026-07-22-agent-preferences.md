@@ -1,6 +1,6 @@
 # Preferencias de proceso (agente)
 
-**Actualizado:** 2026-07-27
+\*\*Actualizado:\*\* 2026-07-29
 
 ## Ejecución
 
@@ -32,4 +32,15 @@
 
 - Epic i18n: `docs/context/2026-07-27-i18n.md` — plan `docs/superpowers/plans/2026-07-27-i18n.md`
 - Epic library domains: `docs/context/2026-07-22-library-domains.md` — plan `docs/superpowers/plans/2026-07-22-library-domains.md`
+
+
+## Security audit tools
+
+- Inventory: `docs/context/2026-07-29-security-audit-toolkit.md`
+- **OWASP / app code:** `.agents/skills/owasp-audit/` + `.cursor/rules/owasp-audit.mdc`
+- **APIs (incl. Server Actions):** `.agents/skills/api-audit/` + `.cursor/rules/api-audit.mdc`
+- **Dependencies:** `.agents/skills/dependency-audit/` + `.cursor/rules/dependency-audit.mdc`
+- **Full-stack / Next.js:** `.agents/skills/security-audit/` (refs: `references/nextjs-security.md`, `supabase-security.md`, `vercel-security.md`)
+- Prefer these skills for exhaustive security reviews; rules are opt-in (`alwaysApply: false`).
+- **cyberaudit-skill:** not installed (Windows CLI `--project` unsupported as of 2026-07-29).
 
