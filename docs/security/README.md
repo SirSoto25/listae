@@ -1,17 +1,17 @@
 # Security audit reports (Listae)
 
 **Date:** 2026-07-29  
-**Branch:** `chore/security-skills`
+**Remediation branch:** `fix/security-remediation`
 
 ## Executive summary
 
 | Area | Result |
 |------|--------|
-| **Application code (OWASP + API)** | **0 Critical**, **2 High** — magic-link abuse surface and missing rate limits on anonymous search |
-| **Dependencies (`pnpm audit`)** | **3 critical**, **10 high** — notably `next-auth` beta track and pending **Next.js** patch |
+| **Application code (OWASP + API)** | High items addressed — rate limits, headers, input validation; see [remediation log](./2026-07-29-remediation.md) |
+| **Dependencies (`pnpm audit`)** | `next` / `next-auth` bumped on remediation branch |
 | **BOLA / IDOR (user-owned resources)** | **Clean** — ownership checks consistent on tested routes |
 
-Prioritize: rate limiting on auth and public search, dependency upgrades (`next`, `next-auth`), then medium/low findings in the linked reports.
+Remediation status: [2026-07-29-remediation.md](./2026-07-29-remediation.md).
 
 ## Reports
 

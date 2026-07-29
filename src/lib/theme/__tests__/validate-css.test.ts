@@ -49,4 +49,12 @@ describe("validateThemeCss", () => {
 
     expect(result.ok).toBe(false);
   });
+
+  it("rejects malformed https url() prefixes", () => {
+    const result = validateThemeCss(
+      `body { background: url("https:evil.example/x.png"); }`,
+    );
+
+    expect(result.ok).toBe(false);
+  });
 });

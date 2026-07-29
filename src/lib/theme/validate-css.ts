@@ -14,6 +14,19 @@ const GOOGLE_FONT_HOSTS = new Set([
   "fonts.gstatic.com",
 ]);
 
+function isWellFormedHttpsUrl(value: string): boolean {
+  if (!/^https:\/\//i.test(value)) {
+    return false;
+  }
+
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "https:" && parsed.hostname.length > 0;
+  } catch {
+    return false;
+  }
+}
+
 function locationAt(css: string, index: number) {
   const precedingText = css.slice(0, index);
   const lines = precedingText.split("\n");
@@ -69,9 +82,9 @@ export function validateThemeCss(css: string): ThemeCssValidationResult {
 
   for (const match of css.matchAll(/url\s*\(\s*(['"]?)(.*?)\1\s*\)/gi)) {
     const url = match[2].trim();
-    if (!url.toLowerCase().startsWith("https:")) {
+    if (!isWellFormedHttpsUrl(url)) {
       errors.push({
-        message: "CSS url() values must use HTTPS.",
+        message: "CSS url() values must be well-formed HTTPS URLs.",
         ...locationAt(css, match.index),
         snippet: match[0],
       });

@@ -43,7 +43,13 @@ export const authConfig = {
         const t = createTranslator(dict);
 
         if (!process.env.EMAIL_SERVER) {
-          console.log(`[listae magic link] ${identifier} -> ${url}`);
+          if (process.env.NODE_ENV !== "production") {
+            console.log(`[listae magic link] ${identifier} -> ${url}`);
+          } else {
+            console.warn(
+              `[listae magic link] EMAIL_SERVER unset; link not sent for ${identifier}`,
+            );
+          }
           return;
         }
 
