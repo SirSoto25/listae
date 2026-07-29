@@ -83,6 +83,7 @@
     "errorVerification": "That sign-in link is no longer valid. It may have expired or already been used. Request a new one below.",
     "errorConfiguration": "Sign-in is temporarily unavailable. Try again in a moment.",
     "errorAccessDenied": "You do not have permission to sign in.",
+    "errorRateLimited": "Too many sign-in attempts. Wait a bit and try again.",
     "errorDefault": "Something went wrong signing in. Request a new magic link below."
   },
   "profile": {

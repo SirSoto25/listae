@@ -6,6 +6,12 @@ const mocks = vi.hoisted(() => ({
   invalidate: vi.fn(),
   searchTmdb: vi.fn(),
   searchOpenLibrary: vi.fn(),
+  checkRateLimit: vi.fn(),
+}));
+
+vi.mock("@/lib/security/rate-limit", () => ({
+  checkRateLimit: mocks.checkRateLimit,
+  clientIpFromHeaders: vi.fn(),
 }));
 
 vi.mock("@/lib/cache/db-search-cache", () => ({
@@ -32,6 +38,7 @@ describe("searchCatalog", () => {
     mocks.set.mockResolvedValue(undefined);
     mocks.searchTmdb.mockResolvedValue([]);
     mocks.searchOpenLibrary.mockResolvedValue([]);
+    mocks.checkRateLimit.mockReturnValue({ ok: true });
   });
 
   it("returns a fresh cache hit without calling providers", async () => {
@@ -96,5 +103,21 @@ describe("searchCatalog", () => {
     );
 
     await expect(searchCatalog("Dune", "all", "es")).resolves.toEqual(stale);
+  });
+
+  it("ignores queries longer than 200 characters", async () => {
+    await expect(
+      searchCatalog("a".repeat(201), "all", "es"),
+    ).resolves.toEqual([]);
+    expect(mocks.searchTmdb).not.toHaveBeenCalled();
+  });
+
+  it("returns no results when the IP rate limit is exceeded", async () => {
+    mocks.checkRateLimit.mockReturnValue({ ok: false, retryAfterSec: 60 });
+
+    await expect(
+      searchCatalog("Dune", "all", "es", "203.0.113.5"),
+    ).resolves.toEqual([]);
+    expect(mocks.searchTmdb).not.toHaveBeenCalled();
   });
 });

@@ -85,10 +85,15 @@ export function normalizeEntryInput(
     throw new Error("invalid list status");
   }
 
+  const notesRaw = String(input.notes ?? "").trim();
+  if (notesRaw.length > 500) {
+    throw new Error("notes must be at most 500 characters");
+  }
+
   const base = {
     status: input.status as ListStatus,
     score: parseScore(input.score),
-    notes: String(input.notes ?? "").trim() || null,
+    notes: notesRaw || null,
   };
 
   if (workType === "movie") {

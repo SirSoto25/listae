@@ -163,6 +163,15 @@ describe("normalizeEntryInput", () => {
     ).toThrow("progress unit must be chapters or pages");
   });
 
+  it("rejects notes longer than 500 characters", () => {
+    expect(() =>
+      normalizeEntryInput("movie", {
+        status: "plan",
+        notes: "x".repeat(501),
+      }),
+    ).toThrow("notes must be at most 500 characters");
+  });
+
   it("enforces the total for the selected progress unit", () => {
     const totals = { chaptersTotal: 12, pagesTotal: 300 };
 

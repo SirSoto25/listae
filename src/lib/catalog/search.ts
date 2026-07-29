@@ -5,11 +5,15 @@ import {
 import type { Locale } from "@/lib/i18n/config";
 import type { WorkType } from "@/types/domain";
 
+import { checkRateLimit } from "@/lib/security/rate-limit";
+
 import { resolveOpenLibraryBilingual, searchOpenLibrary } from "./openlibrary";
 import { resolveTmdbBilingual, searchTmdb } from "./tmdb";
 import type { CatalogHit } from "./types";
 
 const SEARCH_CACHE_TTL_SECONDS = 1800;
+const MAX_QUERY_LENGTH = 200;
+const SEARCH_RATE_LIMIT = { limit: 30, windowMs: 3_600_000 };
 
 export async function resolveCatalogHit(
   source: CatalogHit["source"],
@@ -33,10 +37,18 @@ export async function searchCatalog(
   query: string,
   typeFilter: WorkType | "all",
   locale: Locale,
+  clientIp?: string | null,
 ): Promise<CatalogHit[]> {
   const normalizedQuery = query.trim().replace(/\s+/g, " ");
-  if (!normalizedQuery) {
+  if (!normalizedQuery || normalizedQuery.length > MAX_QUERY_LENGTH) {
     return [];
+  }
+
+  if (clientIp) {
+    const limited = checkRateLimit(`search:ip:${clientIp}`, SEARCH_RATE_LIMIT);
+    if (!limited.ok) {
+      return [];
+    }
   }
 
   const cache = createDbSearchCacheStore();
