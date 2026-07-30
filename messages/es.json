@@ -97,6 +97,13 @@
     "notScored": "Sin puntuación",
     "score": "Puntuación: {score}",
     "emptyStatus": "Aún no hay entradas.",
+    "table": {
+      "index": "#",
+      "title": "Título",
+      "score": "Puntuación",
+      "type": "Tipo",
+      "progress": "Progreso"
+    },
     "noProgressTracking": "Sin seguimiento de progreso",
     "profileLocaleLabel": "Idioma del perfil público",
     "profileLocaleHint": "Etiquetas de estado y textos del perfil para visitantes."
