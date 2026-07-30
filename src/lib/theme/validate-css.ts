@@ -37,37 +37,105 @@ function locationAt(css: string, index: number) {
   };
 }
 
+/** Finds the index after the semicolon that terminates a CSS at-rule value. */
+function findCssRuleTerminator(css: string, start: number): number {
+  let i = start;
+  let parenDepth = 0;
+  let stringChar: '"' | "'" | null = null;
+
+  while (i < css.length) {
+    const ch = css[i];
+
+    if (stringChar) {
+      if (ch === "\\") {
+        i += 2;
+        continue;
+      }
+      if (ch === stringChar) {
+        stringChar = null;
+      }
+      i++;
+      continue;
+    }
+
+    if (ch === '"' || ch === "'") {
+      stringChar = ch;
+      i++;
+      continue;
+    }
+
+    if (ch === "(") {
+      parenDepth++;
+      i++;
+      continue;
+    }
+
+    if (ch === ")") {
+      if (parenDepth > 0) {
+        parenDepth--;
+      }
+      i++;
+      continue;
+    }
+
+    if (ch === ";" && parenDepth === 0) {
+      return i + 1;
+    }
+
+    i++;
+  }
+
+  return i;
+}
+
+function findAtImportRules(css: string): Array<{ index: number; snippet: string }> {
+  const results: Array<{ index: number; snippet: string }> = [];
+
+  for (const match of css.matchAll(/@import\b/gi)) {
+    const start = match.index!;
+    let i = start + match[0].length;
+
+    while (i < css.length && /\s/.test(css[i])) {
+      i++;
+    }
+
+    const end = findCssRuleTerminator(css, i);
+    results.push({
+      index: start,
+      snippet: css.slice(start, end),
+    });
+  }
+
+  return results;
+}
+
 export function validateThemeCss(css: string): ThemeCssValidationResult {
   const errors: ThemeCssError[] = [];
 
-  for (const [index, line] of css.split("\n").entries()) {
-    for (const importMatch of line.matchAll(/@import\b[^;]*(?:;|$)/gi)) {
-      const snippet = importMatch[0];
-      const urlMatch = snippet.match(
-        /@import\s+(?:url\(\s*(['"]?)(.*?)\1\s*\)|(['"])(.*?)\3)/i,
-      );
-      const importUrl = urlMatch?.[2] ?? urlMatch?.[4];
+  for (const { index, snippet } of findAtImportRules(css)) {
+    const urlMatch = snippet.match(
+      /@import\s+(?:url\(\s*(['"])(.*?)\1\s*\)|(['"])(.*?)\3)/is,
+    );
+    const importUrl = urlMatch?.[2] ?? urlMatch?.[4];
 
-      let allowed = false;
-      if (importUrl) {
-        try {
-          const parsedUrl = new URL(importUrl);
-          allowed =
-            parsedUrl.protocol === "https:" &&
-            GOOGLE_FONT_HOSTS.has(parsedUrl.hostname);
-        } catch {
-          allowed = false;
-        }
+    let allowed = false;
+    if (importUrl) {
+      try {
+        const parsedUrl = new URL(importUrl);
+        allowed =
+          parsedUrl.protocol === "https:" &&
+          GOOGLE_FONT_HOSTS.has(parsedUrl.hostname);
+      } catch {
+        allowed = false;
       }
+    }
 
-      if (!allowed) {
-        errors.push({
-          message: "Only Google Fonts HTTPS @import URLs are allowed.",
-          line: index + 1,
-          column: (importMatch.index ?? 0) + 1,
-          snippet,
-        });
-      }
+    if (!allowed) {
+      errors.push({
+        message: "Only Google Fonts HTTPS @import URLs are allowed.",
+        ...locationAt(css, index),
+        snippet,
+      });
     }
   }
 
