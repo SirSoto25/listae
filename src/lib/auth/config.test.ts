@@ -38,13 +38,22 @@ it("allows sign-in before the adapter has inserted the new user", async () => {
   expect(result).toBe(true);
 });
 
-it("keeps same-origin post-login callbacks intact", async () => {
+it("keeps safe locale-prefixed post-login callbacks intact", async () => {
   const result = await authConfig.callbacks.redirect({
-    url: "http://localhost:3000/library",
+    url: "http://localhost:3000/es/library",
     baseUrl: "http://localhost:3000",
   });
 
-  expect(result).toBe("http://localhost:3000/library");
+  expect(result).toBe("http://localhost:3000/es/library");
+});
+
+it("rejects unsafe same-origin redirect targets", async () => {
+  const result = await authConfig.callbacks.redirect({
+    url: "http://localhost:3000//evil.example",
+    baseUrl: "http://localhost:3000",
+  });
+
+  expect(result).toBe("http://localhost:3000");
 });
 
 it("rejects external redirect targets", async () => {

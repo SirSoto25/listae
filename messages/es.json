@@ -83,6 +83,7 @@
     "errorVerification": "Ese enlace de acceso ya no es válido. Puede haber caducado o ya haberse usado. Solicita uno nuevo abajo.",
     "errorConfiguration": "El acceso no está disponible temporalmente. Inténtalo de nuevo en un momento.",
     "errorAccessDenied": "No tienes permiso para iniciar sesión.",
+    "errorRateLimited": "Demasiados intentos de acceso. Espera un momento e inténtalo de nuevo.",
     "errorDefault": "Algo falló al iniciar sesión. Solicita un nuevo enlace mágico abajo."
   },
   "profile": {

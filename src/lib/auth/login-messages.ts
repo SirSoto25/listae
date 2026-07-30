@@ -5,6 +5,7 @@ const ERROR_KEYS: Record<string, string> = {
   Verification: "auth.errorVerification",
   Configuration: "auth.errorConfiguration",
   AccessDenied: "auth.errorAccessDenied",
+  RateLimited: "auth.errorRateLimited",
   Default: "auth.errorDefault",
 };
 

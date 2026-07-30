@@ -12,7 +12,13 @@ import {
 } from "@/lib/db/schema";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { createTranslator } from "@/lib/i18n/t";
+import { safeReturnPath } from "@/lib/safe-return-path";
 import { ensureProfileTheme } from "@/lib/theme/store";
+
+const authSecret = process.env.AUTH_SECRET?.trim();
+if (!authSecret) {
+  throw new Error("AUTH_SECRET is required");
+}
 
 export const authConfig = {
   adapter: DrizzleAdapter(db, {
@@ -37,7 +43,13 @@ export const authConfig = {
         const t = createTranslator(dict);
 
         if (!process.env.EMAIL_SERVER) {
-          console.log(`[listae magic link] ${identifier} -> ${url}`);
+          if (process.env.NODE_ENV !== "production") {
+            console.log(`[listae magic link] ${identifier} -> ${url}`);
+          } else {
+            console.warn(
+              `[listae magic link] EMAIL_SERVER unset; link not sent for ${identifier}`,
+            );
+          }
           return;
         }
 
@@ -69,13 +81,18 @@ export const authConfig = {
     },
     async redirect({ url, baseUrl }) {
       const target = new URL(url, baseUrl);
+      const base = new URL(baseUrl);
 
-      if (target.origin !== baseUrl) {
+      if (target.origin !== base.origin) {
         return baseUrl;
       }
 
-      // Library already sends users without a username to /onboarding.
-      return target.toString();
+      const safePath = safeReturnPath(`${target.pathname}${target.search}`, "");
+      if (!safePath) {
+        return baseUrl;
+      }
+
+      return new URL(safePath, baseUrl).toString();
     },
   },
 } satisfies NextAuthConfig;

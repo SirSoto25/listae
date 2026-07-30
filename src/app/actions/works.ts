@@ -23,6 +23,28 @@ function requireWorkType(raw: FormDataEntryValue | null): WorkType {
   return raw as WorkType;
 }
 
+function requireHttpsCoverUrl(
+  raw: FormDataEntryValue | null,
+): string | undefined {
+  const value = String(raw ?? "").trim();
+  if (!value) {
+    return undefined;
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error("cover URL must be a valid https URL");
+  }
+
+  if (parsed.protocol !== "https:") {
+    throw new Error("cover URL must use https");
+  }
+
+  return parsed.toString();
+}
+
 function optionalInteger(raw: FormDataEntryValue | null): number | undefined {
   if (typeof raw !== "string" || raw.trim() === "") {
     return undefined;
@@ -60,7 +82,7 @@ export async function createManualWorkAction(
     title: String(formData.get("title") ?? ""),
     originalTitle:
       String(formData.get("originalTitle") ?? "").trim() || undefined,
-    coverUrl: String(formData.get("coverUrl") ?? "").trim() || undefined,
+    coverUrl: requireHttpsCoverUrl(formData.get("coverUrl")),
     year: optionalInteger(formData.get("year")),
     synopsis: String(formData.get("synopsis") ?? "").trim() || undefined,
     episodesTotal: optionalInteger(formData.get("episodesTotal")),

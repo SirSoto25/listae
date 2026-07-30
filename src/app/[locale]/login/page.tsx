@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import { auth, signIn } from "@/lib/auth";
@@ -9,6 +10,10 @@ import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { localePath } from "@/lib/i18n/path";
 import { createTranslator } from "@/lib/i18n/t";
+import {
+  checkRateLimit,
+  clientIpFromHeaders,
+} from "@/lib/security/rate-limit";
 
 type LoginPageProps = {
   params: Promise<{ locale: string }>;
@@ -65,8 +70,34 @@ export default async function LoginPage({
           action={async (formData) => {
             "use server";
 
+            const email = String(formData.get("email") ?? "")
+              .trim()
+              .toLowerCase();
+            if (!email) {
+              redirect(localePath(locale, "/login?error=Configuration"));
+            }
+
+            const emailLimit = checkRateLimit(`login:email:${email}`, {
+              limit: 5,
+              windowMs: 3_600_000,
+            });
+            if (!emailLimit.ok) {
+              redirect(localePath(locale, "/login?error=RateLimited"));
+            }
+
+            const ip = clientIpFromHeaders(await headers());
+            if (ip) {
+              const ipLimit = checkRateLimit(`login:ip:${ip}`, {
+                limit: 20,
+                windowMs: 3_600_000,
+              });
+              if (!ipLimit.ok) {
+                redirect(localePath(locale, "/login?error=RateLimited"));
+              }
+            }
+
             await signIn("nodemailer", {
-              email: formData.get("email"),
+              email,
               callbackUrl: localePath(locale, "/library"),
             });
           }}

@@ -10,8 +10,10 @@ import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { catalogSearchLabels } from "@/lib/i18n/labels";
 import { createTranslator } from "@/lib/i18n/t";
+import { clientIpFromHeaders } from "@/lib/security/rate-limit";
 import { workTitle } from "@/lib/i18n/work-text";
 import { WORK_TYPES, type WorkType } from "@/types/domain";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 type HomeProps = {
@@ -35,7 +37,10 @@ export default async function Home({ params, searchParams }: HomeProps) {
   const sp = await searchParams;
   const query = sp.q?.trim() ?? "";
   const type = validType(sp.type);
-  const results = query ? await searchCatalog(query, type, locale) : [];
+  const clientIp = clientIpFromHeaders(await headers());
+  const results = query
+    ? await searchCatalog(query, type, locale, clientIp)
+    : [];
 
   return (
     <main className="flex-1 bg-transparent text-foreground">
