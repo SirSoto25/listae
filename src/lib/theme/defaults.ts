@@ -57,9 +57,9 @@ body {
 }
 
 .listae-profile-username,
-.listae-entry-type,
-.listae-entry-score,
-.listae-entry-progress,
+.listae-col-type,
+.listae-col-score,
+.listae-col-progress,
 .listae-status-empty {
   color: #9ca3af;
 }
@@ -90,9 +90,13 @@ body {
   color: var(--listae-domain-accent);
 }
 
-.listae-domain--audiovisual .listae-entry,
-.listae-domain--reading .listae-entry {
-  border-color: color-mix(in srgb, var(--listae-domain-accent) 28%, #374151);
+.listae-domain--audiovisual .listae-status-table td,
+.listae-domain--reading .listae-status-table td {
+  border-bottom-color: color-mix(in srgb, var(--listae-domain-accent) 28%, #374151);
+}
+
+.listae-domain--audiovisual .listae-entry:nth-child(even),
+.listae-domain--reading .listae-entry:nth-child(even) {
   background: color-mix(in srgb, var(--listae-domain-bg) 70%, #111827);
 }
 
@@ -110,36 +114,53 @@ body {
   margin-top: 2rem;
 }
 
-.listae-status-entries {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-  gap: 1rem;
+.listae-status-table {
+  width: 100%;
   margin-top: 1rem;
+  border-collapse: collapse;
+  table-layout: fixed;
 }
 
-.listae-entry {
-  display: grid;
-  grid-template-columns: 5rem 1fr;
-  gap: 1rem;
-  min-height: 7rem;
-  padding: 1rem;
-  border: 1px solid #374151;
-  border-radius: 0.75rem;
-  background: #1f2937;
+.listae-status-table th,
+.listae-status-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #374151;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.listae-status-table th {
+  color: #9ca3af;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.listae-col-index {
+  width: 2.5rem;
+  text-align: center;
+}
+
+.listae-col-cover {
+  width: 3.5rem;
+}
+
+.listae-col-score,
+.listae-col-type {
+  width: 6rem;
+}
+
+.listae-col-progress {
+  width: 8rem;
 }
 
 .listae-entry-cover {
-  width: 5rem;
-  height: 7rem;
-  border-radius: 0.4rem;
+  display: block;
+  width: 2.5rem;
+  height: 3.5rem;
+  border-radius: 0.25rem;
   object-fit: cover;
-}
-
-.listae-entry-details {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 0.35rem;
 }
 
 .listae-entry-title {
@@ -155,7 +176,7 @@ body {
   color: #93c5fd;
 }
 
-.listae-entry-type {
+.listae-col-type {
   text-transform: capitalize;
 }
 `.trim();

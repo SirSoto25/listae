@@ -38,6 +38,14 @@
 | Display name | `src/app/onboarding/page.tsx`, `src/components/username-field.tsx`, `src/lib/auth/config.ts`, `src/lib/auth/backfill-display-names.ts`, `src/lib/validation.ts` |
 | Docs | `docs/decisions/010-library-domains-and-display-name.md`, `docs/superpowers/specs/2026-07-22-library-domains-design.md` |
 
+## Addendum (2026-07-30) — table markup + granular placeholders
+
+- **Branch:** `feat/profile-status-placeholders`
+- Entry lists render as **`<table class="listae-status-table">`** rows inside `listae-status` sections; empty statuses omitted.
+- New granular placeholders: `{{audiovisual_plan}}` … `{{audiovisual_dropped}}`, `{{reading_plan}}` … `{{reading_dropped}}` (no domain wrapper).
+- Table header i18n: `profile.table.*` in `messages/en.json` and `messages/es.json`.
+- Example MAL-like dark theme: `docs/themes/mal-dark-sirisoto.md`.
+
 ## Antes de compactar
 
 Volcar este archivo + `.superpowers/sdd/progress.md`.

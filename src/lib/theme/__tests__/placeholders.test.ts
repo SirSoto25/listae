@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import { syncTranslator } from "@/lib/i18n/sync-dictionary";
+import { LIST_STATUSES } from "@/types/domain";
 
 import { DEFAULT_CSS, DEFAULT_HTML_TEMPLATE } from "../defaults";
 import {
   buildDomainListsHtml,
+  buildDomainStatusListsHtml,
   buildListsHtml,
+  buildStatusListsHtml,
   renderProfileHtml,
   type ProfileEntry,
 } from "../placeholders";
@@ -34,20 +37,39 @@ const entries: ProfileEntry[] = [
   },
 ];
 
-describe("buildListsHtml", () => {
-  it("groups entries by status and renders all entry fields", () => {
-    const html = buildListsHtml(entries, t);
+describe("buildStatusListsHtml", () => {
+  it("returns empty string when the status has no entries", () => {
+    expect(buildStatusListsHtml(entries, "plan", t)).toBe("");
+    expect(buildStatusListsHtml([], "completed", t)).toBe("");
+  });
 
-    expect(html.indexOf("In progress")).toBeLessThan(
-      html.indexOf("Completed"),
-    );
+  it("renders a status section as a table", () => {
+    const html = buildStatusListsHtml(entries, "completed", t);
+
     expect(html).toContain('data-status="completed"');
+    expect(html).toContain('<table class="listae-status-table">');
+    expect(html).toContain("<thead>");
+    expect(html).toContain('class="listae-col-title"');
+    expect(html).toContain("Title");
+    expect(html).toContain('class="listae-entry" data-type="book" data-index="1"');
     expect(html).toContain('src="https://example.com/dune.jpg"');
     expect(html).toContain('href="/title/1"');
     expect(html).toContain("Dune");
     expect(html).toContain("book");
     expect(html).toContain("Score: 9");
     expect(html).toContain("600/600p");
+  });
+});
+
+describe("buildListsHtml", () => {
+  it("groups entries by status and skips empty statuses", () => {
+    const html = buildListsHtml(entries, t);
+
+    expect(html.indexOf("In progress")).toBeLessThan(
+      html.indexOf("Completed"),
+    );
+    expect(html).not.toContain('data-status="plan"');
+    expect(html).not.toContain("No entries yet.");
   });
 
   it("escapes entry content and rejects unsafe URLs", () => {
@@ -69,6 +91,32 @@ describe("buildListsHtml", () => {
   });
 });
 
+describe("buildDomainStatusListsHtml", () => {
+  it("filters by domain and status without a domain wrapper", () => {
+    const html = buildDomainStatusListsHtml(
+      entries,
+      "audiovisual",
+      "in_progress",
+      t,
+    );
+
+    expect(html).toContain('data-status="in_progress"');
+    expect(html).toContain("Frieren");
+    expect(html).not.toContain("Dune");
+    expect(html).not.toContain('class="listae-domain');
+  });
+
+  it("returns empty string when domain or status has no entries", () => {
+    expect(
+      buildDomainStatusListsHtml(entries, "audiovisual", "completed", t),
+    ).toBe("");
+    expect(
+      buildDomainStatusListsHtml(entries, "reading", "in_progress", t),
+    ).toBe("");
+    expect(buildDomainStatusListsHtml([], "audiovisual", "plan", t)).toBe("");
+  });
+});
+
 describe("buildDomainListsHtml", () => {
   it("wraps audiovisual entries in a domain section", () => {
     const html = buildDomainListsHtml(entries, "audiovisual", t);
@@ -80,6 +128,7 @@ describe("buildDomainListsHtml", () => {
     expect(html).toContain("Frieren");
     expect(html).not.toContain("Dune");
     expect(html).toContain('data-status="in_progress"');
+    expect(html).toContain('<table class="listae-status-table">');
   });
 
   it("wraps reading entries in a domain section", () => {
@@ -146,6 +195,39 @@ describe("renderProfileHtml", () => {
     expect(html).not.toContain("{{lists}}");
   });
 
+  it("replaces granular domain-status placeholders", () => {
+    const template = LIST_STATUSES.map(
+      (status) => `{{audiovisual_${status}}}{{reading_${status}}}`,
+    ).join("");
+    const html = renderProfileHtml({
+      template,
+      username: "alex",
+      displayName: "Alex",
+      entries,
+      t,
+    });
+
+    expect(html).toContain("Frieren");
+    expect(html).toContain("Dune");
+    expect(html).not.toContain("{{audiovisual_in_progress}}");
+    expect(html).not.toContain("{{reading_completed}}");
+    expect(html).not.toContain("{{audiovisual_plan}}");
+    expect(html).not.toMatch(/\{\{audiovisual_/);
+    expect(html).not.toMatch(/\{\{reading_/);
+  });
+
+  it("leaves granular placeholders empty when domain-status has no entries", () => {
+    const html = renderProfileHtml({
+      template: "AV plan={{audiovisual_plan}} reading dropped={{reading_dropped}}",
+      username: "alex",
+      displayName: "Alex",
+      entries,
+      t,
+    });
+
+    expect(html).toBe("AV plan= reading dropped=");
+  });
+
   it("escapes profile values before substitution", () => {
     const html = renderProfileHtml({
       template: "<h1>{{displayName}}</h1><p>{{username}}</p>",
@@ -173,8 +255,9 @@ describe("default theme", () => {
     expect(DEFAULT_CSS).toContain(".listae-domain--reading");
     expect(DEFAULT_CSS).toContain("var(--listae-domain-bg)");
     expect(DEFAULT_CSS).toContain(".listae-entry-cover");
-    expect(DEFAULT_CSS).toContain(".listae-entry-score");
-    expect(DEFAULT_CSS).toContain(".listae-entry-progress");
+    expect(DEFAULT_CSS).toContain(".listae-col-score");
+    expect(DEFAULT_CSS).toContain(".listae-col-progress");
+    expect(DEFAULT_CSS).toContain(".listae-status-table");
   });
 
   it("retains its structural classes after sanitization", () => {
@@ -197,6 +280,7 @@ describe("default theme", () => {
       expect(result.html).toContain(
         'class="listae-domain listae-domain--reading"',
       );
+      expect(result.html).toContain('<table class="listae-status-table">');
     }
   });
 });

@@ -56,17 +56,37 @@ Canonical helpers live in `src/types/domain.ts` (or adjacent module), e.g. `LIBR
 
 | Placeholder | Behavior |
 |-------------|----------|
-| `{{audiovisual_lists}}` | Status sections for AV entries only |
-| `{{reading_lists}}` | Status sections for reading entries only |
+| `{{audiovisual_lists}}` | Status sections for AV entries only (wrapped in domain section) |
+| `{{reading_lists}}` | Status sections for reading entries only (wrapped in domain section) |
 | `{{lists}}` | All entries (unchanged semantics) — **compat** |
+| `{{audiovisual_<status>}}` | Single status table for AV entries only (no domain wrapper). `<status>` is one of `plan`, `in_progress`, `completed`, `on_hold`, `dropped`. Empty when no matching entries. |
+| `{{reading_<status>}}` | Same as above for reading entries. |
 
-Generated markup wraps each domain list in:
+**Addendum (2026-07-30):** Entry markup is now a **table per status section** instead of card grids. Each non-empty status renders:
+
+```html
+<section class="listae-status" data-status="in_progress">
+  <h2 class="listae-status-title">…</h2>
+  <table class="listae-status-table">
+    <thead>… #, cover, title, score, type, progress …</thead>
+    <tbody>
+      <tr class="listae-entry" data-type="anime" data-index="1">…</tr>
+    </tbody>
+  </table>
+</section>
+```
+
+Empty statuses produce **no output** (not even an empty section). Aggregate placeholders (`{{lists}}`, `{{audiovisual_lists}}`, `{{reading_lists}}`) skip empty statuses when building their HTML.
+
+Granular placeholders (`{{audiovisual_in_progress}}`, etc.) return only the matching status table with **no** `.listae-domain` wrapper — use them when the theme author provides their own domain layout.
+
+Generated markup for aggregate domain placeholders still wraps each domain list in:
 
 ```html
 <section class="listae-domain listae-domain--audiovisual" data-domain="audiovisual">…</section>
 ```
 
-(and `--reading` / `data-domain="reading"`). Inner structure keeps existing `listae-status`, `listae-entry`, `data-type`, etc.
+(and `--reading` / `data-domain="reading"`). Inner structure uses `listae-status`, `listae-status-table`, `listae-entry`, `data-type`, `data-index`, etc.
 
 ### 5.2 Default template + CSS
 

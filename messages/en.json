@@ -97,6 +97,13 @@
     "notScored": "Not scored",
     "score": "Score: {score}",
     "emptyStatus": "No entries yet.",
+    "table": {
+      "index": "#",
+      "title": "Title",
+      "score": "Score",
+      "type": "Type",
+      "progress": "Progress"
+    },
     "noProgressTracking": "No progress tracking",
     "profileLocaleLabel": "Public profile language",
     "profileLocaleHint": "Status labels and profile chrome shown to visitors."
