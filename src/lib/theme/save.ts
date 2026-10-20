@@ -89,7 +89,7 @@ export function buildThemeDocument(
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src https: data:;" />
-    <base href="/" />
+    <base href="/" target="_top" />
     <style>${safeCss}</style>
   </head>
   <body>${html}</body>

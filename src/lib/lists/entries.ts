@@ -4,6 +4,7 @@ import { and, asc, desc, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { listEntries, works } from "@/lib/db/schema";
+import { FormInputError } from "@/lib/form-error";
 import type { Locale } from "@/lib/i18n/config";
 import { syncTranslator } from "@/lib/i18n/sync-dictionary";
 import { workTitle } from "@/lib/i18n/work-text";
@@ -25,7 +26,7 @@ export function parseScore(raw: unknown): number | null {
 
   const score = Number(raw);
   if (!Number.isInteger(score) || score < 1 || score > 10) {
-    throw new Error("score must be 1-10");
+    throw new FormInputError("invalidScore", "score must be 1-10");
   }
 
   return score;
@@ -69,8 +70,10 @@ function parseProgress(raw: unknown): number {
 
   const progress = Number(raw);
   if (!Number.isSafeInteger(progress) || progress < 0 || progress > MAX_PROGRESS) {
-    throw new Error(
+    throw new FormInputError(
+      "invalidProgress",
       `progress must be an integer between 0 and ${MAX_PROGRESS}`,
+      { max: MAX_PROGRESS },
     );
   }
 
@@ -91,12 +94,14 @@ export function normalizeEntryInput(
     typeof input.status !== "string" ||
     !LIST_STATUSES.includes(input.status as ListStatus)
   ) {
-    throw new Error("invalid list status");
+    throw new FormInputError("invalidStatus", "invalid list status");
   }
 
   const notesRaw = String(input.notes ?? "").trim();
   if (notesRaw.length > 500) {
-    throw new Error("notes must be at most 500 characters");
+    throw new FormInputError("notesTooLong", "notes must be at most 500 characters", {
+      max: 500,
+    });
   }
 
   const base = {
@@ -117,7 +122,11 @@ export function normalizeEntryInput(
   if (workType === "anime" || workType === "series") {
     const episodesTotal = knownTotal(totals.episodesTotal);
     if (episodesTotal !== null && progressValue > episodesTotal) {
-      throw new Error(`progress cannot exceed ${episodesTotal} episodes`);
+      throw new FormInputError(
+        "progressExceedsEpisodes",
+        `progress cannot exceed ${episodesTotal} episodes`,
+        { total: episodesTotal },
+      );
     }
     return {
       ...base,
@@ -127,7 +136,10 @@ export function normalizeEntryInput(
   }
 
   if (input.progressUnit !== "chapters" && input.progressUnit !== "pages") {
-    throw new Error("progress unit must be chapters or pages");
+    throw new FormInputError(
+      "invalidProgressUnit",
+      "progress unit must be chapters or pages",
+    );
   }
   const total = knownTotal(
     input.progressUnit === "chapters"
@@ -135,7 +147,13 @@ export function normalizeEntryInput(
       : totals.pagesTotal,
   );
   if (total !== null && progressValue > total) {
-    throw new Error(`progress cannot exceed ${total} ${input.progressUnit}`);
+    throw new FormInputError(
+      input.progressUnit === "chapters"
+        ? "progressExceedsChapters"
+        : "progressExceedsPages",
+      `progress cannot exceed ${total} ${input.progressUnit}`,
+      { total },
+    );
   }
 
   return {

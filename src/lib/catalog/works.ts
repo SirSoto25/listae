@@ -2,12 +2,22 @@ import { randomUUID } from "node:crypto";
 
 import { and, eq } from "drizzle-orm";
 
+import { createDbSearchCacheStore } from "@/lib/cache/db-search-cache";
 import { db } from "@/lib/db";
 import { works } from "@/lib/db/schema";
+import { FormInputError } from "@/lib/form-error";
 import type { Locale } from "@/lib/i18n/config";
 
 import { resolveCatalogHit } from "./search";
 import type { CatalogHit, ManualWorkInput } from "./types";
+
+/** Providers often lack a translation; don't ask again on every page view. */
+const LOCALE_FILL_RETRY_SECONDS = 7 * 24 * 60 * 60;
+const LOCALE_FILL_FAILURE_RETRY_SECONDS = 15 * 60;
+
+export function localeFillAttemptKey(workId: string, locale: Locale): string {
+  return `locale-fill:${locale}:${workId}`;
+}
 
 function canonicalTitle(hit: CatalogHit): string {
   return hit.titleEn ?? hit.titleEs ?? hit.title;
@@ -120,10 +130,23 @@ export async function fillMissingWorkLocale(
     return false;
   }
 
-  const hit = await resolveCatalogHit(
-    work.externalSource as CatalogHit["source"],
-    work.externalId,
-  );
+  const attempts = createDbSearchCacheStore();
+  const attemptKey = localeFillAttemptKey(work.id, locale);
+  if ((await attempts.get(attemptKey)) !== null) {
+    return false;
+  }
+
+  let hit: CatalogHit;
+  try {
+    hit = await resolveCatalogHit(
+      work.externalSource as CatalogHit["source"],
+      work.externalId,
+    );
+  } catch (error) {
+    await attempts.set(attemptKey, "failed", LOCALE_FILL_FAILURE_RETRY_SECONDS);
+    throw error;
+  }
+  await attempts.set(attemptKey, "checked", LOCALE_FILL_RETRY_SECONDS);
 
   db.update(works)
     .set({
@@ -145,7 +168,7 @@ export async function createManualWork(
 ): Promise<{ id: string }> {
   const title = input.title.trim();
   if (!title) {
-    throw new Error("A manual work title is required.");
+    throw new FormInputError("titleRequired", "A manual work title is required.");
   }
 
   const id = randomUUID();
