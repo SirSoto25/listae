@@ -13,6 +13,7 @@ let database: typeof import("@/lib/db").db;
 let createManualWork: typeof import("./works").createManualWork;
 let importWork: typeof import("./works").importWork;
 let upsertWorkFromHit: typeof import("./works").upsertWorkFromHit;
+let fillMissingWorkLocale: typeof import("./works").fillMissingWorkLocale;
 
 beforeAll(async () => {
   process.env.DATABASE_URL = "file::memory:";
@@ -23,7 +24,8 @@ beforeAll(async () => {
   ]);
 
   database = dbModule.db;
-  ({ createManualWork, importWork, upsertWorkFromHit } = worksModule);
+  ({ createManualWork, importWork, upsertWorkFromHit, fillMissingWorkLocale } =
+    worksModule);
   database.run(sql`
     create table works (
       id text primary key,
@@ -43,6 +45,14 @@ beforeAll(async () => {
       chapters_total integer,
       pages_total integer,
       created_at integer not null default (unixepoch())
+    )
+  `);
+  database.run(sql`
+    create table search_cache (
+      key text primary key not null,
+      payload text not null,
+      expires_at integer not null,
+      created_at integer not null
     )
   `);
   database.run(sql`
@@ -153,5 +163,23 @@ describe("work helpers", () => {
       year: 2024,
       pagesTotal: 250,
     });
+  });
+
+  it("asks the provider for a missing translation only once", async () => {
+    const hit = {
+      source: "openlibrary" as const,
+      externalId: "OL-NO-ES-W",
+      type: "book" as const,
+      title: "Only English",
+      titleEn: "Only English",
+    };
+    const { id } = await upsertWorkFromHit(hit);
+    mocks.resolveCatalogHit.mockReset();
+    mocks.resolveCatalogHit.mockResolvedValue(hit);
+
+    await fillMissingWorkLocale(id, "es");
+    await fillMissingWorkLocale(id, "es");
+
+    expect(mocks.resolveCatalogHit).toHaveBeenCalledTimes(1);
   });
 });

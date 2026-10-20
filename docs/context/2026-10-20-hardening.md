@@ -50,20 +50,32 @@ eliminaron los SVG de `create-next-app` sin referencias.
   título caída si el proveedor falla, año `0` pintado, picker de colores
   desincronizado con el CSS editado a mano.
 
-## Pendiente (requiere decisión o trabajo mayor)
+## Pendientes del PR, resueltos
 
-- Los enlaces de títulos del perfil público no navegan: el iframe tiene
-  `sandbox=""` y la app envía `X-Frame-Options: DENY`. Para arreglarlo hay
-  que elegir entre `allow-top-navigation-by-user-activation` con
-  `target="_top"` (lo que permite navegar al hacer clic en enlaces del HTML
-  del usuario) o quitar los enlaces.
-- Las server actions lanzan errores en vez de devolverlos, así que se pierde
-  lo escrito en el formulario. Habría que migrar a `useActionState`.
-- `fillMissingWorkLocale` repite la llamada al proveedor en cada vista si no
-  existe traducción. Necesita un marcador persistente (cambio de schema).
-- Faltan `loading.tsx`, `error.tsx` y `not-found.tsx` localizados.
+- **Enlaces del perfil público:** el iframe usa
+  `sandbox="allow-top-navigation-by-user-activation"` y
+  `<base target="_top">`. Un clic real navega la pestaña completa; scripts,
+  formularios, popups y acceso same-origin siguen bloqueados. Cualquier
+  enlace `https` del HTML del usuario también navega al hacer clic, igual que
+  un enlace en cualquier perfil. El preview del editor mantiene `sandbox=""`
+  para que un clic no tire los cambios sin guardar.
+- **Errores de formulario:** las acciones de entradas y de alta manual
+  devuelven `FormState` con el mensaje traducido (`formErrors.*`,
+  `FormInputError`). `ActionForm` envía desde `onSubmit` dentro de una
+  transición, así React no resetea los campos y `SubmitButton` sigue viendo
+  el estado pendiente.
+- **`fillMissingWorkLocale`:** guarda el intento en `search_cache`
+  (`locale-fill:<locale>:<workId>`, 7 días; 15 min si falla el proveedor), sin
+  cambiar el schema.
+- **Páginas de estado:** `loading`, `error` y `not-found` localizados en
+  `[locale]`, más un `not-found` raíz. El idioma sale de la cabecera del
+  middleware o de la cookie.
+
+## Pendiente
+
 - Siguen en inglés los mensajes del validador CSS, las unidades de progreso y
   el tipo de obra en la tabla del perfil público.
+- Login y onboarding redirigen con `?error=` y vacían su único campo.
 - Portabilidad a Postgres: `.get()` y `.run()` síncronos de better-sqlite3,
   `NULLS LAST` y orden de títulos sin distinguir mayúsculas.
 - Next 16 depreca `middleware.ts` en favor de `proxy.ts`.

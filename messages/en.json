@@ -201,5 +201,28 @@
     "title": "Listae — Track what you watch and read",
     "description": "A personal library for films, series, anime, books, manga, and comics.",
     "profileDescription": "{name}'s personal library on Listae: films, series, anime, books, manga, and comics."
+  },
+  "status": {
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "The link may be broken, or the page may have moved.",
+    "backHome": "Back to home",
+    "errorTitle": "Something went wrong",
+    "errorBody": "An unexpected error occurred. You can try again.",
+    "retry": "Try again",
+    "loading": "Loading…"
+  },
+  "formErrors": {
+    "invalidScore": "Score must be a whole number from 1 to 10.",
+    "invalidProgress": "Progress must be a whole number from 0 to {max}.",
+    "invalidStatus": "Choose a valid status.",
+    "notesTooLong": "Notes can be at most {max} characters.",
+    "invalidProgressUnit": "Choose chapters or pages.",
+    "progressExceedsEpisodes": "Progress can't be more than {total} episodes.",
+    "progressExceedsChapters": "Progress can't be more than {total} chapters.",
+    "progressExceedsPages": "Progress can't be more than {total} pages.",
+    "invalidWorkType": "Choose a valid media type.",
+    "titleRequired": "Enter a title.",
+    "invalidCoverUrl": "The cover URL must be a valid https:// address.",
+    "invalidNumber": "Year and totals must be whole numbers from 0 to {max}."
   }
 }
