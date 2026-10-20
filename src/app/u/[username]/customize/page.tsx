@@ -1,14 +1,23 @@
 import { eq } from "drizzle-orm";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { updateProfileLocaleAction } from "@/app/actions/theme";
 import { ThemeEditor } from "@/components/theme-editor";
+import { SubmitButton } from "@/components/submit-button";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
-import { isLocale, LOCALES, type Locale } from "@/lib/i18n/config";
+import {
+  DEFAULT_LOCALE,
+  isLocale,
+  LOCALE_COOKIE_NAME,
+  LOCALES,
+  type Locale,
+} from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { themeEditorLabels } from "@/lib/i18n/labels";
 import { createTranslator } from "@/lib/i18n/t";
 import { listLibraryEntries, rowsToProfileEntries } from "@/lib/lists/entries";
 import { DEFAULT_CSS, DEFAULT_HTML_TEMPLATE } from "@/lib/theme/defaults";
@@ -46,8 +55,14 @@ export default async function CustomizeProfilePage({
   const profileLocale: Locale = isLocale(user.profileLocale)
     ? user.profileLocale
     : "es";
-  const dict = await getDictionary(profileLocale);
-  const t = createTranslator(dict);
+  // This route lives outside /[locale], so the middleware never sets the locale
+  // header. The page chrome follows the locale the visitor last browsed in
+  // (their `listae-locale` cookie), not the language of their public profile.
+  const cookieLocale = (await cookies()).get(LOCALE_COOKIE_NAME)?.value;
+  const uiLocale: Locale = isLocale(cookieLocale)
+    ? cookieLocale
+    : DEFAULT_LOCALE;
+  const t = createTranslator(await getDictionary(uiLocale));
 
   const [theme, rows] = await Promise.all([
     ensureProfileTheme(user.id),
@@ -64,18 +79,15 @@ export default async function CustomizeProfilePage({
               @{user.username}
             </p>
             <h1 className="mt-2 text-4xl font-black tracking-[-0.04em]">
-              Customize profile
+              {t("customize.title")}
             </h1>
-            <p className="mt-2 max-w-2xl text-muted">
-              Edit your safe HTML template and CSS, then review it in the
-              script-free preview.
-            </p>
+            <p className="mt-2 max-w-2xl text-muted">{t("customize.intro")}</p>
           </div>
           <Link
             className="inline-flex h-11 items-center justify-center rounded-xl border border-border bg-surface px-5 text-sm font-black text-foreground hover:border-accent hover:text-accent"
             href={`/u/${user.username}`}
           >
-            View public profile
+            {t("customize.viewPublicProfile")}
           </Link>
         </header>
 
@@ -103,15 +115,14 @@ export default async function CustomizeProfilePage({
           <p className="mt-2 text-xs leading-5 text-muted">
             {t("profile.profileLocaleHint")}
           </p>
-          <button
-            className="mt-4 rounded-[length:var(--radius-control)] border border-border bg-surface px-4 py-2 text-sm font-bold text-foreground hover:border-accent"
-            type="submit"
-          >
+          <SubmitButton
+            className="mt-4 rounded-[length:var(--radius-control)] border border-border bg-surface px-4 py-2 text-sm font-bold text-foreground hover:border-accent">
             {t("entryForm.save")}
-          </button>
+          </SubmitButton>
         </form>
 
         <ThemeEditor
+          labels={themeEditorLabels(t)}
           username={user.username}
           displayName={user.displayName ?? user.username}
           entries={entries}

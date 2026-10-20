@@ -50,8 +50,8 @@ function optionalInteger(raw: FormDataEntryValue | null): number | undefined {
     return undefined;
   }
   const value = Number(raw);
-  if (!Number.isInteger(value) || value < 0) {
-    throw new Error("totals and year must be non-negative integers");
+  if (!Number.isSafeInteger(value) || value < 0 || value > 1_000_000) {
+    throw new Error("totals and year must be integers between 0 and 1000000");
   }
   return value;
 }

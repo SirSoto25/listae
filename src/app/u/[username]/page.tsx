@@ -1,5 +1,7 @@
 import { eq } from "drizzle-orm";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
 import { db } from "@/lib/db";
 import { profileThemes, users } from "@/lib/db/schema";
@@ -15,11 +17,10 @@ type PublicProfilePageProps = {
   params: Promise<{ username: string }>;
 };
 
-export default async function PublicProfilePage({
-  params,
-}: PublicProfilePageProps) {
-  const { username } = await params;
-  const user = await db.query.users.findFirst({
+// React's cache() dedupes this per request, so generateMetadata and the page
+// share a single query.
+const getProfileUser = cache(async (username: string) =>
+  db.query.users.findFirst({
     columns: {
       id: true,
       username: true,
@@ -27,14 +28,43 @@ export default async function PublicProfilePage({
       profileLocale: true,
     },
     where: eq(users.username, username),
-  });
+  }),
+);
+
+function profileLocaleOf(value: string | null | undefined): Locale {
+  return isLocale(value) ? value : "es";
+}
+
+export async function generateMetadata({
+  params,
+}: PublicProfilePageProps): Promise<Metadata> {
+  const { username } = await params;
+  const user = await getProfileUser(username);
+  // Unknown profile: the page itself responds with notFound().
+  if (!user?.username) return {};
+
+  // Same language as the profile content rather than the visitor's locale.
+  const t = createTranslator(
+    await getDictionary(profileLocaleOf(user.profileLocale)),
+  );
+  const name = user.displayName ?? user.username;
+
+  return {
+    title: name,
+    description: t("meta.profileDescription", { name }),
+  };
+}
+
+export default async function PublicProfilePage({
+  params,
+}: PublicProfilePageProps) {
+  const { username } = await params;
+  const user = await getProfileUser(username);
   if (!user?.username) {
     notFound();
   }
 
-  const profileLocale: Locale = isLocale(user.profileLocale)
-    ? user.profileLocale
-    : "es";
+  const profileLocale = profileLocaleOf(user.profileLocale);
   const dict = await getDictionary(profileLocale);
   const t = createTranslator(dict);
 
@@ -75,8 +105,10 @@ export default async function PublicProfilePage({
     <main className="flex flex-1 bg-white">
       <iframe
         sandbox=""
-        title={`${user.displayName ?? user.username}'s Listae profile`}
-        srcDoc={buildThemeDocument(rendered.html, rendered.css)}
+        title={t("customize.profileFrameTitle", {
+          name: user.displayName ?? user.username,
+        })}
+        srcDoc={buildThemeDocument(rendered.html, rendered.css, profileLocale)}
         className="min-h-[calc(100vh-4rem)] w-full border-0"
       />
     </main>

@@ -1,6 +1,7 @@
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 
+import { SubmitButton } from "@/components/submit-button";
 import { UsernameField } from "@/components/username-field";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -86,14 +87,30 @@ export default async function OnboardingPage({
               redirect(localePath(locale, "/onboarding?error=taken"));
             }
 
-            await db
-              .update(users)
-              .set({
-                username,
-                displayName: username,
-                profileLocale: locale,
-              })
-              .where(eq(users.email, currentSession.user.email));
+            let claimed = true;
+            try {
+              // isNull guard: an onboarded user can't re-POST to rename and
+              // free their old handle for someone else.
+              await db
+                .update(users)
+                .set({
+                  username,
+                  displayName: username,
+                  profileLocale: locale,
+                })
+                .where(
+                  and(
+                    eq(users.email, currentSession.user.email),
+                    isNull(users.username),
+                  ),
+                );
+            } catch {
+              // users_username_unique: lost a race for the same handle.
+              claimed = false;
+            }
+            if (!claimed) {
+              redirect(localePath(locale, "/onboarding?error=taken"));
+            }
 
             redirect(localePath(locale, "/library"));
           }}
@@ -103,21 +120,18 @@ export default async function OnboardingPage({
             labels={usernameFieldLabels(t)}
           />
           {error === "invalid" && (
-            <p className="text-sm text-red-600 dark:text-red-400">
+            <p className="text-sm text-red-600 dark:text-red-400" role="alert">
               {t("onboarding.errorInvalid")}
             </p>
           )}
           {error === "taken" && (
-            <p className="text-sm text-red-600 dark:text-red-400">
+            <p className="text-sm text-red-600 dark:text-red-400" role="alert">
               {t("onboarding.errorTaken")}
             </p>
           )}
-          <button
-            className="w-full rounded-[length:var(--radius-control)] bg-primary px-4 py-2.5 font-medium text-primary-foreground hover:opacity-90"
-            type="submit"
-          >
+          <SubmitButton className="w-full rounded-[length:var(--radius-control)] bg-primary px-4 py-2.5 font-medium text-primary-foreground hover:opacity-90">
             {t("onboarding.saveUsername")}
-          </button>
+          </SubmitButton>
         </form>
       </section>
     </main>

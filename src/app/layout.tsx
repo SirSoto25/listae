@@ -3,6 +3,12 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { cookies, headers } from "next/headers";
 
 import {
+  DEFAULT_LOCALE,
+  LOCALE_COOKIE_NAME,
+  LOCALE_HEADER_NAME,
+  isLocale,
+} from "@/lib/i18n/config";
+import {
   THEME_COOKIE_NAME,
   parseThemePreference,
   resolveTheme,
@@ -21,9 +27,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Language-neutral fallback for routes outside /[locale] (profile pages, error
+// pages). The localized title and description live in the [locale] layout's
+// generateMetadata, which overrides these values for everything beneath it.
 export const metadata: Metadata = {
-  title: "Listae — Track what you watch and read",
-  description: "A personal library for films, series, anime, books, and comics.",
+  title: { default: "Listae", template: "%s · Listae" },
 };
 
 export default async function RootLayout({
@@ -42,9 +50,14 @@ export default async function RootLayout({
   // the inline script below corrects before paint if cookie is system.
   const resolved = resolveTheme(preference, systemPrefersDark);
   const darkClass = themeClassName(resolved);
+  const localeHint =
+    headerStore.get(LOCALE_HEADER_NAME) ??
+    cookieStore.get(LOCALE_COOKIE_NAME)?.value;
+  const lang = isLocale(localeHint) ? localeHint : DEFAULT_LOCALE;
 
   return (
     <html
+      lang={lang}
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${darkClass} h-full antialiased`}
     >

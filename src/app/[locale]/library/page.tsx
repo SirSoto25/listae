@@ -16,9 +16,11 @@ import {
   entryFormLabels,
   libraryDomainTabsLabels,
   libraryFiltersLabels,
+  workTypeLabels,
 } from "@/lib/i18n/labels";
 import { localePath } from "@/lib/i18n/path";
 import { createTranslator } from "@/lib/i18n/t";
+import { workTitle } from "@/lib/i18n/work-text";
 import { listLibraryEntries } from "@/lib/lists/entries";
 import {
   LIST_STATUSES,
@@ -116,6 +118,7 @@ export default async function LibraryPage({
   }).toString()}`;
   const countLabel =
     entries.length === 1 ? t("library.countOne") : t("library.countMany");
+  const typeLabels = workTypeLabels(t);
 
   return (
     <main className="flex-1 bg-transparent px-6 py-10 text-foreground">
@@ -204,14 +207,14 @@ export default async function LibraryPage({
                   />
                   <div className="min-w-0">
                     <div className="text-[11px] font-black uppercase tracking-widest text-accent">
-                      {work.type}
+                      {typeLabels[work.type]}
                     </div>
                     <LocaleLink
                       className="mt-1 block truncate text-lg font-black hover:text-accent"
                       href={`/title/${work.id}`}
                       locale={locale}
                     >
-                      {work.title}
+                      {workTitle(work, locale)}
                     </LocaleLink>
                     <p className="mt-1 text-xs text-muted">
                       {t("library.updated")}{" "}

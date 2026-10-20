@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isAppRoute } from "./middleware";
+import { isAppRoute, preferredLocale } from "./middleware";
 
 describe("isAppRoute", () => {
   it("matches app root paths", () => {
@@ -20,5 +20,17 @@ describe("isAppRoute", () => {
   it("excludes profile and api paths", () => {
     expect(isAppRoute("/u/alice")).toBe(false);
     expect(isAppRoute("/api/auth/session")).toBe(false);
+  });
+});
+
+describe("preferredLocale", () => {
+  it("prefers the last browsed locale cookie over Accept-Language", () => {
+    expect(preferredLocale("en", "es-ES,es;q=0.9")).toBe("en");
+    expect(preferredLocale("es", "en-US,en;q=0.9")).toBe("es");
+  });
+
+  it("falls back to Accept-Language when the cookie is missing or invalid", () => {
+    expect(preferredLocale(undefined, "en-US,en;q=0.9")).toBe("en");
+    expect(preferredLocale("fr", "en-US,en;q=0.9")).toBe("en");
   });
 });

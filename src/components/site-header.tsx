@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import { cookies } from "next/headers";
 
 import { LocaleLink } from "@/components/locale-link";
 import { LocaleSwitcher } from "@/components/locale-switcher";
@@ -10,6 +11,10 @@ import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/get-dictionary";
 import { localePath } from "@/lib/i18n/path";
 import { createTranslator } from "@/lib/i18n/t";
+import {
+  THEME_COOKIE_NAME,
+  parseThemePreference,
+} from "@/lib/theme-preference";
 
 type SiteHeaderProps = {
   locale: Locale;
@@ -19,6 +24,9 @@ type SiteHeaderProps = {
 export async function SiteHeader({ locale, dict }: SiteHeaderProps) {
   const t = createTranslator(dict);
   const session = await auth();
+  const themePreference = parseThemePreference(
+    (await cookies()).get(THEME_COOKIE_NAME)?.value,
+  );
   const email = session?.user?.email;
 
   let username: string | null = null;
@@ -75,7 +83,15 @@ export async function SiteHeader({ locale, dict }: SiteHeaderProps) {
           ) : null}
           <div className="flex items-center gap-4 border-l border-border pl-4">
             <LocaleSwitcher locale={locale} />
-            <ThemeToggle />
+            <ThemeToggle
+              initialPreference={themePreference}
+              labels={{
+                label: t("nav.themeLabel"),
+                light: t("nav.themeLight"),
+                dark: t("nav.themeDark"),
+                system: t("nav.themeSystem"),
+              }}
+            />
             {email ? (
               <form
                 action={async () => {

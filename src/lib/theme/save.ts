@@ -1,8 +1,13 @@
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
+
 import { sanitizeThemeHtml } from "./sanitize-html";
 import {
   validateThemeCss,
   type ThemeCssError,
 } from "./validate-css";
+
+/** sanitize-html is slow on huge inputs and profiles re-render on every view. */
+export const MAX_THEME_HTML_LENGTH = 64 * 1024;
 
 export type ThemeSaveInput = {
   htmlTemplate: string;
@@ -27,6 +32,17 @@ export function prepareThemeContent(
   template: string,
   css: string,
 ): PreparedThemeContent {
+  if (template.length > MAX_THEME_HTML_LENGTH) {
+    return {
+      ok: false,
+      errors: [
+        {
+          message: `HTML template must be at most ${MAX_THEME_HTML_LENGTH / 1024} KB.`,
+        },
+      ],
+    };
+  }
+
   const cssResult = validateThemeCss(css);
   if (!cssResult.ok) {
     return cssResult;
@@ -60,11 +76,15 @@ function escapeStyleEndTags(css: string): string {
   return css.replace(/<\/style/gi, "<\\/style");
 }
 
-export function buildThemeDocument(html: string, css: string): string {
+export function buildThemeDocument(
+  html: string,
+  css: string,
+  lang: Locale = DEFAULT_LOCALE,
+): string {
   const safeCss = escapeStyleEndTags(css);
 
   return `<!doctype html>
-<html lang="en">
+<html lang="${lang}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

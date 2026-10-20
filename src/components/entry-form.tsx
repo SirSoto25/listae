@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { addToList, updateEntry } from "@/app/actions/entries";
+import { SubmitButton } from "@/components/submit-button";
 import type { Locale } from "@/lib/i18n/config";
 import {
   LIST_STATUSES,
@@ -140,7 +141,7 @@ export function EntryForm({
               name="progressValue"
               min={0}
               step={1}
-              max={progressMax ?? undefined}
+              max={progressMax && progressMax > 0 ? progressMax : undefined}
               defaultValue={entry?.progressValue ?? 0}
             />
           </label>
@@ -182,14 +183,13 @@ export function EntryForm({
         </label>
       )}
 
-      <button
+      <SubmitButton
         className={`self-end rounded-xl bg-primary px-5 font-semibold text-primary-foreground transition hover:opacity-90 ${
           compact ? "h-11" : "h-12 w-full"
         }`}
-        type="submit"
       >
         {entry ? labels.save : labels.addToLibrary}
-      </button>
+      </SubmitButton>
     </form>
   );
 }

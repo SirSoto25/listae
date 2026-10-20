@@ -72,3 +72,40 @@ describe("validateThemeCss", () => {
     expect(result.ok).toBe(false);
   });
 });
+
+describe("validateThemeCss hardening", () => {
+  it.each([
+    ["escaped url()", "body{background:\\75rl(http://evil.example/x.png)}"],
+    ["escaped @import", "@\\69mport url(//evil.example/x.css);"],
+    ["image-set() strings", 'body{background:image-set("http://evil.example/x.png" 1x)}'],
+    ["unterminated url()", "body{background:url(http://evil.example/x.png"],
+    ["line-continued url()", 'body{background:url("https://ok.example/\\\n")}'],
+  ])("rejects %s", (_label, css) => {
+    expect(validateThemeCss(css).ok).toBe(false);
+  });
+
+  it("keeps escapes inside quoted strings", () => {
+    expect(validateThemeCss('a::before{content:"\\201C"}').ok).toBe(true);
+  });
+
+  it("rejects oversized CSS without scanning it", () => {
+    const result = validateThemeCss(`/*${"x".repeat(70 * 1024)}*/`);
+    expect(result.ok).toBe(false);
+  });
+
+  it("stays fast and bounded on hostile repetition", () => {
+    const started = performance.now();
+    const urls = validateThemeCss("url(".repeat(15_000));
+    const imports = validateThemeCss("@import ".repeat(8_000));
+    expect(performance.now() - started).toBeLessThan(1_000);
+    for (const result of [urls, imports]) {
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.errors.length).toBeLessThanOrEqual(20);
+        for (const error of result.errors) {
+          expect(error.snippet?.length ?? 0).toBeLessThanOrEqual(121);
+        }
+      }
+    }
+  });
+});

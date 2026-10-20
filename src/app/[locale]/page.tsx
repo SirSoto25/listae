@@ -5,10 +5,15 @@ import {
 } from "@/app/actions/works";
 import { CatalogSearch } from "@/components/catalog-search";
 import { WorkCover } from "@/components/work-cover";
+import { SubmitButton } from "@/components/submit-button";
 import { searchCatalog } from "@/lib/catalog/search";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
-import { catalogSearchLabels } from "@/lib/i18n/labels";
+import {
+  catalogSearchLabels,
+  sourceLabels,
+  workTypeLabels,
+} from "@/lib/i18n/labels";
 import { createTranslator } from "@/lib/i18n/t";
 import { clientIpFromHeaders } from "@/lib/security/rate-limit";
 import { workTitle } from "@/lib/i18n/work-text";
@@ -18,8 +23,12 @@ import { notFound } from "next/navigation";
 
 type HomeProps = {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ q?: string; type?: string }>;
+  searchParams: Promise<{ q?: string | string[]; type?: string | string[] }>;
 };
+
+function firstParam(value?: string | string[]): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
 
 function validType(value?: string): WorkType | "all" {
   return value && WORK_TYPES.includes(value as WorkType)
@@ -33,10 +42,12 @@ export default async function Home({ params, searchParams }: HomeProps) {
   const locale = raw as Locale;
   const dict = await getDictionary(locale);
   const t = createTranslator(dict);
+  const typeLabels = workTypeLabels(t);
+  const sourceLabel = sourceLabels(t);
 
   const sp = await searchParams;
-  const query = sp.q?.trim() ?? "";
-  const type = validType(sp.type);
+  const query = firstParam(sp.q)?.trim() ?? "";
+  const type = validType(firstParam(sp.type));
   const clientIp = clientIpFromHeaders(await headers());
   const results = query
     ? await searchCatalog(query, type, locale, clientIp)
@@ -110,9 +121,11 @@ export default async function Home({ params, searchParams }: HomeProps) {
                 />
                 <div className="flex min-w-0 flex-col p-5">
                   <div className="mb-3 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-accent">
-                    <span>{hit.type}</span>
+                    <span>{typeLabels[hit.type]}</span>
                     <span className="text-border">/</span>
-                    <span className="text-muted">{hit.source}</span>
+                    <span className="text-muted">
+                      {sourceLabel[hit.source]}
+                    </span>
                   </div>
                   <h3 className="line-clamp-2 text-lg font-bold leading-6">
                     {workTitle(hit, locale)}
@@ -127,12 +140,10 @@ export default async function Home({ params, searchParams }: HomeProps) {
                       name="externalId"
                       value={hit.externalId}
                     />
-                    <button
-                      className="w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground transition hover:opacity-90 group-hover:opacity-90"
-                      type="submit"
-                    >
+                    <SubmitButton
+                      className="w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground transition hover:opacity-90 group-hover:opacity-90">
                       {t("catalog.trackTitle")}
-                    </button>
+                    </SubmitButton>
                   </form>
                 </div>
               </article>
@@ -174,7 +185,7 @@ export default async function Home({ params, searchParams }: HomeProps) {
                 >
                   {WORK_TYPES.map((workType) => (
                     <option key={workType} value={workType}>
-                      {workType}
+                      {typeLabels[workType]}
                     </option>
                   ))}
                 </select>
@@ -233,12 +244,10 @@ export default async function Home({ params, searchParams }: HomeProps) {
                   </label>
                 ))}
               </div>
-              <button
-                className="h-12 rounded-xl bg-primary px-5 font-bold text-primary-foreground hover:opacity-90 sm:col-span-2"
-                type="submit"
-              >
+              <SubmitButton
+                className="h-12 rounded-xl bg-primary px-5 font-bold text-primary-foreground hover:opacity-90 sm:col-span-2">
                 {t("home.createTitle")}
-              </button>
+              </SubmitButton>
             </form>
           </details>
         )}

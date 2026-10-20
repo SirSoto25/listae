@@ -60,17 +60,26 @@ export type LibraryFilters = {
   sort?: "updatedAt" | "score" | "title";
 };
 
+const MAX_PROGRESS = 100_000;
+
 function parseProgress(raw: unknown): number {
   if (raw === "" || raw === null || raw === undefined) {
     return 0;
   }
 
   const progress = Number(raw);
-  if (!Number.isInteger(progress) || progress < 0) {
-    throw new Error("progress must be a non-negative integer");
+  if (!Number.isSafeInteger(progress) || progress < 0 || progress > MAX_PROGRESS) {
+    throw new Error(
+      `progress must be an integer between 0 and ${MAX_PROGRESS}`,
+    );
   }
 
   return progress;
+}
+
+/** Catalogs report 0 for unknown/unannounced totals; never cap on those. */
+function knownTotal(total: number | null | undefined): number | null {
+  return total && total > 0 ? total : null;
 }
 
 export function normalizeEntryInput(
@@ -106,14 +115,9 @@ export function normalizeEntryInput(
 
   const progressValue = parseProgress(input.progressValue);
   if (workType === "anime" || workType === "series") {
-    if (
-      totals.episodesTotal !== null &&
-      totals.episodesTotal !== undefined &&
-      progressValue > totals.episodesTotal
-    ) {
-      throw new Error(
-        `progress cannot exceed ${totals.episodesTotal} episodes`,
-      );
+    const episodesTotal = knownTotal(totals.episodesTotal);
+    if (episodesTotal !== null && progressValue > episodesTotal) {
+      throw new Error(`progress cannot exceed ${episodesTotal} episodes`);
     }
     return {
       ...base,
@@ -125,11 +129,12 @@ export function normalizeEntryInput(
   if (input.progressUnit !== "chapters" && input.progressUnit !== "pages") {
     throw new Error("progress unit must be chapters or pages");
   }
-  const total =
+  const total = knownTotal(
     input.progressUnit === "chapters"
       ? totals.chaptersTotal
-      : totals.pagesTotal;
-  if (total !== null && total !== undefined && progressValue > total) {
+      : totals.pagesTotal,
+  );
+  if (total !== null && progressValue > total) {
     throw new Error(`progress cannot exceed ${total} ${input.progressUnit}`);
   }
 

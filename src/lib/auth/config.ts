@@ -13,7 +13,19 @@ import {
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { createTranslator } from "@/lib/i18n/t";
 import { safeReturnPath } from "@/lib/safe-return-path";
+import { checkRateLimit } from "@/lib/security/rate-limit";
 import { ensureProfileTheme } from "@/lib/theme/store";
+
+const MAGIC_LINK_RATE_LIMIT = { limit: 5, windowMs: 3_600_000 };
+
+/** Collapses `user+tag@host` aliases so they share one mailbox budget. */
+export function magicLinkRateLimitKey(identifier: string): string {
+  const email = identifier.trim().toLowerCase();
+  const at = email.lastIndexOf("@");
+  if (at <= 0) return `magic-link:${email}`;
+  const local = email.slice(0, at).split("+")[0];
+  return `magic-link:${local}${email.slice(at)}`;
+}
 
 const authSecret = process.env.AUTH_SECRET?.trim();
 if (!authSecret) {
@@ -38,6 +50,16 @@ export const authConfig = {
       server: process.env.EMAIL_SERVER ?? "smtp://localhost:1025",
       from: process.env.EMAIL_FROM ?? "Listae <noreply@localhost>",
       async sendVerificationRequest({ identifier, url }) {
+        // Also covers direct POSTs to /api/auth/signin/nodemailer, which
+        // bypass the throttle in the login page's server action.
+        if (
+          identifier.length > 254 ||
+          !checkRateLimit(magicLinkRateLimitKey(identifier), MAGIC_LINK_RATE_LIMIT)
+            .ok
+        ) {
+          throw new Error("Magic link rate limit exceeded");
+        }
+
         const locale = resolveLocaleFromAuthUrl(url);
         const dict = await getDictionary(locale);
         const t = createTranslator(dict);

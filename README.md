@@ -17,8 +17,8 @@ the product scope and architecture.
    ```
 
 2. Copy `.env.example` to `.env.local` and replace `AUTH_SECRET` with a strong
-   random value. The example defaults to the local SQLite database at
-   `data/listae.db`.
+   random value (for example `openssl rand -base64 32`). `DATABASE_URL`
+   defaults to the local SQLite database at `data/listae.db`.
 
 3. Create/update the local database:
 
@@ -61,6 +61,7 @@ remains available when an external provider is unavailable or has no match.
 | `pnpm build` | Create an optimized production build |
 | `pnpm start` | Serve the production build |
 | `pnpm lint` | Run ESLint |
+| `pnpm typecheck` | Type-check the project with `tsc --noEmit` |
 | `pnpm test` | Run the Vitest suite once |
 | `pnpm test:watch` | Run Vitest in watch mode |
 | `pnpm db:push` | Push the Drizzle schema to the configured database |

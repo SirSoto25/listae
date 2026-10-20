@@ -143,14 +143,33 @@ describe("normalizeEntryInput", () => {
         status: "in_progress",
         progressValue: "-1",
       }),
-    ).toThrow("progress must be a non-negative integer");
+    ).toThrow("progress must be an integer between 0 and 100000");
     expect(() =>
       normalizeEntryInput("book", {
         status: "in_progress",
         progressValue: "1.5",
         progressUnit: "chapters",
       }),
-    ).toThrow("progress must be a non-negative integer");
+    ).toThrow("progress must be an integer between 0 and 100000");
+  });
+
+  it("rejects progress values outside the safe integer range", () => {
+    expect(() =>
+      normalizeEntryInput("series", {
+        status: "in_progress",
+        progressValue: "1e21",
+      }),
+    ).toThrow("progress must be an integer between 0 and 100000");
+  });
+
+  it("treats a zero catalog total as unknown instead of a hard cap", () => {
+    expect(
+      normalizeEntryInput(
+        "series",
+        { status: "in_progress", progressValue: "3" },
+        { episodesTotal: 0 },
+      ).progressValue,
+    ).toBe(3);
   });
 
   it("rejects invalid reading progress units", () => {

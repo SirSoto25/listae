@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 
-import { authConfig } from "./config";
+import { authConfig, magicLinkRateLimitKey } from "./config";
 
 it("allows the initial email verification request before a user exists", async () => {
   const result = await authConfig.callbacks.signIn({
@@ -71,4 +71,13 @@ it("points Auth.js at custom sign-in and verify pages", () => {
     verifyRequest: "/login/verify",
     error: "/login",
   });
+});
+
+it("shares one magic-link budget across case and +tag aliases", () => {
+  expect(magicLinkRateLimitKey(" Victim+1@Example.com ")).toBe(
+    "magic-link:victim@example.com",
+  );
+  expect(magicLinkRateLimitKey("victim@example.com")).toBe(
+    "magic-link:victim@example.com",
+  );
 });

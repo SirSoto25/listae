@@ -156,6 +156,34 @@ describe("buildDomainListsHtml", () => {
 });
 
 describe("renderProfileHtml", () => {
+  it("treats user-controlled titles literally", () => {
+    const html = renderProfileHtml({
+      template: "{{lists}}<footer>{{username}}</footer>",
+      username: "alex",
+      displayName: "Alex",
+      entries: [
+        { ...entries[0]!, title: "Ca$$h $` {{username}} {{lists}}" },
+      ],
+      t,
+    });
+
+    expect(html).toContain("Ca$$h $` {{username}} {{lists}}");
+    expect(html.match(/<footer>alex<\/footer>/g)).toHaveLength(1);
+    expect(html.match(/listae-status-table/g)).toHaveLength(1);
+  });
+
+  it("leaves unknown placeholders untouched", () => {
+    const html = renderProfileHtml({
+      template: "{{constructor}}{{nope}}",
+      username: "alex",
+      displayName: "Alex",
+      entries,
+      t,
+    });
+
+    expect(html).toBe("{{constructor}}{{nope}}");
+  });
+
   it("replaces the supported top-level placeholders", () => {
     const html = renderProfileHtml({
       template:

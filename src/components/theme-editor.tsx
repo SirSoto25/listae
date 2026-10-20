@@ -6,7 +6,10 @@ import {
   saveThemeAction,
   type SaveThemeResult,
 } from "@/app/actions/theme";
-import { DomainThemePicker } from "@/components/domain-theme-picker";
+import {
+  DomainThemePicker,
+  type DomainThemePickerLabels,
+} from "@/components/domain-theme-picker";
 import { DEFAULT_CSS } from "@/lib/theme/defaults";
 import {
   parseDomainVarsBlock,
@@ -16,8 +19,34 @@ import {
 import type { ProfileEntry } from "@/lib/theme/placeholders";
 import { renderTheme } from "@/lib/theme/render";
 import { buildThemeDocument } from "@/lib/theme/save";
+import type { ThemeCssError } from "@/lib/theme/validate-css";
 import type { Locale } from "@/lib/i18n/config";
 import { syncTranslator } from "@/lib/i18n/sync-dictionary";
+
+export type ThemeEditorLabels = {
+  htmlTemplate: string;
+  htmlTemplateHelp: string;
+  customCss: string;
+  customCssHelp: string;
+  errorsHeading: string;
+  /** Template with a `{line}` slot, e.g. "Line {line}". */
+  errorLine: string;
+  /** Template with a `{column}` slot, e.g. "column {column}". */
+  errorColumn: string;
+  /** Location prefix for errors that carry no line number. */
+  errorGeneric: string;
+  invalidDomainColors: string;
+  themeSaved: string;
+  saveTheme: string;
+  saving: string;
+  restoreDefaults: string;
+  livePreview: string;
+  previewNote: string;
+  previewFrameTitle: string;
+  previewUnavailableTitle: string;
+  previewUnavailableBody: string;
+  domainPicker: DomainThemePickerLabels;
+};
 
 function domainVarsFromCss(css: string): DomainVarsInput {
   const parsed =
@@ -28,7 +57,36 @@ function domainVarsFromCss(css: string): DomainVarsInput {
   return parsed;
 }
 
+const HTML_ESCAPES: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (char) => HTML_ESCAPES[char] ?? char);
+}
+
+function formatErrorLocation(
+  error: ThemeCssError,
+  labels: ThemeEditorLabels,
+): string {
+  const parts = [
+    error.line
+      ? labels.errorLine.replace("{line}", String(error.line))
+      : labels.errorGeneric,
+  ];
+  if (error.column) {
+    parts.push(labels.errorColumn.replace("{column}", String(error.column)));
+  }
+  return parts.join(", ");
+}
+
 type ThemeEditorProps = {
+  /** Editor chrome in the viewer's UI language (not the profile's). */
+  labels: ThemeEditorLabels;
   username: string;
   displayName: string;
   entries: ProfileEntry[];
@@ -40,6 +98,7 @@ type ThemeEditorProps = {
 };
 
 export function ThemeEditor({
+  labels,
   username,
   displayName,
   entries,
@@ -69,9 +128,9 @@ export function ThemeEditor({
     [customCss, displayName, entries, htmlTemplate, profileLocale, username],
   );
   const previewDoc = preview.ok
-    ? buildThemeDocument(preview.html, preview.css)
+    ? buildThemeDocument(preview.html, preview.css, profileLocale)
     : buildThemeDocument(
-        '<main style="font-family:system-ui;padding:2rem"><h1>Preview unavailable</h1><p>Fix the CSS errors to continue.</p></main>',
+        `<main style="font-family:system-ui;padding:2rem"><h1>${escapeHtml(labels.previewUnavailableTitle)}</h1><p>${escapeHtml(labels.previewUnavailableBody)}</p></main>`,
         "",
       );
 
@@ -89,12 +148,7 @@ export function ThemeEditor({
     } catch {
       setResult({
         ok: false,
-        errors: [
-          {
-            message:
-              "Domain colors must be valid #RRGGBB hex values before applying.",
-          },
-        ],
+        errors: [{ message: labels.invalidDomainColors }],
       });
     }
   }
@@ -124,12 +178,10 @@ export function ThemeEditor({
       >
         <label className="block">
           <span className="text-sm font-black text-foreground">
-            HTML template
+            {labels.htmlTemplate}
           </span>
           <span className="mt-1 block text-xs text-muted">
-            Supported placeholders: {"{{displayName}}"}, {"{{username}}"},{" "}
-            {"{{audiovisual_lists}}"}, {"{{reading_lists}}"}, and{" "}
-            {"{{lists}}"}.
+            {labels.htmlTemplateHelp}
           </span>
           <textarea
             className="mt-3 min-h-72 w-full rounded-[length:var(--radius-panel)] border border-border bg-primary p-4 font-mono text-sm leading-6 text-primary-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
@@ -141,6 +193,7 @@ export function ThemeEditor({
         </label>
 
         <DomainThemePicker
+          labels={labels.domainPicker}
           value={domainVars}
           onChange={setDomainVars}
           onApply={applyDomainColors}
@@ -148,18 +201,21 @@ export function ThemeEditor({
 
         <label className="block">
           <span className="text-sm font-black text-foreground">
-            Custom CSS
+            {labels.customCss}
           </span>
           <span className="mt-1 block text-xs text-muted">
-            HTTPS Google Fonts imports are allowed. JavaScript is never run.
-            Domain picker rewrites the marked /* listae:domain-vars */ block
-            only.
+            {labels.customCssHelp}
           </span>
           <textarea
             className="mt-3 min-h-96 w-full rounded-[length:var(--radius-panel)] border border-border bg-primary p-4 font-mono text-sm leading-6 text-primary-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
             name="customCss"
             value={customCss}
-            onChange={(event) => setCustomCss(event.target.value)}
+            onChange={(event) => {
+              const css = event.target.value;
+              setCustomCss(css);
+              const parsed = parseDomainVarsBlock(css);
+              if (parsed) setDomainVars(parsed);
+            }}
             spellCheck={false}
           />
         </label>
@@ -169,14 +225,12 @@ export function ThemeEditor({
             className="rounded-[length:var(--radius-panel)] border border-border bg-background p-4 text-sm text-foreground"
             role="alert"
           >
-            <p className="font-black">Fix these CSS errors:</p>
+            <p className="font-black">{labels.errorsHeading}</p>
             <ul className="mt-2 space-y-3">
               {errors.map((error, index) => (
                 <li key={`${error.line}-${error.column}-${index}`}>
                   <p>
-                    {error.line ? `Line ${error.line}` : "CSS"}
-                    {error.column ? `, column ${error.column}` : ""}:{" "}
-                    {error.message}
+                    {formatErrorLocation(error, labels)}: {error.message}
                   </p>
                   {error.snippet && (
                     <code className="mt-1 block overflow-x-auto rounded border border-border bg-surface px-2 py-1 font-mono text-xs text-muted">
@@ -194,7 +248,7 @@ export function ThemeEditor({
             className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800"
             role="status"
           >
-            Theme saved.
+            {labels.themeSaved}
           </p>
         )}
 
@@ -204,28 +258,30 @@ export function ThemeEditor({
             type="submit"
             disabled={isPending}
           >
-            {isPending ? "Saving…" : "Save theme"}
+            {isPending ? labels.saving : labels.saveTheme}
           </button>
           <button
             className="rounded-xl border border-border bg-surface px-5 py-3 text-sm font-black text-foreground hover:border-accent hover:text-accent"
             type="button"
             onClick={restoreDefaults}
           >
-            Restore defaults
+            {labels.restoreDefaults}
           </button>
         </div>
       </form>
 
       <section className="min-w-0">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-black text-foreground">Live preview</h2>
+          <h2 className="text-sm font-black text-foreground">
+            {labels.livePreview}
+          </h2>
           <span className="text-xs font-semibold text-muted">
-            Sandboxed · scripts disabled
+            {labels.previewNote}
           </span>
         </div>
         <iframe
           sandbox=""
-          title="Theme preview"
+          title={labels.previewFrameTitle}
           srcDoc={previewDoc}
           className="min-h-[480px] w-full rounded-[length:var(--radius-panel)] border border-border bg-surface"
         />

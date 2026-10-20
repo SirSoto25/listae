@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
+import { SubmitButton } from "@/components/submit-button";
 import { auth, signIn } from "@/lib/auth";
 import { loginErrorMessage } from "@/lib/auth/login-messages";
 import { db } from "@/lib/db";
@@ -33,6 +34,10 @@ export default async function LoginPage({
   const session = await auth();
   const { error } = await searchParams;
   const errorMessage = loginErrorMessage(error, locale);
+  // Mirrors src/lib/auth/config.ts: links are only printed to the server
+  // console when EMAIL_SERVER is unset outside production.
+  const showConsoleLinkHint =
+    !process.env.EMAIL_SERVER && process.env.NODE_ENV !== "production";
 
   if (session?.user?.email) {
     const [profile] = await db
@@ -112,19 +117,19 @@ export default async function LoginPage({
               required
             />
           </label>
-          <button
-            className="w-full rounded-[length:var(--radius-control)] bg-primary px-4 py-2.5 font-bold text-primary-foreground hover:opacity-90"
-            type="submit"
-          >
+          <SubmitButton
+            className="w-full rounded-[length:var(--radius-control)] bg-primary px-4 py-2.5 font-bold text-primary-foreground hover:opacity-90">
             {errorMessage
               ? t("auth.sendNewMagicLink")
               : t("auth.sendMagicLink")}
-          </button>
+          </SubmitButton>
         </form>
 
-        <p className="mt-5 text-xs leading-5 text-muted">
-          {t("auth.loginFooter")}
-        </p>
+        {showConsoleLinkHint ? (
+          <p className="mt-5 text-xs leading-5 text-muted">
+            {t("auth.loginFooter")}
+          </p>
+        ) : null}
       </section>
     </main>
   );

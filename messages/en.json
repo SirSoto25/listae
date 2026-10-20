@@ -5,7 +5,11 @@
     "profile": "Profile",
     "finishSetup": "Finish setup",
     "login": "Sign in",
-    "logout": "Log out"
+    "logout": "Log out",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "themeLabel": "Theme: {mode}"
   },
   "common": {
     "backToSearch": "← Back to search",
@@ -148,5 +152,54 @@
     "addToLibrary": "Add to your library",
     "saved": "Your library entry was saved.",
     "signInToTrack": "Sign in to track this title"
+  },
+  "workType": {
+    "anime": "Anime",
+    "series": "Series",
+    "movie": "Movie",
+    "book": "Book",
+    "manga": "Manga",
+    "comic": "Comic"
+  },
+  "source": {
+    "tmdb": "TMDB",
+    "openlibrary": "Open Library",
+    "manual": "Manual"
+  },
+  "customize": {
+    "title": "Customize profile",
+    "intro": "Edit your safe HTML template and CSS, then review it in the script-free preview.",
+    "viewPublicProfile": "View public profile",
+    "profileFrameTitle": "{name}'s Listae profile",
+    "htmlTemplate": "HTML template",
+    "htmlTemplateHelp": "Supported placeholders: {{displayName}}, {{username}}, {{audiovisual_lists}}, {{reading_lists}}, and {{lists}}.",
+    "customCss": "Custom CSS",
+    "customCssHelp": "HTTPS Google Fonts imports are allowed. JavaScript is never run. Domain picker rewrites the marked /* listae:domain-vars */ block only.",
+    "domainColors": "Domain colors",
+    "domainColorsHelp": "Updates the marked CSS variable block for preview. Save theme to persist.",
+    "colorBackground": "Background",
+    "colorAccent": "Accent",
+    "colorText": "Text",
+    "hexInputAria": "{label}: hex code",
+    "applyDomainColors": "Apply domain colors",
+    "invalidDomainColors": "Domain colors must be valid #RRGGBB hex values before applying.",
+    "errorsHeading": "Fix these CSS errors:",
+    "errorLine": "Line {line}",
+    "errorColumn": "column {column}",
+    "errorGeneric": "CSS",
+    "themeSaved": "Theme saved.",
+    "saveTheme": "Save theme",
+    "saving": "Saving…",
+    "restoreDefaults": "Restore defaults",
+    "livePreview": "Live preview",
+    "previewNote": "Sandboxed · scripts disabled",
+    "previewFrameTitle": "Theme preview",
+    "previewUnavailableTitle": "Preview unavailable",
+    "previewUnavailableBody": "Fix the CSS errors to continue."
+  },
+  "meta": {
+    "title": "Listae — Track what you watch and read",
+    "description": "A personal library for films, series, anime, books, manga, and comics.",
+    "profileDescription": "{name}'s personal library on Listae: films, series, anime, books, manga, and comics."
   }
 }
