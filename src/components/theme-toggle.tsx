@@ -1,12 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import {
-  THEME_COOKIE_NAME,
-  parseThemePreference,
-  type ThemePreference,
-} from "@/lib/theme-preference";
+import { THEME_COOKIE_NAME, type ThemePreference } from "@/lib/theme-preference";
 
 function writeThemeCookie(value: ThemePreference) {
   const maxAge = 60 * 60 * 24 * 365;
@@ -23,17 +19,14 @@ function applyResolved(preference: ThemePreference) {
 
 const CYCLE: ThemePreference[] = ["light", "dark", "system"];
 
-export function ThemeToggle() {
-  const [preference, setPreference] = useState<ThemePreference>("system");
+type ThemeToggleProps = {
+  initialPreference: ThemePreference;
+  labels: Record<ThemePreference, string> & { label: string };
+};
 
-  useEffect(() => {
-    const match = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith(`${THEME_COOKIE_NAME}=`));
-    const raw = match?.split("=")[1];
-    const parsed = parseThemePreference(raw);
-    setPreference(parsed);
-  }, []);
+export function ThemeToggle({ initialPreference, labels }: ThemeToggleProps) {
+  const [preference, setPreference] =
+    useState<ThemePreference>(initialPreference);
 
   function cycle() {
     const next = CYCLE[(CYCLE.indexOf(preference) + 1) % CYCLE.length]!;
@@ -42,12 +35,8 @@ export function ThemeToggle() {
     applyResolved(next);
   }
 
-  const label =
-    preference === "light"
-      ? "Theme: Light"
-      : preference === "dark"
-        ? "Theme: Dark"
-        : "Theme: System";
+  const mode = labels[preference];
+  const label = labels.label.replace("{mode}", mode);
 
   return (
     <button
@@ -57,7 +46,7 @@ export function ThemeToggle() {
       aria-label={label}
       title={label}
     >
-      {preference === "light" ? "Light" : preference === "dark" ? "Dark" : "System"}
+      {mode}
     </button>
   );
 }

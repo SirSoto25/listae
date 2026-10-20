@@ -1,5 +1,8 @@
 import type { WorkType } from "@/types/domain";
 
+/** Upper bound for any single catalog provider request. */
+export const PROVIDER_TIMEOUT_MS = 8000;
+
 export type CatalogHit = {
   source: "tmdb" | "openlibrary";
   externalId: string;

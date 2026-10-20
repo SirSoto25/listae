@@ -1,7 +1,7 @@
 import type { WorkType } from "@/types/domain";
 import type { Locale } from "@/lib/i18n/config";
 
-import type { CatalogHit } from "./types";
+import { PROVIDER_TIMEOUT_MS, type CatalogHit } from "./types";
 
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
@@ -124,7 +124,11 @@ async function fetchTmdbDetails(
     params.language = language;
   }
   const { url, headers } = buildTmdbRequest(`${mediaType}/${id}`, apiKey, params);
-  const response = await fetch(url, { cache: "no-store", headers });
+  const response = await fetch(url, {
+    cache: "no-store",
+    headers,
+    signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
+  });
   if (!response.ok) {
     throw new Error(`TMDB lookup failed with status ${response.status}`);
   }
@@ -163,7 +167,11 @@ export async function searchTmdb(
     language: tmdbLanguageForLocale(locale),
   });
 
-  const response = await fetch(url, { cache: "no-store", headers });
+  const response = await fetch(url, {
+    cache: "no-store",
+    headers,
+    signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
+  });
   if (!response.ok) {
     throw new Error(`TMDB search failed with status ${response.status}`);
   }

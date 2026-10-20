@@ -4,6 +4,7 @@ import {
   checkRateLimit,
   clientIpFromHeaders,
   resetRateLimitsForTests,
+  trackedRateLimitKeysForTests,
 } from "./rate-limit";
 
 afterEach(() => {
@@ -37,13 +38,28 @@ describe("checkRateLimit", () => {
   });
 });
 
+describe("checkRateLimit memory bounds", () => {
+  it("caps the number of tracked keys", () => {
+    for (let i = 0; i < 10_050; i++) {
+      checkRateLimit(`flood:${i}`, { limit: 1, windowMs: 60_000 });
+    }
+    expect(trackedRateLimitKeysForTests()).toBeLessThanOrEqual(10_000);
+  });
+
+  it("still limits very long keys after hashing them", () => {
+    const key = `login:email:${"a".repeat(5_000)}@example.com`;
+    expect(checkRateLimit(key, { limit: 1, windowMs: 60_000 }).ok).toBe(true);
+    expect(checkRateLimit(key, { limit: 1, windowMs: 60_000 }).ok).toBe(false);
+  });
+});
+
 describe("clientIpFromHeaders", () => {
-  it("prefers the first x-forwarded-for address", () => {
+  it("uses the proxy-appended (right-most) x-forwarded-for hop", () => {
     const headers = new Headers({
       "x-forwarded-for": "203.0.113.5, 198.51.100.2",
     });
 
-    expect(clientIpFromHeaders(headers)).toBe("203.0.113.5");
+    expect(clientIpFromHeaders(headers)).toBe("198.51.100.2");
   });
 
   it("falls back to x-real-ip", () => {

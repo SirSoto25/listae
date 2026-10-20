@@ -5,7 +5,11 @@
     "profile": "Perfil",
     "finishSetup": "Completar registro",
     "login": "Iniciar sesión",
-    "logout": "Cerrar sesión"
+    "logout": "Cerrar sesión",
+    "themeLight": "Claro",
+    "themeDark": "Oscuro",
+    "themeSystem": "Sistema",
+    "themeLabel": "Tema: {mode}"
   },
   "common": {
     "backToSearch": "← Volver a buscar",
@@ -148,5 +152,54 @@
     "addToLibrary": "Añade a tu biblioteca",
     "saved": "Tu entrada de biblioteca se guardó.",
     "signInToTrack": "Inicia sesión para seguir este título"
+  },
+  "workType": {
+    "anime": "Anime",
+    "series": "Serie",
+    "movie": "Película",
+    "book": "Libro",
+    "manga": "Manga",
+    "comic": "Cómic"
+  },
+  "source": {
+    "tmdb": "TMDB",
+    "openlibrary": "Open Library",
+    "manual": "Manual"
+  },
+  "customize": {
+    "title": "Personalizar perfil",
+    "intro": "Edita tu plantilla HTML segura y tu CSS, y revisa el resultado en la vista previa sin scripts.",
+    "viewPublicProfile": "Ver perfil público",
+    "profileFrameTitle": "Perfil de {name} en Listae",
+    "htmlTemplate": "Plantilla HTML",
+    "htmlTemplateHelp": "Marcadores de posición admitidos: {{displayName}}, {{username}}, {{audiovisual_lists}}, {{reading_lists}} y {{lists}}.",
+    "customCss": "CSS personalizado",
+    "customCssHelp": "Se permiten importaciones de Google Fonts por HTTPS. Nunca se ejecuta JavaScript. El selector de colores por dominio solo reescribe el bloque marcado /* listae:domain-vars */.",
+    "domainColors": "Colores por dominio",
+    "domainColorsHelp": "Actualiza el bloque marcado de variables CSS en la vista previa. Guarda el tema para conservar los cambios.",
+    "colorBackground": "Fondo",
+    "colorAccent": "Acento",
+    "colorText": "Texto",
+    "hexInputAria": "{label}: código hexadecimal",
+    "applyDomainColors": "Aplicar colores por dominio",
+    "invalidDomainColors": "Los colores por dominio deben ser valores hexadecimales #RRGGBB válidos antes de aplicarlos.",
+    "errorsHeading": "Corrige estos errores de CSS:",
+    "errorLine": "Línea {line}",
+    "errorColumn": "columna {column}",
+    "errorGeneric": "CSS",
+    "themeSaved": "Tema guardado.",
+    "saveTheme": "Guardar tema",
+    "saving": "Guardando…",
+    "restoreDefaults": "Restaurar valores predeterminados",
+    "livePreview": "Vista previa en directo",
+    "previewNote": "Aislada · scripts desactivados",
+    "previewFrameTitle": "Vista previa del tema",
+    "previewUnavailableTitle": "Vista previa no disponible",
+    "previewUnavailableBody": "Corrige los errores de CSS para continuar."
+  },
+  "meta": {
+    "title": "Listae — Sigue lo que ves y lees",
+    "description": "Una biblioteca personal de películas, series, anime, libros, manga y cómics.",
+    "profileDescription": "La biblioteca personal de {name} en Listae: películas, series, anime, libros, manga y cómics."
   }
 }

@@ -19,5 +19,7 @@ export function loginErrorMessage(
 
   const code = Array.isArray(error) ? error[0] : error;
   const t = syncTranslator(locale);
-  return t(ERROR_KEYS[code ?? ""] ?? ERROR_KEYS.Default);
+  const key =
+    code && Object.hasOwn(ERROR_KEYS, code) ? ERROR_KEYS[code] : undefined;
+  return t(key ?? ERROR_KEYS.Default);
 }

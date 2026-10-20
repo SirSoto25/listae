@@ -17,6 +17,10 @@ export default async function LoginVerifyPage({
   const locale = raw as Locale;
   const dict = await getDictionary(locale);
   const t = createTranslator(dict);
+  // Mirrors src/lib/auth/config.ts: links are only printed to the server
+  // console when EMAIL_SERVER is unset outside production.
+  const showConsoleLinkHint =
+    !process.env.EMAIL_SERVER && process.env.NODE_ENV !== "production";
 
   return (
     <main className="flex flex-1 items-center justify-center bg-transparent px-6 py-16">
@@ -30,9 +34,11 @@ export default async function LoginVerifyPage({
         <p className="mt-3 text-sm leading-6 text-muted">
           {t("auth.verifyBody")}
         </p>
-        <p className="mt-4 text-sm leading-6 text-muted">
-          {t("auth.verifyDevHint")}
-        </p>
+        {showConsoleLinkHint ? (
+          <p className="mt-4 text-sm leading-6 text-muted">
+            {t("auth.verifyDevHint")}
+          </p>
+        ) : null}
         <div className="mt-8 flex flex-col gap-3 text-sm font-bold">
           <LocaleLink
             className="text-accent hover:opacity-90"

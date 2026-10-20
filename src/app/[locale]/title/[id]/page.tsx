@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import { EntryForm } from "@/components/entry-form";
 import { LocaleLink } from "@/components/locale-link";
@@ -10,7 +10,11 @@ import { db } from "@/lib/db";
 import { users, works } from "@/lib/db/schema";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
-import { entryFormLabels } from "@/lib/i18n/labels";
+import {
+  entryFormLabels,
+  sourceLabels,
+  workTypeLabels,
+} from "@/lib/i18n/labels";
 import { localePath } from "@/lib/i18n/path";
 import { createTranslator } from "@/lib/i18n/t";
 import { workSynopsis, workTitle } from "@/lib/i18n/work-text";
@@ -41,7 +45,9 @@ export default async function TitlePage({
   const missingLocaleText =
     locale === "es" ? !work.titleEs?.trim() : !work.titleEn?.trim();
   if (missingLocaleText) {
-    const filled = await fillMissingWorkLocale(work.id, locale);
+    const filled = await fillMissingWorkLocale(work.id, locale).catch(
+      () => false,
+    );
     if (filled) {
       work =
         (await db.query.works.findFirst({
@@ -52,6 +58,10 @@ export default async function TitlePage({
 
   const displayTitle = workTitle(work, locale);
   const displaySynopsis = workSynopsis(work, locale);
+  const typeLabel = workTypeLabels(t)[work.type];
+  const sourceLabel = work.externalSource
+    ? sourceLabels(t)[work.externalSource]
+    : null;
 
   const session = await auth();
   const user = session?.user?.email
@@ -83,19 +93,17 @@ export default async function TitlePage({
 
           <div>
             <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-accent">
-              <span>{work.type}</span>
-              {work.year && (
+              <span>{typeLabel}</span>
+              {work.year != null && (
                 <>
                   <span className="text-border">/</span>
                   <span className="text-muted">{work.year}</span>
                 </>
               )}
-              {work.externalSource && (
+              {sourceLabel && (
                 <>
                   <span className="text-border">/</span>
-                  <span className="text-muted">
-                    {work.externalSource}
-                  </span>
+                  <span className="text-muted">{sourceLabel}</span>
                 </>
               )}
             </div>

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
 
 import { loginErrorMessage } from "./login-messages";
 
@@ -20,4 +20,9 @@ it("falls back for unknown Auth.js error codes", () => {
 
 it("returns null when there is no error", () => {
   expect(loginErrorMessage(undefined)).toBeNull();
+});
+
+it("does not resolve Object.prototype names as error codes", () => {
+  expect(loginErrorMessage("constructor", "en")).toMatch(/new magic link/i);
+  expect(loginErrorMessage("__proto__", "en")).toMatch(/new magic link/i);
 });

@@ -1,6 +1,29 @@
+import type { ExternalSource, WorkType } from "@/types/domain";
+
 import type { createTranslator } from "./t";
 
 type T = ReturnType<typeof createTranslator>;
+
+/** Display names for the `works.type` enum (the raw value is never shown). */
+export function workTypeLabels(t: T): Record<WorkType, string> {
+  return {
+    anime: t("workType.anime"),
+    series: t("workType.series"),
+    movie: t("workType.movie"),
+    book: t("workType.book"),
+    manga: t("workType.manga"),
+    comic: t("workType.comic"),
+  };
+}
+
+/** Display names for the `works.externalSource` enum. */
+export function sourceLabels(t: T): Record<ExternalSource, string> {
+  return {
+    tmdb: t("source.tmdb"),
+    openlibrary: t("source.openlibrary"),
+    manual: t("source.manual"),
+  };
+}
 
 export function entryFormLabels(t: T) {
   return {
@@ -31,6 +54,7 @@ export function catalogSearchLabels(t: T) {
     searchAria: t("catalog.searchAria"),
     mediaTypeAria: t("catalog.mediaTypeAria"),
     allMedia: t("catalog.allMedia"),
+    workTypes: workTypeLabels(t),
   };
 }
 
@@ -58,6 +82,7 @@ export function libraryFiltersLabels(t: T) {
     statusCompleted: t("library.statusCompleted"),
     statusOnHold: t("library.statusOnHold"),
     statusDropped: t("library.statusDropped"),
+    workTypes: workTypeLabels(t),
   };
 }
 
@@ -66,5 +91,43 @@ export function usernameFieldLabels(t: T) {
     label: t("onboarding.usernameLabel"),
     hint: t("onboarding.usernameHint"),
     warning: t("onboarding.usernameWarning"),
+  };
+}
+
+export function domainThemePickerLabels(t: T) {
+  return {
+    heading: t("customize.domainColors"),
+    help: t("customize.domainColorsHelp"),
+    audiovisual: t("library.domainAudiovisual"),
+    reading: t("library.domainReading"),
+    background: t("customize.colorBackground"),
+    accent: t("customize.colorAccent"),
+    text: t("customize.colorText"),
+    hexInputAria: t("customize.hexInputAria"),
+    apply: t("customize.applyDomainColors"),
+  };
+}
+
+export function themeEditorLabels(t: T) {
+  return {
+    htmlTemplate: t("customize.htmlTemplate"),
+    htmlTemplateHelp: t("customize.htmlTemplateHelp"),
+    customCss: t("customize.customCss"),
+    customCssHelp: t("customize.customCssHelp"),
+    errorsHeading: t("customize.errorsHeading"),
+    errorLine: t("customize.errorLine"),
+    errorColumn: t("customize.errorColumn"),
+    errorGeneric: t("customize.errorGeneric"),
+    invalidDomainColors: t("customize.invalidDomainColors"),
+    themeSaved: t("customize.themeSaved"),
+    saveTheme: t("customize.saveTheme"),
+    saving: t("customize.saving"),
+    restoreDefaults: t("customize.restoreDefaults"),
+    livePreview: t("customize.livePreview"),
+    previewNote: t("customize.previewNote"),
+    previewFrameTitle: t("customize.previewFrameTitle"),
+    previewUnavailableTitle: t("customize.previewUnavailableTitle"),
+    previewUnavailableBody: t("customize.previewUnavailableBody"),
+    domainPicker: domainThemePickerLabels(t),
   };
 }

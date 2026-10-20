@@ -12,6 +12,7 @@ export type CatalogSearchLabels = {
   searchAria: string;
   mediaTypeAria: string;
   allMedia: string;
+  workTypes: Record<WorkType, string>;
 };
 
 type CatalogSearchProps = {
@@ -42,7 +43,10 @@ export function CatalogSearch({
       }
       const suffix = params.toString();
       const base = localePath(locale, "/");
-      router.replace(suffix ? `${base}?${suffix}` : base, { scroll: false });
+      const target = suffix ? `${base}?${suffix}` : base;
+      const current = `${window.location.pathname}${window.location.search}`;
+      if (target === current) return;
+      router.replace(target, { scroll: false });
     }, 300);
 
     return () => window.clearTimeout(timeout);
@@ -66,7 +70,7 @@ export function CatalogSearch({
       <label>
         <span className="sr-only">{labels.mediaTypeAria}</span>
         <select
-          className="h-14 w-full rounded-2xl border border-border bg-surface px-4 font-medium capitalize text-foreground shadow-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
+          className="h-14 w-full rounded-2xl border border-border bg-surface px-4 font-medium text-foreground shadow-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
           value={type}
           onChange={(event) =>
             setType(event.target.value as WorkType | "all")
@@ -75,7 +79,7 @@ export function CatalogSearch({
           <option value="all">{labels.allMedia}</option>
           {WORK_TYPES.map((workType) => (
             <option key={workType} value={workType}>
-              {workType}
+              {labels.workTypes[workType]}
             </option>
           ))}
         </select>

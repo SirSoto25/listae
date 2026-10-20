@@ -26,9 +26,13 @@ export type LibraryFiltersLabels = {
   statusCompleted: string;
   statusOnHold: string;
   statusDropped: string;
+  workTypes: Record<WorkType, string>;
 };
 
-const STATUS_LABEL_KEYS: Record<ListStatus, keyof LibraryFiltersLabels> = {
+const STATUS_LABEL_KEYS: Record<
+  ListStatus,
+  Exclude<keyof LibraryFiltersLabels, "workTypes">
+> = {
   plan: "statusPlan",
   in_progress: "statusInProgress",
   completed: "statusCompleted",
@@ -82,7 +86,7 @@ export function LibraryFilters({
           <option value="all">{labels.allTypes}</option>
           {typeOptions.map((workType) => (
             <option key={workType} value={workType}>
-              {workType}
+              {labels.workTypes[workType]}
             </option>
           ))}
         </select>

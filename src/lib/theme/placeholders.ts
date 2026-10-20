@@ -233,8 +233,11 @@ export function renderProfileHtml({
     }
   }
 
-  return Object.entries(replacements).reduce(
-    (html, [placeholder, value]) => html.replaceAll(placeholder, value),
-    template,
+  // Single pass: substituted values (user-controlled titles) are never
+  // re-scanned for placeholders, and `$` sequences in them stay literal.
+  return template.replace(/\{\{\w+\}\}/g, (placeholder) =>
+    Object.hasOwn(replacements, placeholder)
+      ? replacements[placeholder]!
+      : placeholder,
   );
 }

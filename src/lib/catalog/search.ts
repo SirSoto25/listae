@@ -44,13 +44,6 @@ export async function searchCatalog(
     return [];
   }
 
-  if (clientIp) {
-    const limited = checkRateLimit(`search:ip:${clientIp}`, SEARCH_RATE_LIMIT);
-    if (!limited.ok) {
-      return [];
-    }
-  }
-
   const cache = createDbSearchCacheStore();
   const key = buildSearchCacheKey(normalizedQuery, typeFilter, locale);
   const cachedPayload = await cache.get(key);
@@ -66,6 +59,14 @@ export async function searchCatalog(
   const stalePayload = await cache.get(key, true);
   const staleHits =
     stalePayload === null ? null : parseCachedHits(stalePayload);
+
+  // Only provider round-trips spend the IP budget; cache hits are free.
+  if (clientIp) {
+    const limited = checkRateLimit(`search:ip:${clientIp}`, SEARCH_RATE_LIMIT);
+    if (!limited.ok) {
+      return staleHits ?? [];
+    }
+  }
 
   const searches: Promise<CatalogHit[]>[] = [];
   if (["all", "anime", "series", "movie"].includes(typeFilter)) {
@@ -95,6 +96,10 @@ export async function searchCatalog(
   }
 
   const hits = successful.flatMap((result) => result.value);
+  if (successful.length < settled.length) {
+    // A provider is down: serve what we have without caching a partial list.
+    return staleHits ?? hits;
+  }
   await cache.set(key, JSON.stringify(hits), SEARCH_CACHE_TTL_SECONDS);
   return hits;
 }

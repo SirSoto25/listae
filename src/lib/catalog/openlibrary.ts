@@ -1,6 +1,6 @@
 import type { WorkType } from "@/types/domain";
 
-import type { CatalogHit } from "./types";
+import { PROVIDER_TIMEOUT_MS, type CatalogHit } from "./types";
 
 const OPEN_LIBRARY_SEARCH_URL = "https://openlibrary.org/search.json";
 const OPEN_LIBRARY_COVER_URL = "https://covers.openlibrary.org/b/id";
@@ -99,7 +99,10 @@ export async function searchOpenLibrary(
   );
   url.searchParams.set("limit", "20");
 
-  const response = await fetch(url, { cache: "no-store" });
+  const response = await fetch(url, {
+    cache: "no-store",
+    signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
+  });
   if (!response.ok) {
     throw new Error(
       `Open Library search failed with status ${response.status}`,
@@ -136,7 +139,10 @@ async function fetchSpanishEdition(
 ): Promise<{ title?: string; synopsis?: string } | null> {
   const response = await fetch(
     `https://openlibrary.org/works/${externalId}/editions.json?limit=50`,
-    { cache: "no-store" },
+    {
+      cache: "no-store",
+      signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
+    },
   );
   if (!response.ok) {
     return null;
@@ -165,7 +171,10 @@ export async function resolveOpenLibraryBilingual(
 
   const response = await fetch(
     `https://openlibrary.org/works/${externalId}.json`,
-    { cache: "no-store" },
+    {
+      cache: "no-store",
+      signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
+    },
   );
   if (!response.ok) {
     throw new Error(
