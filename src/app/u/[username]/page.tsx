@@ -103,8 +103,11 @@ export default async function PublicProfilePage({
 
   return (
     <main className="flex flex-1 bg-white">
+      {/* Links may navigate the whole tab, only on a real click. Scripts,
+          forms, popups and same-origin access stay blocked. The editor
+          preview keeps sandbox="" so a click can't drop unsaved edits. */}
       <iframe
-        sandbox=""
+        sandbox="allow-top-navigation-by-user-activation"
         title={t("customize.profileFrameTitle", {
           name: user.displayName ?? user.username,
         })}

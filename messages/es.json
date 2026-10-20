@@ -201,5 +201,28 @@
     "title": "Listae — Sigue lo que ves y lees",
     "description": "Una biblioteca personal de películas, series, anime, libros, manga y cómics.",
     "profileDescription": "La biblioteca personal de {name} en Listae: películas, series, anime, libros, manga y cómics."
+  },
+  "status": {
+    "notFoundTitle": "Página no encontrada",
+    "notFoundBody": "Puede que el enlace esté roto o que la página se haya movido.",
+    "backHome": "Volver al inicio",
+    "errorTitle": "Algo ha salido mal",
+    "errorBody": "Ha ocurrido un error inesperado. Puedes intentarlo de nuevo.",
+    "retry": "Reintentar",
+    "loading": "Cargando…"
+  },
+  "formErrors": {
+    "invalidScore": "La puntuación debe ser un número entero del 1 al 10.",
+    "invalidProgress": "El progreso debe ser un número entero entre 0 y {max}.",
+    "invalidStatus": "Elige un estado válido.",
+    "notesTooLong": "Las notas pueden tener como máximo {max} caracteres.",
+    "invalidProgressUnit": "Elige capítulos o páginas.",
+    "progressExceedsEpisodes": "El progreso no puede superar los {total} episodios.",
+    "progressExceedsChapters": "El progreso no puede superar los {total} capítulos.",
+    "progressExceedsPages": "El progreso no puede superar las {total} páginas.",
+    "invalidWorkType": "Elige un tipo de obra válido.",
+    "titleRequired": "Escribe un título.",
+    "invalidCoverUrl": "La URL de la portada debe ser una dirección https:// válida.",
+    "invalidNumber": "El año y los totales deben ser números enteros entre 0 y {max}."
   }
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { SiteHeader } from "@/components/site-header";
+import { StatusLabelsProvider } from "@/components/status-labels";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { createTranslator } from "@/lib/i18n/t";
@@ -29,11 +30,18 @@ export default async function LocaleLayout({ children, params }: Props) {
   if (!isLocale(raw)) notFound();
   const locale = raw as Locale;
   const dict = await getDictionary(locale);
+  const t = createTranslator(dict);
 
   return (
-    <>
+    <StatusLabelsProvider
+      labels={{
+        errorTitle: t("status.errorTitle"),
+        errorBody: t("status.errorBody"),
+        retry: t("status.retry"),
+      }}
+    >
       <SiteHeader locale={locale} dict={dict} />
       {children}
-    </>
+    </StatusLabelsProvider>
   );
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { addToList, updateEntry } from "@/app/actions/entries";
+import { ActionForm } from "@/components/action-form";
 import { SubmitButton } from "@/components/submit-button";
 import type { Locale } from "@/lib/i18n/config";
 import {
@@ -85,7 +86,7 @@ export function EntryForm({
     : episodesTotal;
 
   return (
-    <form
+    <ActionForm
       action={action}
       className={
         compact
@@ -190,6 +191,6 @@ export function EntryForm({
       >
         {entry ? labels.save : labels.addToLibrary}
       </SubmitButton>
-    </form>
+    </ActionForm>
   );
 }

@@ -7,6 +7,8 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
+import type { FormState } from "@/lib/form-error";
+import { formErrorState } from "@/lib/form-error-state";
 import { addListEntry, updateListEntry } from "@/lib/lists/entries";
 import { isLocale, LOCALES, type Locale } from "@/lib/i18n/config";
 import { localePath } from "@/lib/i18n/path";
@@ -51,16 +53,23 @@ function entryInput(formData: FormData) {
   };
 }
 
-export async function addToList(formData: FormData): Promise<never> {
+export async function addToList(
+  _previous: FormState,
+  formData: FormData,
+): Promise<FormState> {
   const userId = await requireUserId();
   const workId = String(formData.get("workId") ?? "");
   if (!workId) {
     throw new Error("work is required");
   }
 
-  await addListEntry(userId, workId, entryInput(formData));
-  revalidateEntryPaths(workId);
   const locale = localeFromForm(formData);
+  try {
+    await addListEntry(userId, workId, entryInput(formData));
+  } catch (error) {
+    return formErrorState(error, locale);
+  }
+  revalidateEntryPaths(workId);
   redirect(
     safeReturnPath(
       formData.get("returnPath"),
@@ -69,16 +78,23 @@ export async function addToList(formData: FormData): Promise<never> {
   );
 }
 
-export async function updateEntry(formData: FormData): Promise<never> {
+export async function updateEntry(
+  _previous: FormState,
+  formData: FormData,
+): Promise<FormState> {
   const userId = await requireUserId();
   const workId = String(formData.get("workId") ?? "");
   if (!workId) {
     throw new Error("work is required");
   }
 
-  await updateListEntry(userId, workId, entryInput(formData));
-  revalidateEntryPaths(workId);
   const locale = localeFromForm(formData);
+  try {
+    await updateListEntry(userId, workId, entryInput(formData));
+  } catch (error) {
+    return formErrorState(error, locale);
+  }
+  revalidateEntryPaths(workId);
   redirect(
     safeReturnPath(
       formData.get("returnPath"),

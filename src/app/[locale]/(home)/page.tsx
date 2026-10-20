@@ -5,6 +5,7 @@ import {
 } from "@/app/actions/works";
 import { CatalogSearch } from "@/components/catalog-search";
 import { WorkCover } from "@/components/work-cover";
+import { ActionForm } from "@/components/action-form";
 import { SubmitButton } from "@/components/submit-button";
 import { searchCatalog } from "@/lib/catalog/search";
 import { isLocale, type Locale } from "@/lib/i18n/config";
@@ -163,10 +164,11 @@ export default async function Home({ params, searchParams }: HomeProps) {
             <summary className="cursor-pointer font-bold text-foreground">
               {t("home.manualTitle")}
             </summary>
-            <form
+            <ActionForm
               className="mt-6 grid gap-4 sm:grid-cols-2"
               action={createManualWorkAction}
             >
+              <input type="hidden" name="locale" value={locale} />
               <label className="grid gap-1.5 text-sm font-semibold">
                 {t("home.fieldTitle")}
                 <input
@@ -212,6 +214,7 @@ export default async function Home({ params, searchParams }: HomeProps) {
                   className="h-11 rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
                   type="url"
                   name="coverUrl"
+                  pattern="https://.*"
                   placeholder="https://…"
                 />
               </label>
@@ -248,7 +251,7 @@ export default async function Home({ params, searchParams }: HomeProps) {
                 className="h-12 rounded-xl bg-primary px-5 font-bold text-primary-foreground hover:opacity-90 sm:col-span-2">
                 {t("home.createTitle")}
               </SubmitButton>
-            </form>
+            </ActionForm>
           </details>
         )}
       </section>
