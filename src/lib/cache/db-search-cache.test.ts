@@ -1,26 +1,18 @@
 import { sql } from "drizzle-orm";
 import { beforeAll, describe, expect, it } from "vitest";
 
+import { migratedTestDb } from "@/test/db";
+
 let cache: ReturnType<typeof import("./db-search-cache").createDbSearchCacheStore>;
 let database: typeof import("@/lib/db").db;
 
 beforeAll(async () => {
-  process.env.DATABASE_URL = "file::memory:";
-
   const [{ createDbSearchCacheStore }, dbModule] = await Promise.all([
     import("./db-search-cache"),
-    import("@/lib/db"),
+    migratedTestDb(),
   ]);
 
   database = dbModule.db;
-  database.run(sql`
-    create table search_cache (
-      key text primary key,
-      payload text not null,
-      expires_at integer not null,
-      created_at integer not null
-    )
-  `);
   cache = createDbSearchCacheStore();
 });
 
