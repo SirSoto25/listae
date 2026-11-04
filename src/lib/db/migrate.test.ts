@@ -7,11 +7,17 @@ import { openDatabase } from "./connection";
 import { runMigrations } from "./migrate";
 
 const MIGRATIONS = path.join(process.cwd(), "drizzle");
+const MIGRATION_COUNT = (
+  JSON.parse(
+    fs.readFileSync(path.join(MIGRATIONS, "meta/_journal.json"), "utf8"),
+  ) as { entries: unknown[] }
+).entries.length;
 
 const APP_TABLES = [
   "accounts",
   "list_entries",
   "profile_themes",
+  "rate_limit_windows",
   "search_cache",
   "sessions",
   "users",
@@ -53,13 +59,13 @@ describe("runMigrations", () => {
     const sqlite = openDatabase(":memory:");
 
     expect(runMigrations(sqlite, MIGRATIONS)).toEqual({
-      applied: 1,
+      applied: MIGRATION_COUNT,
       baselined: false,
     });
     expect(tableNames(sqlite)).toEqual(
       expect.arrayContaining([...APP_TABLES, "__drizzle_migrations"]),
     );
-    expect(journalRows(sqlite)).toBe(1);
+    expect(journalRows(sqlite)).toBe(MIGRATION_COUNT);
     sqlite.close();
   });
 
@@ -71,13 +77,16 @@ describe("runMigrations", () => {
       applied: 0,
       baselined: false,
     });
-    expect(journalRows(sqlite)).toBe(1);
+    expect(journalRows(sqlite)).toBe(MIGRATION_COUNT);
     sqlite.close();
   });
 
   it("defaults to the drizzle folder in the working directory", () => {
     const sqlite = openDatabase(":memory:");
-    expect(runMigrations(sqlite)).toEqual({ applied: 1, baselined: false });
+    expect(runMigrations(sqlite)).toEqual({
+      applied: MIGRATION_COUNT,
+      baselined: false,
+    });
     sqlite.close();
   });
 
@@ -88,21 +97,22 @@ describe("runMigrations", () => {
       .prepare("insert into users (id, email, username) values (?, ?, ?)")
       .run("u1", "ana@example.com", "ana");
 
+    // `0000` is recorded without running; later migrations run normally.
     expect(runMigrations(sqlite, MIGRATIONS)).toEqual({
-      applied: 0,
+      applied: MIGRATION_COUNT - 1,
       baselined: true,
     });
     expect(
       sqlite.prepare("select id, email, username from users").all(),
     ).toEqual([{ id: "u1", email: "ana@example.com", username: "ana" }]);
-    expect(journalRows(sqlite)).toBe(1);
+    expect(journalRows(sqlite)).toBe(MIGRATION_COUNT);
 
     // A later start must neither baseline again nor re-run 0000.
     expect(runMigrations(sqlite, MIGRATIONS)).toEqual({
       applied: 0,
       baselined: false,
     });
-    expect(journalRows(sqlite)).toBe(1);
+    expect(journalRows(sqlite)).toBe(MIGRATION_COUNT);
     sqlite.close();
   });
 
@@ -123,13 +133,13 @@ describe("runMigrations", () => {
 
       const reopened = openDatabase(file);
       expect(runMigrations(reopened, MIGRATIONS)).toEqual({
-        applied: 0,
+        applied: MIGRATION_COUNT - 1,
         baselined: true,
       });
       expect(reopened.prepare("select count(*) as n from users").get()).toEqual(
         { n: 1 },
       );
-      expect(journalRows(reopened)).toBe(1);
+      expect(journalRows(reopened)).toBe(MIGRATION_COUNT);
       reopened.close();
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });

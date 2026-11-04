@@ -58,4 +58,10 @@ marcados como pendientes y no se consideran verificados por los unit tests.
 - ~~Migraciones Drizzle versionadas (antes `db:push`)~~ — hecho el 2026-11-04:
   se aplican al arrancar y las BBDD de `db:push` se adoptan con baseline
   ([ADR 012](../decisions/012-migrations-on-startup.md)).
+- ~~`CHECK` e índices en la BBDD~~ — hecho el 2026-11-04 con la migración
+  `0001`: `CHECK` de puntuación, progreso, estado, unidad, tipo, fuente e
+  idioma; índices de listas, obras, sesiones, caché y tokens;
+  `works.created_by` y tabla `rate_limit_windows` (aún sin uso: T1.2 y la
+  cuota de obras manuales). Limpia filas inválidas en vez de fallar
+  (addendum de [ADR 012](../decisions/012-migrations-on-startup.md)).
 - Checks manuales de navegador listados arriba (pendientes del usuario).
