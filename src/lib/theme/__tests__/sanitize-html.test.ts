@@ -40,13 +40,39 @@ describe("sanitizeThemeHtml", () => {
     );
   });
 
-  it("keeps images with HTTPS sources", () => {
+  it("keeps images with HTTPS sources and never sends the referrer", () => {
     const result = sanitizeThemeHtml(
-      `<img src="https://images.example/cover.jpg" alt="Cover" />`,
+      `<img src="https://images.example/cover.jpg" alt="Cover" referrerpolicy="unsafe-url" />`,
     );
 
     expect(result).toBe(
-      `<img src="https://images.example/cover.jpg" alt="Cover" />`,
+      `<img src="https://images.example/cover.jpg" alt="Cover" referrerpolicy="no-referrer" />`,
+    );
+  });
+
+  it("forces rel on links", () => {
+    expect(
+      sanitizeThemeHtml('<a href="/title/1" rel="opener" target="_top">x</a>'),
+    ).toBe('<a href="/title/1" target="_top" rel="noopener noreferrer">x</a>');
+  });
+
+  it("drops links and images with entity-encoded or protocol-relative urls", () => {
+    const result = sanitizeThemeHtml(
+      '<a href="&#106;avascript:alert(1)">a</a><a href="/\\evil.example">b</a><img src="//evil.example/x.png" />',
+    );
+
+    expect(result).toBe(
+      '<a rel="noopener noreferrer">a</a><a rel="noopener noreferrer">b</a><img referrerpolicy="no-referrer" />',
+    );
+  });
+
+  it("allows Listae data attributes only on the tags that use them", () => {
+    const result = sanitizeThemeHtml(
+      '<section data-status="plan" data-domain="reading" data-type="x"><table><tbody><tr data-type="book" data-index="1" data-status="y"><td>z</td></tr></tbody></table></section><div data-status="plan"></div>',
+    );
+
+    expect(result).toBe(
+      '<section data-status="plan" data-domain="reading"><table><tbody><tr data-type="book" data-index="1"><td>z</td></tr></tbody></table></section><div></div>',
     );
   });
 });

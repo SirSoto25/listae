@@ -1,5 +1,6 @@
 import { renderProfileHtml, type ProfileEntry, type ProfileTranslator } from "./placeholders";
-import { prepareThemeContent } from "./save";
+import { sanitizeThemeHtml } from "./sanitize-html";
+import { validateThemeContent } from "./save";
 import { type ThemeCssError } from "./validate-css";
 
 export type RenderThemeArgs = {
@@ -23,18 +24,19 @@ export function renderTheme({
   entries,
   t,
 }: RenderThemeArgs): RenderThemeResult {
-  const prepared = prepareThemeContent(template, css);
-  if (!prepared.ok) {
-    return prepared;
+  const validated = validateThemeContent(template, css);
+  if (!validated.ok) {
+    return validated;
   }
 
-  const html = renderProfileHtml({
-    template: prepared.template,
-    username,
-    displayName,
-    entries,
-    t,
-  });
+  // Substitute first, sanitize the final document (SEC-M1, ADR 014).
+  // Sanitizing the template alone let `java{{x}}script:` pass as a
+  // relative URL and become `javascript:` once `{{x}}` was empty. Legacy
+  // templates with placeholders in attributes keep rendering: whatever the
+  // substitution builds there is cleaned here.
+  const html = sanitizeThemeHtml(
+    renderProfileHtml({ template, username, displayName, entries, t }),
+  );
 
-  return { ok: true, html, css: prepared.css };
+  return { ok: true, html, css: validated.css };
 }
