@@ -43,3 +43,4 @@ Implicaciones positivas y negativas.
 | 012 | Migraciones al arrancar (instrumentation) + SQLite en WAL | aceptada |
 | 013 | CSP con nonce, dos políticas (app y perfil `/u/*`) | aceptada |
 | 014 | Rate limits en SQLite con IP de confianza (`CLIENT_IP_HEADER`) | aceptada |
+| 015 | Sanitizar el documento final del perfil; placeholders solo en texto | aceptada |

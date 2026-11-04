@@ -29,7 +29,7 @@ export function renderTheme({
     return validated;
   }
 
-  // Substitute first, sanitize the final document (SEC-M1, ADR 014).
+  // Substitute first, sanitize the final document (SEC-M1, ADR 015).
   // Sanitizing the template alone let `java{{x}}script:` pass as a
   // relative URL and become `javascript:` once `{{x}}` was empty. Legacy
   // templates with placeholders in attributes keep rendering: whatever the

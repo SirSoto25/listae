@@ -40,6 +40,18 @@ Generated markup:
 
 Substitution is a single pass over `{{\w+}}`: unknown tokens stay literal, and user-controlled values are never re-scanned for placeholders.
 
+**Placeholders only in text.** Saving a template with `{{` inside a tag (attribute value) fails with `placeholderInAttribute` and the line/column of the first one (`prepareThemeForSave`). Templates saved before that rule keep rendering; the final sanitize neutralizes them (ADR 015).
+
+## Render pipeline (ADR 015)
+
+`renderTheme` (public profile and editor preview), in this order:
+
+1. Template length (`MAX_THEME_HTML_LENGTH`) and `validateThemeCss`.
+2. `renderProfileHtml` on the stored template.
+3. `sanitizeThemeHtml` on the **final** HTML. Never sanitize only the template: `href="java{{x}}script:"` passes as a relative URL and becomes `javascript:` once `{{x}}` is empty.
+
+`sanitizeThemeHtml` keeps the generated hooks (`section[data-status|data-domain]`, `tr[data-type|data-index]`), keeps `a[href]` / `img[src]` only for `https:` or `/…` (not `//`, not `/\`), and forces `rel="noopener noreferrer"` on links and `referrerpolicy="no-referrer"` on images. If you add generated markup, add its attributes to the allowlist and to the bundled-theme test in `src/lib/theme/__tests__/render.test.ts`.
+
 Default template (`DEFAULT_HTML_TEMPLATE`) uses `{{displayName}}`, `{{username}}`, `{{audiovisual_lists}}` and `{{reading_lists}}`, so entries are grouped by domain and then by status, with cover, title, score, type and progress.
 
 ## CSS policy (Listae)
