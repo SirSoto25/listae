@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE, type Locale, isLocale } from "./config";
+import { DEFAULT_LOCALE, type Locale } from "./config";
 
 export function resolveLocaleFromAcceptLanguage(
   header: string | null,
@@ -12,7 +12,3 @@ export function resolveLocaleFromAcceptLanguage(
   return DEFAULT_LOCALE;
 }
 
-export function resolveLocaleFromPathname(pathname: string): Locale | null {
-  const match = /^\/(es|en)(?=\/|$)/.exec(pathname);
-  return match && isLocale(match[1]) ? match[1] : null;
-}

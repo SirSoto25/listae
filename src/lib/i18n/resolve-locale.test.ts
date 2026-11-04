@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  resolveLocaleFromAcceptLanguage,
-  resolveLocaleFromPathname,
-} from "./resolve-locale";
+import { resolveLocaleFromAcceptLanguage } from "./resolve-locale";
 
 describe("resolveLocaleFromAcceptLanguage", () => {
   it("prefers es when listed first", () => {
@@ -16,16 +13,5 @@ describe("resolveLocaleFromAcceptLanguage", () => {
   it("defaults to es when header missing or unsupported", () => {
     expect(resolveLocaleFromAcceptLanguage(null)).toBe("es");
     expect(resolveLocaleFromAcceptLanguage("fr-FR,de;q=0.9")).toBe("es");
-  });
-});
-
-describe("resolveLocaleFromPathname", () => {
-  it("extracts es or en prefix", () => {
-    expect(resolveLocaleFromPathname("/es/library")).toBe("es");
-    expect(resolveLocaleFromPathname("/en")).toBe("en");
-  });
-
-  it("returns null without prefix", () => {
-    expect(resolveLocaleFromPathname("/library")).toBeNull();
   });
 });

@@ -254,7 +254,3 @@ export async function resolveTmdbBilingual(
     synopsis: synopsisEn ?? synopsisEs,
   };
 }
-
-export async function resolveTmdb(externalId: string): Promise<CatalogHit> {
-  return resolveTmdbBilingual(externalId);
-}

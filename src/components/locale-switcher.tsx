@@ -2,7 +2,7 @@
 
 import { usePathname, useSearchParams } from "next/navigation";
 
-import type { Locale } from "@/lib/i18n/config";
+import { LOCALE_NAMES, type Locale } from "@/lib/i18n/config";
 import { switchLocalePath } from "@/lib/i18n/path";
 
 type LocaleSwitcherProps = {
@@ -13,11 +13,6 @@ type LocaleSwitcherProps = {
 const LABELS: Record<Locale, string> = {
   es: "ES",
   en: "EN",
-};
-
-const LANGUAGE_NAMES: Record<Locale, string> = {
-  es: "Español",
-  en: "English",
 };
 
 export function LocaleSwitcher({ locale, groupLabel }: LocaleSwitcherProps) {
@@ -38,7 +33,7 @@ export function LocaleSwitcher({ locale, groupLabel }: LocaleSwitcherProps) {
             aria-current="page"
             className="rounded px-2 py-1 text-accent underline underline-offset-4"
             lang={loc}
-            title={LANGUAGE_NAMES[loc]}
+            title={LOCALE_NAMES[loc]}
           >
             {LABELS[loc]}
           </span>
@@ -46,7 +41,7 @@ export function LocaleSwitcher({ locale, groupLabel }: LocaleSwitcherProps) {
           // Plain <a>: a full load re-renders the root layout's <html lang>.
           <a
             key={loc}
-            aria-label={LANGUAGE_NAMES[loc]}
+            aria-label={LOCALE_NAMES[loc]}
             className="rounded px-2 py-1 text-muted hover:text-accent"
             href={`${switchLocalePath(pathname, loc)}${query ? `?${query}` : ""}`}
             hrefLang={loc}

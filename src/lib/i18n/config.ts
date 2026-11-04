@@ -1,6 +1,11 @@
 export const LOCALES = ["es", "en"] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = "es";
+/** Endonyms for language pickers; shown in each language, never translated. */
+export const LOCALE_NAMES: Record<Locale, string> = {
+  es: "Español",
+  en: "English",
+};
 /** Last locale the visitor browsed in; wins over Accept-Language on redirects. */
 export const LOCALE_COOKIE_NAME = "listae-locale";
 /** Request header the middleware sets so the root layout can render `<html lang>`. */
