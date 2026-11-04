@@ -54,6 +54,8 @@ marcados como pendientes y no se consideran verificados por los unit tests.
 - Migración de SQLite a Postgres.
 - Adaptador Redis para `SearchCacheStore`.
 - Fuente dedicada de anime, por ejemplo AniList.
-- Deduplicación suave de obras manuales; validación de forma de JSON de caché;
-  migraciones Drizzle versionadas (hoy `db:push`).
+- Deduplicación suave de obras manuales; validación de forma de JSON de caché.
+- ~~Migraciones Drizzle versionadas (antes `db:push`)~~ — hecho el 2026-11-04:
+  se aplican al arrancar y las BBDD de `db:push` se adoptan con baseline
+  ([ADR 012](../decisions/012-migrations-on-startup.md)).
 - Checks manuales de navegador listados arriba (pendientes del usuario).

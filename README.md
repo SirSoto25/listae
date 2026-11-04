@@ -20,11 +20,11 @@ the product scope and architecture.
    random value (for example `openssl rand -base64 32`). `DATABASE_URL`
    defaults to the local SQLite database at `data/listae.db`.
 
-3. Create/update the local database:
-
-   ```bash
-   pnpm db:push
-   ```
+3. Database: nothing to run. Migrations in `drizzle/` are applied
+   automatically when the server starts (`pnpm dev` / `pnpm start`), and a
+   database created earlier with `db:push` is adopted without losing data
+   ([ADR 012](docs/decisions/012-migrations-on-startup.md)). After changing
+   `src/lib/db/schema.ts`, run `pnpm db:generate` and commit `drizzle/`.
 
 4. Start the development server:
 
@@ -64,9 +64,9 @@ remains available when an external provider is unavailable or has no match.
 | `pnpm typecheck` | Type-check the project with `tsc --noEmit` |
 | `pnpm test` | Run the Vitest suite once |
 | `pnpm test:watch` | Run Vitest in watch mode |
-| `pnpm db:push` | Push the Drizzle schema to the configured database |
-| `pnpm db:generate` | Generate Drizzle migrations |
-| `pnpm db:migrate` | Apply generated Drizzle migrations |
+| `pnpm db:generate` | Generate a Drizzle migration after changing `schema.ts` (commit `drizzle/`) |
+| `pnpm db:migrate` | Apply pending migrations by hand (the server already does it on startup) |
+| `pnpm db:push` | Push the schema without a migration: only for prototypes with a throwaway database |
 
 ## MVP status
 
