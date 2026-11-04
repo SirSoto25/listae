@@ -1,5 +1,21 @@
+export const THEME_ERROR_CODES = [
+  "htmlTooLarge",
+  "cssTooLarge",
+  "cssEscapeOutsideString",
+  "importNotAllowed",
+  "expressionNotAllowed",
+  "imageSetNotAllowed",
+  "urlNotHttps",
+  "urlMalformed",
+  "invalidDomainColors",
+  "placeholderInAttribute",
+] as const;
+
+export type ThemeErrorCode = (typeof THEME_ERROR_CODES)[number];
+
 export type ThemeCssError = {
-  message: string;
+  code: ThemeErrorCode;
+  params?: Record<string, string | number>;
   line?: number;
   column?: number;
   snippet?: string;
@@ -163,17 +179,18 @@ export function validateThemeCss(css: string): ThemeCssValidationResult {
       ok: false,
       errors: [
         {
-          message: `Custom CSS must be at most ${MAX_THEME_CSS_LENGTH / 1024} KB.`,
+          code: "cssTooLarge",
+          params: { max: MAX_THEME_CSS_LENGTH / 1024 },
         },
       ],
     };
   }
 
   const errors: ThemeCssError[] = [];
-  const report = (message: string, index: number, snippet: string) => {
+  const report = (code: ThemeErrorCode, index: number, snippet: string) => {
     if (errors.length < MAX_REPORTED_ERRORS) {
       errors.push({
-        message,
+        code,
         ...locationAt(css, index),
         snippet: clipSnippet(snippet),
       });
@@ -183,7 +200,7 @@ export function validateThemeCss(css: string): ThemeCssValidationResult {
   const escapeIndex = findEscapeOutsideStrings(css);
   if (escapeIndex !== -1) {
     report(
-      "CSS escapes (\\) are only allowed inside quoted strings.",
+      "cssEscapeOutsideString",
       escapeIndex,
       css.slice(escapeIndex, escapeIndex + 16),
     );
@@ -210,7 +227,7 @@ export function validateThemeCss(css: string): ThemeCssValidationResult {
 
     if (!allowed) {
       report(
-        "Only Google Fonts HTTPS @import URLs are allowed.",
+        "importNotAllowed",
         index,
         snippet,
       );
@@ -220,7 +237,7 @@ export function validateThemeCss(css: string): ThemeCssValidationResult {
   const expressionMatch = /expression\s*\(/i.exec(css);
   if (expressionMatch) {
     report(
-      "CSS expression() is not allowed.",
+      "expressionNotAllowed",
       expressionMatch.index,
       expressionMatch[0],
     );
@@ -229,7 +246,7 @@ export function validateThemeCss(css: string): ThemeCssValidationResult {
   const imageSetMatch = /\b(?:image-set|src)\s*\(/i.exec(css);
   if (imageSetMatch) {
     report(
-      "Load images with url() only; image-set() and src() are not allowed.",
+      "imageSetNotAllowed",
       imageSetMatch.index,
       imageSetMatch[0],
     );
@@ -244,7 +261,7 @@ export function validateThemeCss(css: string): ThemeCssValidationResult {
     const url = (match[1] ?? match[2] ?? match[3] ?? "").trim();
     if (!isWellFormedHttpsUrl(url)) {
       report(
-        "CSS url() values must be well-formed HTTPS URLs.",
+        "urlNotHttps",
         match.index,
         match[0],
       );
@@ -252,7 +269,7 @@ export function validateThemeCss(css: string): ThemeCssValidationResult {
   }
   for (const match of css.matchAll(/url\s*\(/gi)) {
     if (!wellFormedUrlStarts.has(match.index)) {
-      report("Malformed or unterminated url().", match.index, match[0]);
+      report("urlMalformed", match.index, match[0]);
     }
   }
 

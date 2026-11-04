@@ -1,6 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { buildThemeDocument } from "../save";
+import { buildThemeDocument, prepareThemeContent } from "../save";
+
+describe("prepareThemeContent", () => {
+  it("reports oversized html with a code and max param", () => {
+    const result = prepareThemeContent("a".repeat(64 * 1024 + 1), "");
+
+    expect(result).toEqual({
+      ok: false,
+      errors: [{ code: "htmlTooLarge", params: { max: 64 } }],
+    });
+  });
+});
 
 describe("buildThemeDocument", () => {
   it("sends link clicks to the top tab and sets the profile language", () => {

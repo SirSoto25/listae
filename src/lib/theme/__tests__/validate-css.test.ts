@@ -33,7 +33,25 @@ describe("validateThemeCss", () => {
     if (!result.ok) {
       expect(result.errors[0].snippet).toBe(importSnippet);
       expect(result.errors[0].line).toBe(1);
+      expect(result.errors[0].column).toBe(1);
+      expect(result.errors[0].code).toBe("importNotAllowed");
     }
+  });
+
+  it("reports oversized css with a code and max param", () => {
+    const result = validateThemeCss("a".repeat(64 * 1024 + 1));
+
+    expect(result).toEqual({
+      ok: false,
+      errors: [{ code: "cssTooLarge", params: { max: 64 } }],
+    });
+  });
+
+  it("reports expression() with its code", () => {
+    const result = validateThemeCss(`body { width: expression(alert(1)); }`);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.errors[0].code).toBe("expressionNotAllowed");
   });
 
   it("rejects a non-Google @import after an allowed import", () => {
