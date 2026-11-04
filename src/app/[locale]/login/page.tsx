@@ -52,7 +52,7 @@ export default async function LoginPage({
   }
 
   return (
-    <main className="flex flex-1 items-center justify-center bg-transparent px-6 py-16">
+    <div className="flex flex-1 items-center justify-center bg-transparent px-6 py-16">
       <section className="w-full max-w-md rounded-[length:var(--radius-panel)] border border-border bg-surface p-8">
         <h1 className="text-2xl font-black tracking-tight text-foreground">
           {t("auth.loginTitle")}
@@ -131,6 +131,6 @@ export default async function LoginPage({
           </p>
         ) : null}
       </section>
-    </main>
+    </div>
   );
 }

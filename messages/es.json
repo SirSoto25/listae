@@ -1,5 +1,8 @@
 {
   "nav": {
+    "skip": "Saltar al contenido",
+    "mainAria": "Navegación principal",
+    "languageGroup": "Idioma",
     "search": "Buscar",
     "library": "Biblioteca",
     "profile": "Perfil",

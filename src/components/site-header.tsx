@@ -41,7 +41,10 @@ export async function SiteHeader({ locale, dict }: SiteHeaderProps) {
 
   return (
     <header className="border-b border-border bg-surface/80 px-6 backdrop-blur">
-      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between">
+      <nav
+        aria-label={t("nav.mainAria")}
+        className="mx-auto flex min-h-16 max-w-6xl flex-wrap items-center justify-between gap-x-5 gap-y-2 py-3"
+      >
         <LocaleLink
           className="text-xl font-black tracking-[-0.05em] text-foreground"
           href="/"
@@ -49,7 +52,7 @@ export async function SiteHeader({ locale, dict }: SiteHeaderProps) {
         >
           listae<span className="text-accent">.</span>
         </LocaleLink>
-        <div className="flex items-center gap-5 text-sm font-semibold text-muted">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold text-muted">
           <LocaleLink className="hover:text-accent" href="/" locale={locale}>
             {t("nav.search")}
           </LocaleLink>
@@ -81,8 +84,8 @@ export async function SiteHeader({ locale, dict }: SiteHeaderProps) {
               )}
             </>
           ) : null}
-          <div className="flex items-center gap-4 border-l border-border pl-4">
-            <LocaleSwitcher locale={locale} />
+          <div className="flex flex-wrap items-center gap-4 border-l border-border pl-4">
+            <LocaleSwitcher groupLabel={t("nav.languageGroup")} locale={locale} />
             <ThemeToggle
               initialPreference={themePreference}
               labels={{

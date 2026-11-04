@@ -121,7 +121,7 @@ export default async function LibraryPage({
   const typeLabels = workTypeLabels(t);
 
   return (
-    <main className="flex-1 bg-transparent px-6 py-10 text-foreground">
+    <div className="flex-1 bg-transparent px-6 py-10 text-foreground">
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col gap-6 border-b border-border pb-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -241,6 +241,6 @@ export default async function LibraryPage({
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }

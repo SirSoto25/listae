@@ -7,7 +7,7 @@ export default async function LocaleLoading() {
   const t = createTranslator(await getDictionary(await requestLocale()));
 
   return (
-    <main className="flex flex-1 items-center justify-center bg-transparent px-6 py-16">
+    <div className="flex flex-1 items-center justify-center bg-transparent px-6 py-16">
       <div
         aria-live="polite"
         className="flex items-center gap-3 text-sm font-bold text-muted"
@@ -19,6 +19,6 @@ export default async function LocaleLoading() {
         />
         {t("status.loading")}
       </div>
-    </main>
+    </div>
   );
 }

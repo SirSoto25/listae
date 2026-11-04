@@ -74,7 +74,7 @@ export default async function TitlePage({
   const { saved } = await searchParams;
 
   return (
-    <main className="flex-1 bg-transparent px-6 py-10 text-foreground">
+    <div className="flex-1 bg-transparent px-6 py-10 text-foreground">
       <div className="mx-auto max-w-5xl">
         <LocaleLink
           className="text-sm font-bold text-muted hover:text-accent"
@@ -175,6 +175,6 @@ export default async function TitlePage({
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
