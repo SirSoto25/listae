@@ -19,7 +19,7 @@ import {
 import type { ProfileEntry } from "@/lib/theme/placeholders";
 import { renderTheme } from "@/lib/theme/render";
 import { buildThemeDocument } from "@/lib/theme/save";
-import type { ThemeCssError } from "@/lib/theme/validate-css";
+import type { ThemeCssError, ThemeErrorCode } from "@/lib/theme/validate-css";
 import type { Locale } from "@/lib/i18n/config";
 import { syncTranslator } from "@/lib/i18n/sync-dictionary";
 
@@ -35,7 +35,7 @@ export type ThemeEditorLabels = {
   errorColumn: string;
   /** Location prefix for errors that carry no line number. */
   errorGeneric: string;
-  invalidDomainColors: string;
+  errorMessages: Record<ThemeErrorCode, string>;
   themeSaved: string;
   saveTheme: string;
   saving: string;
@@ -67,6 +67,15 @@ const HTML_ESCAPES: Record<string, string> = {
 
 function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (char) => HTML_ESCAPES[char] ?? char);
+}
+
+function interpolate(
+  template: string,
+  params?: Record<string, string | number>,
+): string {
+  return template.replace(/\{(\w+)\}/g, (_, name: string) =>
+    String(params?.[name] ?? `{${name}}`),
+  );
 }
 
 function formatErrorLocation(
@@ -148,7 +157,7 @@ export function ThemeEditor({
     } catch {
       setResult({
         ok: false,
-        errors: [{ message: labels.invalidDomainColors }],
+        errors: [{ code: "invalidDomainColors" }],
       });
     }
   }
@@ -230,7 +239,7 @@ export function ThemeEditor({
               {errors.map((error, index) => (
                 <li key={`${error.line}-${error.column}-${index}`}>
                   <p>
-                    {formatErrorLocation(error, labels)}: {error.message}
+                    {formatErrorLocation(error, labels)}: {interpolate(labels.errorMessages[error.code], error.params)}
                   </p>
                   {error.snippet && (
                     <code className="mt-1 block overflow-x-auto rounded border border-border bg-surface px-2 py-1 font-mono text-xs text-muted">

@@ -37,7 +37,8 @@ export function prepareThemeContent(
       ok: false,
       errors: [
         {
-          message: `HTML template must be at most ${MAX_THEME_HTML_LENGTH / 1024} KB.`,
+          code: "htmlTooLarge",
+          params: { max: MAX_THEME_HTML_LENGTH / 1024 },
         },
       ],
     };

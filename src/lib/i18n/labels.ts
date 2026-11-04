@@ -1,5 +1,10 @@
 import type { ExternalSource, WorkType } from "@/types/domain";
 
+import {
+  THEME_ERROR_CODES,
+  type ThemeErrorCode,
+} from "@/lib/theme/validate-css";
+
 import type { createTranslator } from "./t";
 
 type T = ReturnType<typeof createTranslator>;
@@ -118,7 +123,9 @@ export function themeEditorLabels(t: T) {
     errorLine: t("customize.errorLine"),
     errorColumn: t("customize.errorColumn"),
     errorGeneric: t("customize.errorGeneric"),
-    invalidDomainColors: t("customize.invalidDomainColors"),
+    errorMessages: Object.fromEntries(
+      THEME_ERROR_CODES.map((code) => [code, t(`customize.errors.${code}`)]),
+    ) as Record<ThemeErrorCode, string>,
     themeSaved: t("customize.themeSaved"),
     saveTheme: t("customize.saveTheme"),
     saving: t("customize.saving"),
