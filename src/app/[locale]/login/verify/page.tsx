@@ -3,11 +3,19 @@ import { notFound } from "next/navigation";
 import { LocaleLink } from "@/components/locale-link";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { pageMetadata } from "@/lib/i18n/page-metadata";
 import { createTranslator } from "@/lib/i18n/t";
 
 type LoginVerifyPageProps = {
   params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: Pick<LoginVerifyPageProps, "params">) {
+  const { locale } = await params;
+  return pageMetadata(locale, "verify");
+}
 
 export default async function LoginVerifyPage({
   params,

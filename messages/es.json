@@ -200,7 +200,14 @@
   "meta": {
     "title": "Listae — Sigue lo que ves y lees",
     "description": "Una biblioteca personal de películas, series, anime, libros, manga y cómics.",
-    "profileDescription": "La biblioteca personal de {name} en Listae: películas, series, anime, libros, manga y cómics."
+    "profileDescription": "La biblioteca personal de {name} en Listae: películas, series, anime, libros, manga y cómics.",
+    "pages": {
+      "login": "Iniciar sesión",
+      "verify": "Enlace enviado",
+      "onboarding": "Elige tu nombre de usuario",
+      "library": "Biblioteca",
+      "customize": "Personalizar perfil"
+    }
   },
   "status": {
     "notFoundTitle": "Página no encontrada",

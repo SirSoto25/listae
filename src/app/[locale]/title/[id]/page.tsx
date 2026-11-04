@@ -18,6 +18,7 @@ import {
 import { localePath } from "@/lib/i18n/path";
 import { createTranslator } from "@/lib/i18n/t";
 import { workSynopsis, workTitle } from "@/lib/i18n/work-text";
+import { isUuid } from "@/lib/ids";
 import { getEntry } from "@/lib/lists/entries";
 
 type TitlePageProps = {
@@ -25,12 +26,25 @@ type TitlePageProps = {
   searchParams: Promise<{ saved?: string }>;
 };
 
+export async function generateMetadata({
+  params,
+}: Pick<TitlePageProps, "params">) {
+  const { locale: raw, id } = await params;
+  if (!isLocale(raw) || !isUuid(id)) return {};
+  const work = await db.query.works.findFirst({
+    where: eq(works.id, id),
+  });
+  if (!work) return {};
+  return { title: workTitle(work, raw) };
+}
+
 export default async function TitlePage({
   params,
   searchParams,
 }: TitlePageProps) {
   const { locale: raw, id } = await params;
   if (!isLocale(raw)) notFound();
+  if (!isUuid(id)) notFound();
   const locale = raw as Locale;
   const dict = await getDictionary(locale);
   const t = createTranslator(dict);

@@ -11,12 +11,20 @@ import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { usernameFieldLabels } from "@/lib/i18n/labels";
 import { localePath } from "@/lib/i18n/path";
+import { pageMetadata } from "@/lib/i18n/page-metadata";
 import { createTranslator } from "@/lib/i18n/t";
 
 type OnboardingPageProps = {
   params: Promise<{ locale: string }>;
   searchParams: Promise<{ error?: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: Pick<OnboardingPageProps, "params">) {
+  const { locale } = await params;
+  return pageMetadata(locale, "onboarding");
+}
 
 export default async function OnboardingPage({
   params,

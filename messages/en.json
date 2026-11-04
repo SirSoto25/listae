@@ -200,7 +200,14 @@
   "meta": {
     "title": "Listae — Track what you watch and read",
     "description": "A personal library for films, series, anime, books, manga, and comics.",
-    "profileDescription": "{name}'s personal library on Listae: films, series, anime, books, manga, and comics."
+    "profileDescription": "{name}'s personal library on Listae: films, series, anime, books, manga, and comics.",
+    "pages": {
+      "login": "Sign in",
+      "verify": "Link sent",
+      "onboarding": "Choose your username",
+      "library": "Library",
+      "customize": "Customize profile"
+    }
   },
   "status": {
     "notFoundTitle": "Page not found",

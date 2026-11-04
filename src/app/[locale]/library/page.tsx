@@ -19,6 +19,7 @@ import {
   workTypeLabels,
 } from "@/lib/i18n/labels";
 import { localePath } from "@/lib/i18n/path";
+import { pageMetadata } from "@/lib/i18n/page-metadata";
 import { createTranslator } from "@/lib/i18n/t";
 import { workTitle } from "@/lib/i18n/work-text";
 import { listLibraryEntries } from "@/lib/lists/entries";
@@ -42,6 +43,13 @@ type LibraryPageProps = {
     saved?: string;
   }>;
 };
+
+export async function generateMetadata({
+  params,
+}: Pick<LibraryPageProps, "params">) {
+  const { locale } = await params;
+  return pageMetadata(locale, "library");
+}
 
 function parseType(
   value: string | undefined,
