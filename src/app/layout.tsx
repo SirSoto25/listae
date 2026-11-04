@@ -8,6 +8,7 @@ import {
   LOCALE_HEADER_NAME,
   isLocale,
 } from "@/lib/i18n/config";
+import { NONCE_HEADER_NAME } from "@/lib/security/csp";
 import {
   THEME_COOKIE_NAME,
   parseThemePreference,
@@ -54,6 +55,8 @@ export default async function RootLayout({
     headerStore.get(LOCALE_HEADER_NAME) ??
     cookieStore.get(LOCALE_COOKIE_NAME)?.value;
   const lang = isLocale(localeHint) ? localeHint : DEFAULT_LOCALE;
+  // Set by the proxy with the per-request CSP (ADR 013).
+  const nonce = headerStore.get(NONCE_HEADER_NAME) ?? undefined;
 
   return (
     <html
@@ -64,6 +67,7 @@ export default async function RootLayout({
       <head>
         {preference === "system" ? (
           <script
+            nonce={nonce}
             dangerouslySetInnerHTML={{
               __html: `(()=>{try{var d=window.matchMedia("(prefers-color-scheme: dark)").matches;document.documentElement.classList.toggle("dark",d);document.documentElement.style.colorScheme=d?"dark":"light";}catch(e){}})();`,
             }}
