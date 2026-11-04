@@ -50,3 +50,6 @@ next-env.d.ts
 
 # graphify code graph (local AST)
 graphify-out/
+
+# agent working directory (SDD artifacts, not versioned)
+.superpowers/
