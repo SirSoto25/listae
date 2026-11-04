@@ -1,5 +1,7 @@
 # Listae MVP Implementation Plan
 
+> Rutas anteriores a `[locale]` (ADR 011).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Ship a local-first Next.js app where users magic-link in, search/add media (API + manual), track progress with MAL-like statuses and 1–10 scores, and publish a public `/u/[username]` page styled with a free HTML template + CSS (Google Fonts `@import` only).

@@ -1,5 +1,7 @@
 # Security remediation (2026-07-29)
 
+> Referencias `archivo:línea` a fecha 2026-07-29; pueden no coincidir con el código actual.
+
 Branch: `fix/security-remediation`
 
 ## Fixed in this branch

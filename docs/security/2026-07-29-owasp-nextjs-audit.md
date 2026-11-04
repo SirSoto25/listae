@@ -1,5 +1,7 @@
 # Security Audit Report — Listae (OWASP Top 10 / Next.js)
 
+> Referencias `archivo:línea` a fecha 2026-07-29; pueden no coincidir con el código actual.
+
 **Project:** Listae  
 **Stack:** Next.js 16.2.10 App Router, Auth.js (next-auth 5.0.0-beta.31) magic link, Drizzle ORM + SQLite (better-sqlite3), sanitize-html, i18n middleware, custom profile themes (ADR 005)  
 **Date:** 2026-07-29  

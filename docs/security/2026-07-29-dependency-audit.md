@@ -1,5 +1,7 @@
 # Dependency & Stack Security Audit
 
+> Referencias `archivo:línea` a fecha 2026-07-29; pueden no coincidir con el código actual.
+
 ## Project: listae
 ## Stack: Node.js (pnpm), Next.js 16.2.10, React 19, Auth.js (next-auth 5 beta), Drizzle + better-sqlite3
 ## Date: 2026-07-29

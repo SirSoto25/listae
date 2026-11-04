@@ -1,5 +1,7 @@
 # Listae — Library domains, profile section styling, display name
 
+> Rutas anteriores a `[locale]` (ADR 011).
+
 **Date:** 2026-07-22  
 **Repo:** https://github.com/SirSoto25/listae  
 **Status:** Approved (2026-07-22) — proceed to implementation plan  

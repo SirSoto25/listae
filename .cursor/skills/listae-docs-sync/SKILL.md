@@ -19,7 +19,7 @@ Extends global template skill `living-project-docs`.
 
 ## Mandatory updates
 
-- New decision → new ADR + index row (next number after 007+)
+- New decision → new ADR + index row (siguiente número libre del índice de `docs/decisions/README.md`)
 - Scope/status change → update `docs/context/2026-07-21-producto-y-alcance.md` or add dated note
 - Agents/skills tooling changes → update or add under `docs/context/`
 - Do not finish a milestone that changed decisions without docs + commit to GitHub when the user wants progress pushed

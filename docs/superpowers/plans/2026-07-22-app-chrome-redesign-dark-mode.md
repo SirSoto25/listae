@@ -1,5 +1,7 @@
 # App Chrome Redesign + Dark Mode Implementation Plan
 
+> Rutas anteriores a `[locale]` (ADR 011).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Ship Listae’s cool indigo app-chrome identity (tokens-first) and light/dark/system theming via cookie, without touching public profile HTML/CSS.

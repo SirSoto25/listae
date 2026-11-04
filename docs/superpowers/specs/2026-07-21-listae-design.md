@@ -1,5 +1,7 @@
 # Listae — Design Spec
 
+> Rutas anteriores a `[locale]` (ADR 011).
+
 **Date:** 2026-07-21  
 **Repo:** https://github.com/SirSoto25/listae.git  
 **Status:** Approved (2026-07-21) — proceed to implementation plan

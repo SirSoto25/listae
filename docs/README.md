@@ -8,6 +8,9 @@ Convención del repo: **ir dejando rastro en Markdown** a medida que avanzamos.
 | `superpowers/plans/` | Planes de implementación paso a paso |
 | `decisions/` | Decisiones concretas (ADR): stack, auth, caché, etc. |
 | `context/` | Contexto vivo del producto, alcance, glosario, pendientes |
+| `security/` | Informes de auditoría de seguridad (2026-07-29) y su remediación |
+| `themes/` | Referencias de temas de perfil (HTML/CSS) |
+| `audits/` | Auditorías completas del proyecto (p. ej. `2026-11-04-auditoria-completa.md`) |
 
 ## Cómo usarlo
 
