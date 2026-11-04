@@ -60,7 +60,7 @@ export function CatalogSearch({
           ⌕
         </span>
         <input
-          className="h-14 w-full rounded-2xl border border-border bg-surface pl-12 pr-4 text-base text-foreground shadow-sm outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
+          className="h-14 w-full rounded-2xl border border-border-control bg-surface pl-12 pr-4 text-base text-foreground shadow-sm outline-none transition focus:border-accent"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={labels.searchPlaceholder}
@@ -70,7 +70,7 @@ export function CatalogSearch({
       <label>
         <span className="sr-only">{labels.mediaTypeAria}</span>
         <select
-          className="h-14 w-full rounded-2xl border border-border bg-surface px-4 font-medium text-foreground shadow-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
+          className="h-14 w-full rounded-2xl border border-border-control bg-surface px-4 font-medium text-foreground shadow-sm outline-none focus:border-accent"
           value={type}
           onChange={(event) =>
             setType(event.target.value as WorkType | "all")

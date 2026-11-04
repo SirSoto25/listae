@@ -106,7 +106,7 @@ export function EntryForm({
       <label className="block text-sm font-semibold text-muted">
         {labels.status}
         <select
-          className="mt-1.5 h-11 w-full rounded-xl border border-border bg-surface px-3 font-normal text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
+          className="mt-1.5 h-11 w-full rounded-xl border border-border-control bg-surface px-3 font-normal text-foreground outline-none focus:border-accent"
           name="status"
           defaultValue={entry?.status ?? "plan"}
         >
@@ -121,7 +121,7 @@ export function EntryForm({
       <label className="block text-sm font-semibold text-muted">
         {labels.score}
         <input
-          className="mt-1.5 h-11 w-full rounded-xl border border-border bg-surface px-3 font-normal text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
+          className="mt-1.5 h-11 w-full rounded-xl border border-border-control bg-surface px-3 font-normal text-foreground outline-none focus:border-accent"
           type="number"
           name="score"
           min={1}
@@ -137,7 +137,7 @@ export function EntryForm({
           <label className="block text-sm font-semibold text-muted">
             {labels.progress}
             <input
-              className="mt-1.5 h-11 w-full rounded-xl border border-border bg-surface px-3 font-normal text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
+              className="mt-1.5 h-11 w-full rounded-xl border border-border-control bg-surface px-3 font-normal text-foreground outline-none focus:border-accent"
               type="number"
               name="progressValue"
               min={0}
@@ -150,7 +150,7 @@ export function EntryForm({
             <label className="block text-sm font-semibold text-muted">
               {labels.unit}
               <select
-                className="mt-1.5 h-11 w-full rounded-xl border border-border bg-surface px-2 font-normal text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
+                className="mt-1.5 h-11 w-full rounded-xl border border-border-control bg-surface px-2 font-normal text-foreground outline-none focus:border-accent"
                 name="progressUnit"
                 value={progressUnit}
                 onChange={(event) =>
@@ -175,7 +175,7 @@ export function EntryForm({
         <label className="block text-sm font-semibold text-muted">
           {labels.notes}
           <textarea
-            className="mt-1.5 min-h-24 w-full resize-y rounded-xl border border-border bg-surface px-3 py-2 font-normal text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
+            className="mt-1.5 min-h-24 w-full resize-y rounded-xl border border-border-control bg-surface px-3 py-2 font-normal text-foreground outline-none focus:border-accent"
             name="notes"
             maxLength={500}
             defaultValue={entry?.notes ?? ""}
