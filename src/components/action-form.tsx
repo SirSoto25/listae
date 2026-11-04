@@ -31,7 +31,7 @@ export function ActionForm({ action, children, ...props }: ActionFormProps) {
       {/* Stays mounted (visually hidden while empty) so screen readers
           announce the error when it appears. */}
       <p
-        className="col-span-full text-sm font-semibold text-red-600 empty:sr-only dark:text-red-400"
+        className="col-span-full text-sm font-semibold text-danger empty:sr-only"
         role="alert"
       >
         {state.error}

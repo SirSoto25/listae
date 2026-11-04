@@ -110,7 +110,7 @@ export default async function LoginPage({
           <label className="block text-sm font-bold text-foreground">
             {t("auth.emailLabel")}
             <input
-              className="mt-2 block w-full rounded-[length:var(--radius-control)] border border-border bg-surface px-3 py-2 text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
+              className="mt-2 block w-full rounded-[length:var(--radius-control)] border border-border-control bg-surface px-3 py-2 text-foreground outline-none focus:border-accent"
               type="email"
               name="email"
               autoComplete="email"

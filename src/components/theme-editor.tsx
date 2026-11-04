@@ -184,7 +184,7 @@ export function ThemeEditor({
             {labels.htmlTemplateHelp}
           </span>
           <textarea
-            className="mt-3 min-h-72 w-full rounded-[length:var(--radius-panel)] border border-border bg-primary p-4 font-mono text-sm leading-6 text-primary-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
+            className="mt-3 min-h-72 w-full rounded-[length:var(--radius-panel)] border border-border-control bg-primary p-4 font-mono text-sm leading-6 text-primary-foreground outline-none focus:border-accent"
             name="htmlTemplate"
             value={htmlTemplate}
             onChange={(event) => setHtmlTemplate(event.target.value)}
@@ -207,7 +207,7 @@ export function ThemeEditor({
             {labels.customCssHelp}
           </span>
           <textarea
-            className="mt-3 min-h-96 w-full rounded-[length:var(--radius-panel)] border border-border bg-primary p-4 font-mono text-sm leading-6 text-primary-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
+            className="mt-3 min-h-96 w-full rounded-[length:var(--radius-panel)] border border-border-control bg-primary p-4 font-mono text-sm leading-6 text-primary-foreground outline-none focus:border-accent"
             name="customCss"
             value={customCss}
             onChange={(event) => {
@@ -245,7 +245,7 @@ export function ThemeEditor({
 
         {result?.ok && (
           <p
-            className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800"
+            className="rounded-2xl bg-success-bg px-4 py-3 text-sm font-bold text-success-fg"
             role="status"
           >
             {labels.themeSaved}

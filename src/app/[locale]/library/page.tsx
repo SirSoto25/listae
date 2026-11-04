@@ -175,7 +175,7 @@ export default async function LibraryPage({
         </div>
 
         {sp.saved === "1" && (
-          <p className="mt-5 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
+          <p role="status" className="mt-5 rounded-xl bg-success-bg px-4 py-3 text-sm font-semibold text-success-fg">
             {t("library.entryUpdated")}
           </p>
         )}

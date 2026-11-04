@@ -58,7 +58,7 @@ function ColorField({
           type="color"
           value={color}
           onChange={(event) => onChange(event.target.value)}
-          className="h-9 w-12 cursor-pointer rounded border border-border bg-surface p-0.5"
+          className="h-9 w-12 cursor-pointer rounded border border-border-control bg-surface p-0.5"
           aria-label={label}
         />
         <input
@@ -66,7 +66,7 @@ function ColorField({
           value={color}
           onChange={(event) => onChange(event.target.value)}
           spellCheck={false}
-          className="w-full rounded-lg border border-border bg-primary px-2.5 py-1.5 font-mono text-xs text-primary-foreground outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+          className="w-full rounded-lg border border-border-control bg-primary px-2.5 py-1.5 font-mono text-xs text-primary-foreground outline-none focus:border-accent"
           pattern="#[0-9A-Fa-f]{6}"
           maxLength={7}
           aria-label={hexAriaLabel}
