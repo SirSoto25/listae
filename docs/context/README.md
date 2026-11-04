@@ -19,4 +19,7 @@ Notas vivas: alcance, glosario, estado del proyecto, resúmenes de sesión.
 | [2026-07-22-app-chrome-redesign.md](./2026-07-22-app-chrome-redesign.md) | Redesign chrome + dark mode: spec/plan, mapa de código, progreso SDD |
 | [2026-07-22-library-domains.md](./2026-07-22-library-domains.md) | Split AV/lectura, picker CSS de dominio, displayName=username |
 | [2026-07-22-agent-preferences.md](./2026-07-22-agent-preferences.md) | Preferencia fija: implementar siempre vía subagentes (SDD) |
+| [2026-07-27-i18n.md](./2026-07-27-i18n.md) | URL locales es/en e i18n casero: estado y decisiones |
+| [2026-07-29-security-audit-toolkit.md](./2026-07-29-security-audit-toolkit.md) | Toolkit de auditoría de seguridad: skills, reglas y setup |
 | [2026-10-20-hardening.md](./2026-10-20-hardening.md) | Build roto en main, CI, fixes de seguridad/DoS e i18n; pendientes abiertos |
+| `docs/audits/2026-11-04-auditoria-completa.md` (fuera de `context/`, sin enlazar) | Auditoría completa de 2026-11-04 y origen del plan de remediación |

@@ -1,5 +1,7 @@
 # Library Domains + Profile Section Styling + DisplayName Implementation Plan
 
+> Rutas anteriores a `[locale]` (ADR 011).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Split the personal library into audiovisual / reading / all tabs, add profile placeholders and a domain CSS-variable picker, and sync `displayName` to the chosen username with no email-derived UI.

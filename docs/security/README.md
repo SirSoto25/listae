@@ -1,5 +1,7 @@
 # Security audit reports (Listae)
 
+> Referencias `archivo:línea` a fecha 2026-07-29; pueden no coincidir con el código actual.
+
 **Date:** 2026-07-29  
 **Remediation branch:** `fix/security-remediation`
 

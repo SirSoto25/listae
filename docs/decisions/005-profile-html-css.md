@@ -24,3 +24,7 @@ Se quiere personalizar la página de listas al estilo CSS custom de MAL, pero m�
 
 - Módulo de sanitizado/validación con tests dedicados.
 - UX del editor debe mostrar diagnósticos precisos, no un “CSS inválido” genérico.
+
+## Enmiendas
+
+- **ADR 010 (library domains):** la plantilla gana tokens por dominio: `{{audiovisual_lists}}`, `{{reading_lists}}` y los 10 granulares `{{<audiovisual|reading>_<status>}}`. El CSS por defecto añade `.listae-domain--audiovisual` / `.listae-domain--reading` con variables `--listae-domain-*`. Las reglas de sanitizado y de `@import` no cambian.
