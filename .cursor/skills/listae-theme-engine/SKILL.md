@@ -18,20 +18,29 @@ Extends global template skill `user-profile-theme-engine`. Spec: `docs/superpowe
 
 ## Placeholders (v1)
 
-| Token | Meaning |
-|-------|---------|
-| `{{username}}` | Public username |
-| `{{displayName}}` | Display name |
-| `{{lists}}` | Rendered lists block (or iterate entries in template) |
-| `{{entry.title}}` | Work title |
-| `{{entry.type}}` | anime/series/movie/book/manga/comic |
-| `{{entry.status}}` | plan/in_progress/completed/on_hold/dropped |
-| `{{entry.score}}` | 1–10 or empty |
-| `{{entry.progress}}` | Formatted progress |
-| `{{entry.cover}}` | Cover image URL |
-| `{{entry.url}}` | Link to `/title/[id]` |
+Source of truth: `src/lib/theme/placeholders.ts` (`renderProfileHtml`) and `src/lib/theme/defaults.ts` (`DEFAULT_HTML_TEMPLATE`, `DEFAULT_CSS`). There are **no** per-entry placeholders (titles, scores, covers, URLs): entries are only rendered through the block placeholders below.
 
-Default template MUST group entries by status and include cover + title + score + progress.
+| Token | Replaced with |
+|-------|---------------|
+| `{{username}}` | Public username (HTML-escaped) |
+| `{{displayName}}` | Display name (HTML-escaped) |
+| `{{lists}}` | All domains: one `section.listae-status` per non-empty status, in `LIST_STATUSES` order |
+| `{{audiovisual_lists}}` | `section.listae-domain.listae-domain--audiovisual[data-domain]` with its non-empty status sections, or empty |
+| `{{reading_lists}}` | `section.listae-domain.listae-domain--reading[data-domain]` with its non-empty status sections, or empty |
+| `{{<audiovisual\|reading>_<plan\|in_progress\|completed\|on_hold\|dropped>}}` | One `section.listae-status[data-status]` for that domain and status (10 granular tokens), or empty |
+
+Statuses: `plan`, `in_progress`, `completed`, `on_hold`, `dropped`. Status headings are localized via `profile.status.*`.
+
+Generated markup:
+
+- Status block: `section.listae-status[data-status]` > `h2.listae-status-title` + `table.listae-status-table`.
+- Table head: `th.listae-col-index`, `th.listae-col-cover`, `th.listae-col-title`, `th.listae-col-score`, `th.listae-col-type`, `th.listae-col-progress`.
+- Row: `tr.listae-entry[data-type][data-index]` with the matching `td.listae-col-*` cells. Cover is an `img.listae-entry-cover` only for `https:` URLs; title links are `a.listae-entry-title` only for `/…` or `https:` URLs.
+- Domain CSS hooks: `--listae-domain-bg`, `--listae-domain-accent`, `--listae-domain-fg` (defined in `DEFAULT_CSS`, between `listae:domain-vars` markers).
+
+Substitution is a single pass over `{{\w+}}`: unknown tokens stay literal, and user-controlled values are never re-scanned for placeholders.
+
+Default template (`DEFAULT_HTML_TEMPLATE`) uses `{{displayName}}`, `{{username}}`, `{{audiovisual_lists}}` and `{{reading_lists}}`, so entries are grouped by domain and then by status, with cover, title, score, type and progress.
 
 ## CSS policy (Listae)
 
