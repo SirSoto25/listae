@@ -10,6 +10,7 @@ import { users } from "@/lib/db/schema";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { localePath } from "@/lib/i18n/path";
+import { pageMetadata } from "@/lib/i18n/page-metadata";
 import { createTranslator } from "@/lib/i18n/t";
 import {
   checkRateLimit,
@@ -20,6 +21,13 @@ type LoginPageProps = {
   params: Promise<{ locale: string }>;
   searchParams: Promise<{ error?: string | string[] }>;
 };
+
+export async function generateMetadata({
+  params,
+}: Pick<LoginPageProps, "params">) {
+  const { locale } = await params;
+  return pageMetadata(locale, "login");
+}
 
 export default async function LoginPage({
   params,

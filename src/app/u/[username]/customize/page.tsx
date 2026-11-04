@@ -18,6 +18,7 @@ import {
 } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { themeEditorLabels } from "@/lib/i18n/labels";
+import { pageMetadata } from "@/lib/i18n/page-metadata";
 import { createTranslator } from "@/lib/i18n/t";
 import { listLibraryEntries, rowsToProfileEntries } from "@/lib/lists/entries";
 import { DEFAULT_CSS, DEFAULT_HTML_TEMPLATE } from "@/lib/theme/defaults";
@@ -26,6 +27,15 @@ import { ensureProfileTheme } from "@/lib/theme/store";
 type CustomizeProfilePageProps = {
   params: Promise<{ username: string }>;
 };
+
+// Mirrors the page body: chrome follows the visitor's browsing locale cookie.
+export async function generateMetadata() {
+  const cookieLocale = (await cookies()).get(LOCALE_COOKIE_NAME)?.value;
+  return pageMetadata(
+    isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE,
+    "customize",
+  );
+}
 
 export default async function CustomizeProfilePage({
   params,
