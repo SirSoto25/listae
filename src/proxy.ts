@@ -30,7 +30,7 @@ export function preferredLocale(
     : resolveLocaleFromAcceptLanguage(acceptLanguage);
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (/^\/(es|en)(?=\/|$)/.test(pathname)) {

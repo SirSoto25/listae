@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isAppRoute, preferredLocale } from "./middleware";
+import { isAppRoute, preferredLocale } from "./proxy";
 
 describe("isAppRoute", () => {
   it("matches app root paths", () => {
