@@ -120,12 +120,12 @@ export default async function OnboardingPage({
             labels={usernameFieldLabels(t)}
           />
           {error === "invalid" && (
-            <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+            <p className="text-sm text-danger" role="alert">
               {t("onboarding.errorInvalid")}
             </p>
           )}
           {error === "taken" && (
-            <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+            <p className="text-sm text-danger" role="alert">
               {t("onboarding.errorTaken")}
             </p>
           )}
