@@ -6,7 +6,7 @@ Branch: `fix/security-remediation`
 
 | Finding | Remediation |
 |---------|-------------|
-| Dependency advisories (`next`, `next-auth`) | Upgraded to patched versions |
+| Dependency advisories (`next`, `next-auth`) | Upgraded to patched versions. `next` had new advisories later and was bumped to 16.4.5 on 2026-11-04 (with `nodemailer` 10, `sanitize-html` 2.18 and transitive overrides); see `docs/superpowers/plans/2026-11-04-audit-remediation.md` (T0.1) |
 | Missing `AUTH_SECRET` enforcement | Startup throw in `src/lib/auth/config.ts` |
 | Magic-link / search abuse (LISTAE-001, API4) | In-memory rate limits on auth email + catalog search |
 | Input bounds (notes, search query, `coverUrl`) | Server-side validation tightened |
