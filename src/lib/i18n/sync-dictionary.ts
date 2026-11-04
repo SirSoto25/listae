@@ -6,10 +6,6 @@ import { createTranslator } from "./t";
 
 const dictionaries: Record<Locale, Dictionary> = { es, en };
 
-export function syncDictionary(locale: Locale): Dictionary {
-  return dictionaries[locale];
-}
-
 export function syncTranslator(locale: Locale) {
   return createTranslator(dictionaries[locale]);
 }

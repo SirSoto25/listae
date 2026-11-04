@@ -47,6 +47,8 @@ export const authConfig = {
   },
   providers: [
     Nodemailer({
+      // Only satisfies the provider's type/config; the real send happens in
+      // sendVerificationRequest below.
       server: process.env.EMAIL_SERVER ?? "smtp://localhost:1025",
       from: process.env.EMAIL_FROM ?? "Listae <noreply@localhost>",
       async sendVerificationRequest({ identifier, url }) {

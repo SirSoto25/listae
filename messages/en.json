@@ -103,7 +103,6 @@
     },
     "notScored": "Not scored",
     "score": "Score: {score}",
-    "emptyStatus": "No entries yet.",
     "table": {
       "index": "#",
       "title": "Title",

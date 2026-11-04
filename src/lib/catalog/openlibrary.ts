@@ -211,9 +211,3 @@ export async function resolveOpenLibraryBilingual(
       : { coverUrl: `${OPEN_LIBRARY_COVER_URL}/${cover}-M.jpg` }),
   };
 }
-
-export async function resolveOpenLibrary(
-  externalId: string,
-): Promise<CatalogHit> {
-  return resolveOpenLibraryBilingual(externalId);
-}
