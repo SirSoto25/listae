@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { SiteHeader } from "@/components/site-header";
+import { SkipLink } from "@/components/skip-link";
 import { StatusLabelsProvider } from "@/components/status-labels";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
@@ -40,8 +41,11 @@ export default async function LocaleLayout({ children, params }: Props) {
         retry: t("status.retry"),
       }}
     >
+      <SkipLink label={t("nav.skip")} />
       <SiteHeader locale={locale} dict={dict} />
-      {children}
+      <main id="main" tabIndex={-1} className="flex flex-1 flex-col">
+        {children}
+      </main>
     </StatusLabelsProvider>
   );
 }

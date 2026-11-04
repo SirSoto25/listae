@@ -16,7 +16,7 @@ export default async function LocaleNotFound() {
   const t = createTranslator(await getDictionary(locale));
 
   return (
-    <main className="flex flex-1 items-center justify-center bg-transparent px-6 py-16">
+    <div className="flex flex-1 items-center justify-center bg-transparent px-6 py-16">
       <section className="w-full max-w-md rounded-[length:var(--radius-panel)] border border-border bg-surface p-8">
         <h1 className="text-2xl font-black tracking-tight text-foreground">
           {t("status.notFoundTitle")}
@@ -32,6 +32,6 @@ export default async function LocaleNotFound() {
           {t("status.backHome")}
         </LocaleLink>
       </section>
-    </main>
+    </div>
   );
 }

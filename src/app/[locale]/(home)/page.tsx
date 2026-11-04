@@ -55,7 +55,7 @@ export default async function Home({ params, searchParams }: HomeProps) {
     : [];
 
   return (
-    <main className="flex-1 bg-transparent text-foreground">
+    <div className="flex-1 bg-transparent text-foreground">
       <section className="border-b border-border px-6 py-14 sm:py-20">
         <div className="mx-auto max-w-5xl">
           <p className="mb-4 text-xs font-black uppercase tracking-[0.28em] text-accent">
@@ -255,6 +255,6 @@ export default async function Home({ params, searchParams }: HomeProps) {
           </details>
         )}
       </section>
-    </main>
+    </div>
   );
 }

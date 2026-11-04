@@ -1,5 +1,8 @@
 {
   "nav": {
+    "skip": "Skip to content",
+    "mainAria": "Main navigation",
+    "languageGroup": "Language",
     "search": "Search",
     "library": "Library",
     "profile": "Profile",

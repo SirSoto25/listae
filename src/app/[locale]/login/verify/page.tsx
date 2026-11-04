@@ -23,7 +23,7 @@ export default async function LoginVerifyPage({
     !process.env.EMAIL_SERVER && process.env.NODE_ENV !== "production";
 
   return (
-    <main className="flex flex-1 items-center justify-center bg-transparent px-6 py-16">
+    <div className="flex flex-1 items-center justify-center bg-transparent px-6 py-16">
       <section className="w-full max-w-md rounded-[length:var(--radius-panel)] border border-border bg-surface p-8">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent">
           {t("auth.verifyEyebrow")}
@@ -56,6 +56,6 @@ export default async function LoginVerifyPage({
           </LocaleLink>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

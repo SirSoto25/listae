@@ -51,7 +51,7 @@ export default async function OnboardingPage({
   const { error } = await searchParams;
 
   return (
-    <main className="flex flex-1 items-center justify-center bg-transparent px-6 py-16">
+    <div className="flex flex-1 items-center justify-center bg-transparent px-6 py-16">
       <section className="w-full max-w-md rounded-[length:var(--radius-panel)] border border-border bg-surface p-8 shadow-sm">
         <h1 className="text-2xl font-semibold text-foreground">
           {t("onboarding.title")}
@@ -134,6 +134,6 @@ export default async function OnboardingPage({
           </SubmitButton>
         </form>
       </section>
-    </main>
+    </div>
   );
 }

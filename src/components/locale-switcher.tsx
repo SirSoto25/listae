@@ -7,6 +7,7 @@ import { switchLocalePath } from "@/lib/i18n/path";
 
 type LocaleSwitcherProps = {
   locale: Locale;
+  groupLabel: string;
 };
 
 const LABELS: Record<Locale, string> = {
@@ -19,18 +20,22 @@ const LANGUAGE_NAMES: Record<Locale, string> = {
   en: "English",
 };
 
-export function LocaleSwitcher({ locale }: LocaleSwitcherProps) {
+export function LocaleSwitcher({ locale, groupLabel }: LocaleSwitcherProps) {
   const pathname = usePathname();
   const query = useSearchParams().toString();
 
   return (
-    <div className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider">
+    <div
+      role="group"
+      aria-label={groupLabel}
+      className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider"
+    >
       {(["es", "en"] as const).map((loc) => {
         const active = loc === locale;
         return active ? (
           <span
             key={loc}
-            aria-current="true"
+            aria-current="page"
             className="rounded px-2 py-1 text-accent underline underline-offset-4"
             lang={loc}
             title={LANGUAGE_NAMES[loc]}
