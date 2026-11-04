@@ -24,6 +24,11 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # drizzle-kit 0.31 has no `generate --check`: generate and fail on any diff.
+      - name: Migrations match schema
+        run: |
+          pnpm db:generate
+          test -z "$(git status --porcelain drizzle)" || (git status drizzle; exit 1)
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
