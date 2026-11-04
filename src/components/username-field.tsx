@@ -28,7 +28,7 @@ export function UsernameField({ email, labels }: UsernameFieldProps) {
       <label className="block text-sm font-medium text-foreground">
         {labels.label}
         <input
-          className="mt-2 block w-full rounded-[length:var(--radius-control)] border border-border bg-surface px-3 py-2 text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
+          className="mt-2 block w-full rounded-[length:var(--radius-control)] border border-border-control bg-surface px-3 py-2 text-foreground outline-none focus:border-accent"
           type="text"
           name="username"
           autoComplete="username"
@@ -44,7 +44,7 @@ export function UsernameField({ email, labels }: UsernameFieldProps) {
       </label>
       <p className="text-xs text-muted">{labels.hint}</p>
       {showWarning && (
-        <p className="text-sm text-amber-700 dark:text-amber-400">
+        <p className="text-sm text-warning">
           {labels.warning}
         </p>
       )}

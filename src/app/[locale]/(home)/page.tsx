@@ -172,7 +172,7 @@ export default async function Home({ params, searchParams }: HomeProps) {
               <label className="grid gap-1.5 text-sm font-semibold">
                 {t("home.fieldTitle")}
                 <input
-                  className="h-11 rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
+                  className="h-11 rounded-xl border border-border-control bg-surface px-3 outline-none focus:border-accent"
                   name="title"
                   defaultValue={query}
                   required
@@ -181,7 +181,7 @@ export default async function Home({ params, searchParams }: HomeProps) {
               <label className="grid gap-1.5 text-sm font-semibold">
                 {t("home.fieldType")}
                 <select
-                  className="h-11 rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
+                  className="h-11 rounded-xl border border-border-control bg-surface px-3 outline-none focus:border-accent"
                   name="type"
                   defaultValue={type === "all" ? "movie" : type}
                 >
@@ -195,14 +195,14 @@ export default async function Home({ params, searchParams }: HomeProps) {
               <label className="grid gap-1.5 text-sm font-semibold">
                 {t("home.fieldOriginalTitle")}
                 <input
-                  className="h-11 rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
+                  className="h-11 rounded-xl border border-border-control bg-surface px-3 outline-none focus:border-accent"
                   name="originalTitle"
                 />
               </label>
               <label className="grid gap-1.5 text-sm font-semibold">
                 {t("home.fieldYear")}
                 <input
-                  className="h-11 rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
+                  className="h-11 rounded-xl border border-border-control bg-surface px-3 outline-none focus:border-accent"
                   type="number"
                   name="year"
                   min={0}
@@ -211,7 +211,7 @@ export default async function Home({ params, searchParams }: HomeProps) {
               <label className="grid gap-1.5 text-sm font-semibold sm:col-span-2">
                 {t("home.fieldCoverUrl")}
                 <input
-                  className="h-11 rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
+                  className="h-11 rounded-xl border border-border-control bg-surface px-3 outline-none focus:border-accent"
                   type="url"
                   name="coverUrl"
                   pattern="https://.*"
@@ -221,7 +221,7 @@ export default async function Home({ params, searchParams }: HomeProps) {
               <label className="grid gap-1.5 text-sm font-semibold sm:col-span-2">
                 {t("home.fieldSynopsis")}
                 <textarea
-                  className="min-h-24 rounded-xl border border-border bg-surface px-3 py-2 outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
+                  className="min-h-24 rounded-xl border border-border-control bg-surface px-3 py-2 outline-none focus:border-accent"
                   name="synopsis"
                 />
               </label>
@@ -239,7 +239,7 @@ export default async function Home({ params, searchParams }: HomeProps) {
                   >
                     {label}
                     <input
-                      className="h-11 min-w-0 rounded-xl border border-border bg-surface px-3 outline-none focus:border-accent focus:ring-4 focus:ring-accent/20"
+                      className="h-11 min-w-0 rounded-xl border border-border-control bg-surface px-3 outline-none focus:border-accent"
                       type="number"
                       name={name}
                       min={0}

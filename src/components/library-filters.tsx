@@ -72,7 +72,7 @@ export function LibraryFilters({
   }
 
   const selectClass =
-    "h-11 rounded-xl border border-border bg-surface px-3 text-sm font-medium text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-accent/20";
+    "h-11 rounded-xl border border-border-control bg-surface px-3 text-sm font-medium text-foreground outline-none focus:border-accent";
 
   return (
     <div className="flex flex-wrap gap-3 rounded-2xl border border-border bg-background p-3">
