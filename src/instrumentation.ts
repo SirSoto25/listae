@@ -10,4 +10,6 @@ export async function register() {
   const { sqlite } = await import("@/lib/db");
   const { runMigrations } = await import("@/lib/db/migrate");
   runMigrations(sqlite);
+  const { warnIfClientIpUnconfigured } = await import("@/lib/security/client-ip");
+  warnIfClientIpUnconfigured();
 }

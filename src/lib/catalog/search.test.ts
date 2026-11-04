@@ -11,7 +11,6 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/security/rate-limit", () => ({
   checkRateLimit: mocks.checkRateLimit,
-  clientIpFromHeaders: vi.fn(),
 }));
 
 vi.mock("@/lib/cache/db-search-cache", () => ({
@@ -29,7 +28,11 @@ vi.mock("./openlibrary", () => ({
   searchOpenLibrary: mocks.searchOpenLibrary,
 }));
 
+import { migratedTestDb } from "@/test/db";
+
 import { searchCatalog } from "./search";
+
+type RateLimitModule = typeof import("@/lib/security/rate-limit");
 
 describe("searchCatalog", () => {
   beforeEach(() => {
@@ -119,5 +122,40 @@ describe("searchCatalog", () => {
       searchCatalog("Dune", "all", "es", "203.0.113.5"),
     ).resolves.toEqual([]);
     expect(mocks.searchTmdb).not.toHaveBeenCalled();
+  });
+
+  it("keys the search budget by IP and groups IPv6 by /64", async () => {
+    await searchCatalog("Dune", "all", "es", "203.0.113.5");
+    await searchCatalog("Dune", "all", "es", "2001:db8:1:2::abcd");
+
+    expect(mocks.checkRateLimit.mock.calls).toEqual([
+      ["search:ip:203.0.113.5", { limit: 30, windowMs: 3_600_000, failOpen: true }],
+      ["search:ip:2001:db8:1:2::/64", { limit: 30, windowMs: 3_600_000, failOpen: true }],
+    ]);
+  });
+
+  it("unknown ip falls back to a shared search bucket and never to per-email bypass", async () => {
+    await migratedTestDb();
+    const real = await vi.importActual<RateLimitModule>(
+      "@/lib/security/rate-limit",
+    );
+    real.resetRateLimitsForTests();
+    mocks.checkRateLimit.mockImplementation(real.checkRateLimit);
+
+    for (let i = 0; i < 301; i++) {
+      await searchCatalog(`query ${i}`, "movie", "es", null);
+    }
+    expect(mocks.searchTmdb).toHaveBeenCalledTimes(300);
+
+    // A known IP has its own, separate budget.
+    await searchCatalog("another", "movie", "es", "203.0.113.5");
+    expect(mocks.searchTmdb).toHaveBeenCalledTimes(301);
+
+    // The shared search bucket never touches the per-email login budget.
+    const magicLink = { limit: 5, windowMs: 3_600_000 };
+    for (let i = 0; i < 5; i++) {
+      expect(real.checkRateLimit("magic-link:v@x.com", magicLink).ok).toBe(true);
+    }
+    expect(real.checkRateLimit("magic-link:v@x.com", magicLink).ok).toBe(false);
   });
 });
