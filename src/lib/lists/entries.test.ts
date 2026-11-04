@@ -1,6 +1,8 @@
 import { sql } from "drizzle-orm";
 import { beforeAll, describe, expect, it } from "vitest";
 
+import { migratedTestDb } from "@/test/db";
+
 let parseScore: typeof import("./entries").parseScore;
 let normalizeEntryInput: typeof import("./entries").normalizeEntryInput;
 let listLibraryEntries: typeof import("./entries").listLibraryEntries;
@@ -9,11 +11,10 @@ let createManualWork: typeof import("@/lib/catalog/works").createManualWork;
 let database: typeof import("@/lib/db").db;
 
 beforeAll(async () => {
-  process.env.DATABASE_URL = "file::memory:";
-
-  const [entriesModule, dbModule, worksModule] = await Promise.all([
+  // Real schema: CHECKs and indexes from `drizzle/`, not hand-written DDL.
+  const dbModule = await migratedTestDb();
+  const [entriesModule, worksModule] = await Promise.all([
     import("./entries"),
-    import("@/lib/db"),
     import("@/lib/catalog/works"),
   ]);
 
@@ -24,52 +25,6 @@ beforeAll(async () => {
   createManualWork = worksModule.createManualWork;
   database = dbModule.db;
 
-  database.run(sql`
-    create table users (
-      id text primary key,
-      email text not null unique,
-      username text unique,
-      display_name text,
-      profile_locale text not null default 'es'
-    )
-  `);
-  database.run(sql`
-    create table works (
-      id text primary key,
-      type text not null,
-      title text not null,
-      title_es text,
-      title_en text,
-      original_title text,
-      cover_url text,
-      year integer,
-      synopsis text,
-      synopsis_es text,
-      synopsis_en text,
-      external_source text,
-      external_id text,
-      episodes_total integer,
-      chapters_total integer,
-      pages_total integer,
-      created_at integer not null default (unixepoch())
-    )
-  `);
-  database.run(sql`
-    create table list_entries (
-      id text primary key,
-      user_id text not null references users(id) on delete cascade,
-      work_id text not null references works(id) on delete cascade,
-      status text not null,
-      score integer,
-      progress_value integer not null default 0,
-      progress_unit text,
-      notes text,
-      started_at integer,
-      finished_at integer,
-      updated_at integer not null default (unixepoch()),
-      unique(user_id, work_id)
-    )
-  `);
   database.run(sql`
     insert into users (id, email, username, display_name)
     values ('user-domain', 'domain@example.com', 'domainuser', 'Domain User')

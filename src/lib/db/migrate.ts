@@ -59,6 +59,44 @@ export function runMigrations(
   }
 
   const before = journalRows(sqlite);
-  migrate(drizzle(sqlite), { migrationsFolder });
+  withForeignKeysOff(sqlite, () => {
+    try {
+      migrate(drizzle(sqlite), { migrationsFolder });
+    } catch (error) {
+      if (!baselined) throw error;
+      // The pending migrations ran in one transaction and were rolled back.
+      throw new Error(
+        "Migrations failed on a database created with db:push from a schema newer than " +
+          "the first migration. No rows were changed: restore a backup, recreate the " +
+          "database, or record the already-applied migrations in __drizzle_migrations " +
+          "by hand (ADR 012).",
+        { cause: error },
+      );
+    }
+  });
   return { applied: journalRows(sqlite) - before, baselined };
+}
+
+/**
+ * Runs `fn` with foreign keys off, as SQLite requires to rebuild a table
+ * (https://sqlite.org/lang_altertable.html#otheralter). Drizzle's generated
+ * `PRAGMA foreign_keys=OFF` runs inside the migration transaction, where the
+ * pragma is a no-op, so `DROP TABLE works` would cascade-delete every list
+ * entry. Integrity is checked before foreign keys are turned back on.
+ */
+function withForeignKeysOff(sqlite: Database.Database, fn: () => void) {
+  if (sqlite.pragma("foreign_keys", { simple: true }) !== 1) return fn();
+  sqlite.pragma("foreign_keys = OFF");
+  try {
+    fn();
+    const violations = sqlite.pragma("foreign_key_check") as unknown[];
+    if (violations.length > 0) {
+      throw new Error(
+        `Migrations left ${violations.length} foreign key violation(s): ` +
+          JSON.stringify(violations.slice(0, 5)),
+      );
+    }
+  } finally {
+    sqlite.pragma("foreign_keys = ON");
+  }
 }

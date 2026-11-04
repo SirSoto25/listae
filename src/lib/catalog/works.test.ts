@@ -1,6 +1,8 @@
 import { sql } from "drizzle-orm";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
+import { migratedTestDb } from "@/test/db";
+
 const mocks = vi.hoisted(() => ({
   resolveCatalogHit: vi.fn(),
 }));
@@ -16,50 +18,12 @@ let upsertWorkFromHit: typeof import("./works").upsertWorkFromHit;
 let fillMissingWorkLocale: typeof import("./works").fillMissingWorkLocale;
 
 beforeAll(async () => {
-  process.env.DATABASE_URL = "file::memory:";
+  // Real schema: CHECKs and indexes from `drizzle/`, not hand-written DDL.
+  database = (await migratedTestDb()).db;
+  const worksModule = await import("./works");
 
-  const [worksModule, dbModule] = await Promise.all([
-    import("./works"),
-    import("@/lib/db"),
-  ]);
-
-  database = dbModule.db;
   ({ createManualWork, importWork, upsertWorkFromHit, fillMissingWorkLocale } =
     worksModule);
-  database.run(sql`
-    create table works (
-      id text primary key,
-      type text not null,
-      title text not null,
-      title_es text,
-      title_en text,
-      original_title text,
-      cover_url text,
-      year integer,
-      synopsis text,
-      synopsis_es text,
-      synopsis_en text,
-      external_source text,
-      external_id text,
-      episodes_total integer,
-      chapters_total integer,
-      pages_total integer,
-      created_at integer not null default (unixepoch())
-    )
-  `);
-  database.run(sql`
-    create table search_cache (
-      key text primary key not null,
-      payload text not null,
-      expires_at integer not null,
-      created_at integer not null
-    )
-  `);
-  database.run(sql`
-    create unique index works_external_source_external_id_unique
-    on works (external_source, external_id)
-    where external_source is not null and external_id is not null
-  `);
 });
 
 describe("work helpers", () => {

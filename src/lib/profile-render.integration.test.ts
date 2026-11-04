@@ -1,6 +1,8 @@
 import { sql } from "drizzle-orm";
 import { beforeAll, describe, expect, it } from "vitest";
 
+import { migratedTestDb } from "@/test/db";
+
 let database: typeof import("@/lib/db").db;
 let createManualWork: typeof import("@/lib/catalog/works").createManualWork;
 let addListEntry: typeof import("@/lib/lists/entries").addListEntry;
@@ -10,69 +12,14 @@ let buildThemeDocument: typeof import("@/lib/theme/save").buildThemeDocument;
 let syncTranslator: typeof import("@/lib/i18n/sync-dictionary").syncTranslator;
 
 beforeAll(async () => {
-  process.env.DATABASE_URL = "file::memory:";
-
-  database = (await import("@/lib/db")).db;
+  // Real schema: CHECKs and indexes from `drizzle/`, not hand-written DDL.
+  database = (await migratedTestDb()).db;
   ({ createManualWork } = await import("@/lib/catalog/works"));
   ({ addListEntry, listLibraryEntries } = await import("@/lib/lists/entries"));
   ({ renderTheme } = await import("@/lib/theme/render"));
   ({ buildThemeDocument } = await import("@/lib/theme/save"));
   ({ syncTranslator } = await import("@/lib/i18n/sync-dictionary"));
 
-  database.run(sql`
-    create table users (
-      id text primary key,
-      email text not null unique,
-      username text unique,
-      display_name text,
-      profile_locale text not null default 'es'
-    )
-  `);
-  database.run(sql`
-    create table profile_themes (
-      id text primary key,
-      user_id text not null unique references users(id) on delete cascade,
-      html_template text not null,
-      custom_css text not null
-    )
-  `);
-  database.run(sql`
-    create table works (
-      id text primary key,
-      type text not null,
-      title text not null,
-      title_es text,
-      title_en text,
-      original_title text,
-      cover_url text,
-      year integer,
-      synopsis text,
-      synopsis_es text,
-      synopsis_en text,
-      external_source text,
-      external_id text,
-      episodes_total integer,
-      chapters_total integer,
-      pages_total integer,
-      created_at integer not null default (unixepoch())
-    )
-  `);
-  database.run(sql`
-    create table list_entries (
-      id text primary key,
-      user_id text not null references users(id) on delete cascade,
-      work_id text not null references works(id) on delete cascade,
-      status text not null,
-      score integer,
-      progress_value integer not null default 0,
-      progress_unit text,
-      notes text,
-      started_at integer,
-      finished_at integer,
-      updated_at integer not null default (unixepoch()),
-      unique(user_id, work_id)
-    )
-  `);
 });
 
 describe("manual work to themed profile render", () => {

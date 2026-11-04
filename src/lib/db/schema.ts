@@ -1,5 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
+  check,
+  index,
   integer,
   primaryKey,
   sqliteTable,
@@ -14,6 +16,14 @@ import {
   PROGRESS_UNITS,
   WORK_TYPES,
 } from "@/types/domain";
+
+/**
+ * `('a', 'b', …)` for a CHECK. The values are code constants from
+ * `@/types/domain`, never user input, so inlining them with `sql.raw` is safe.
+ */
+function sqlList(values: readonly string[]) {
+  return sql.raw(`(${values.map((value) => `'${value}'`).join(", ")})`);
+}
 
 export const users = sqliteTable(
   "users",
@@ -35,6 +45,10 @@ export const users = sqliteTable(
   (table) => [
     unique("users_email_unique").on(table.email),
     unique("users_username_unique").on(table.username),
+    check(
+      "users_profile_locale_check",
+      sql`${table.profileLocale} in ('es', 'en')`,
+    ),
   ],
 );
 
@@ -60,13 +74,17 @@ export const accounts = sqliteTable(
   ],
 );
 
-export const sessions = sqliteTable("sessions", {
-  sessionToken: text("session_token").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  expires: integer("expires", { mode: "timestamp" }).notNull(),
-});
+export const sessions = sqliteTable(
+  "sessions",
+  {
+    sessionToken: text("session_token").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    expires: integer("expires", { mode: "timestamp" }).notNull(),
+  },
+  (table) => [index("sessions_user_id_idx").on(table.userId)],
+);
 
 export const verificationTokens = sqliteTable(
   "verification_tokens",
@@ -75,7 +93,10 @@ export const verificationTokens = sqliteTable(
     token: text("token").notNull(),
     expires: integer("expires", { mode: "timestamp" }).notNull(),
   },
-  (table) => [primaryKey({ columns: [table.identifier, table.token] })],
+  (table) => [
+    primaryKey({ columns: [table.identifier, table.token] }),
+    index("verification_tokens_expires_idx").on(table.expires),
+  ],
 );
 
 export const profileThemes = sqliteTable(
@@ -115,6 +136,10 @@ export const works = sqliteTable(
     episodesTotal: integer("episodes_total"),
     chaptersTotal: integer("chapters_total"),
     pagesTotal: integer("pages_total"),
+    /** Who created a manual work; `null` for imports and deleted users. */
+    createdBy: text("created_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .default(sql`(unixepoch())`),
@@ -125,6 +150,13 @@ export const works = sqliteTable(
       .where(
         sql`${table.externalSource} is not null and ${table.externalId} is not null`,
       ),
+    index("works_type_idx").on(table.type),
+    index("works_created_by_idx").on(table.createdBy, table.createdAt),
+    check("works_type_check", sql`${table.type} in ${sqlList(WORK_TYPES)}`),
+    check(
+      "works_external_source_check",
+      sql`${table.externalSource} is null or ${table.externalSource} in ${sqlList(EXTERNAL_SOURCES)}`,
+    ),
   ],
 );
 
@@ -154,12 +186,43 @@ export const listEntries = sqliteTable(
       table.userId,
       table.workId,
     ),
+    index("list_entries_user_updated_idx").on(table.userId, table.updatedAt),
+    index("list_entries_user_status_idx").on(table.userId, table.status),
+    check(
+      "list_entries_score_check",
+      sql`${table.score} is null or ${table.score} between 1 and 10`,
+    ),
+    check("list_entries_progress_check", sql`${table.progressValue} >= 0`),
+    check(
+      "list_entries_status_check",
+      sql`${table.status} in ${sqlList(LIST_STATUSES)}`,
+    ),
+    check(
+      "list_entries_progress_unit_check",
+      sql`${table.progressUnit} is null or ${table.progressUnit} in ${sqlList(PROGRESS_UNITS)}`,
+    ),
   ],
 );
 
-export const searchCache = sqliteTable("search_cache", {
-  key: text("key").primaryKey(),
-  payload: text("payload").notNull(),
-  expiresAt: integer("expires_at").notNull(),
-  createdAt: integer("created_at").notNull(),
-});
+export const searchCache = sqliteTable(
+  "search_cache",
+  {
+    key: text("key").primaryKey(),
+    payload: text("payload").notNull(),
+    expiresAt: integer("expires_at").notNull(),
+    createdAt: integer("created_at").notNull(),
+  },
+  (table) => [index("search_cache_expires_at_idx").on(table.expiresAt)],
+);
+
+/** Fixed rate-limit windows shared by every worker (SEC-A2). */
+export const rateLimitWindows = sqliteTable(
+  "rate_limit_windows",
+  {
+    key: text("key").primaryKey(),
+    count: integer("count").notNull(),
+    /** Epoch milliseconds. */
+    resetAt: integer("reset_at").notNull(),
+  },
+  (table) => [index("rate_limit_windows_reset_at_idx").on(table.resetAt)],
+);
