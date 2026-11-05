@@ -95,6 +95,15 @@ it("keeps the rate-limited login error returned by signIn", async () => {
   expect(result).toBe("http://localhost:3000/en/login?error=RateLimited");
 });
 
+it("sends the visitor back to the search they came from after login", async () => {
+  const result = await config.authConfig.callbacks.redirect({
+    url: "http://localhost:3000/es?q=dune&type=movie",
+    baseUrl: "http://localhost:3000",
+  });
+
+  expect(result).toBe("http://localhost:3000/es?q=dune&type=movie");
+});
+
 it("rejects unsafe same-origin redirect targets", async () => {
   const result = await config.authConfig.callbacks.redirect({
     url: "http://localhost:3000//evil.example",

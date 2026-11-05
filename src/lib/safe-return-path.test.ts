@@ -25,6 +25,28 @@ describe("safeReturnPath", () => {
   });
 });
 
+describe("safeReturnPath for the search page", () => {
+  it.each([
+    "/es",
+    "/en?q=dune",
+    "/es?q=dune&type=movie",
+    "/es?q=Cien%20a%C3%B1os%20de%20soledad",
+  ])("accepts the locale home with a search query %s", (value) => {
+    expect(safeReturnPath(value, "/es/library")).toBe(value);
+  });
+
+  it.each([
+    "/esx?q=dune",
+    "/fr?q=dune",
+    "/es#frag",
+    "/es?q=dune\n",
+    "//es?q=dune",
+    "?q=dune",
+  ])("rejects look-alike home paths %j", (value) => {
+    expect(safeReturnPath(value, "/es/library")).toBe("/es/library");
+  });
+});
+
 describe("safeReturnPath with locale", () => {
   it("accepts locale-prefixed library and title paths", () => {
     expect(safeReturnPath("/es/library", "/es")).toBe("/es/library");

@@ -11,12 +11,16 @@ import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { localePath } from "@/lib/i18n/path";
 import { pageMetadata } from "@/lib/i18n/page-metadata";
 import { createTranslator } from "@/lib/i18n/t";
+import { safeReturnPath } from "@/lib/safe-return-path";
 
 import { requestMagicLink } from "./actions";
 
 type LoginPageProps = {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ error?: string | string[] }>;
+  searchParams: Promise<{
+    error?: string | string[];
+    callbackUrl?: string | string[];
+  }>;
 };
 
 export async function generateMetadata({
@@ -37,7 +41,14 @@ export default async function LoginPage({
   const t = createTranslator(dict);
 
   const session = await auth();
-  const { error } = await searchParams;
+  const { error, callbackUrl } = await searchParams;
+  // Where to land after the magic link: only known application paths, and
+  // the library when nothing (or something else) was asked for.
+  const libraryPath = localePath(locale, "/library");
+  const returnPath = safeReturnPath(
+    Array.isArray(callbackUrl) ? callbackUrl[0] : callbackUrl,
+    libraryPath,
+  );
   const errorMessage = loginErrorMessage(error, locale);
   // Mirrors src/lib/auth/config.ts: links are only printed to the server
   // console when EMAIL_SERVER is unset outside production.
@@ -52,7 +63,7 @@ export default async function LoginPage({
       .limit(1);
 
     redirect(
-      localePath(locale, profile?.username ? "/library" : "/onboarding"),
+      profile?.username ? returnPath : localePath(locale, "/onboarding"),
     );
   }
 
@@ -79,6 +90,8 @@ export default async function LoginPage({
           className="mt-6 space-y-4"
           action={requestMagicLink.bind(null, locale)}
         >
+          {/* Already filtered through safeReturnPath; the action re-checks it. */}
+          <input type="hidden" name="callbackUrl" value={returnPath} />
           <label className="block text-sm font-bold text-foreground">
             {t("auth.emailLabel")}
             <input

@@ -55,7 +55,10 @@ describe("searchCatalog", () => {
     ];
     mocks.get.mockResolvedValue(JSON.stringify(cached));
 
-    await expect(searchCatalog(" Dune ", "all", "es")).resolves.toEqual(cached);
+    await expect(searchCatalog(" Dune ", "all", "es")).resolves.toEqual({
+      status: "ok",
+      hits: cached,
+    });
     expect(mocks.searchTmdb).not.toHaveBeenCalled();
     expect(mocks.searchOpenLibrary).not.toHaveBeenCalled();
   });
@@ -76,10 +79,10 @@ describe("searchCatalog", () => {
     mocks.searchTmdb.mockResolvedValue([movie]);
     mocks.searchOpenLibrary.mockResolvedValue([book]);
 
-    await expect(searchCatalog("Dune", "all", "en")).resolves.toEqual([
-      movie,
-      book,
-    ]);
+    await expect(searchCatalog("Dune", "all", "en")).resolves.toEqual({
+      status: "ok",
+      hits: [movie, book],
+    });
     expect(mocks.set).toHaveBeenCalledWith(
       "catalog:en:all:dune",
       JSON.stringify([movie, book]),
@@ -105,23 +108,91 @@ describe("searchCatalog", () => {
       new Error("Open Library unavailable"),
     );
 
-    await expect(searchCatalog("Dune", "all", "es")).resolves.toEqual(stale);
+    await expect(searchCatalog("Dune", "all", "es")).resolves.toEqual({
+      status: "ok",
+      hits: stale,
+    });
+  });
+
+  it("reports provider_down when every provider fails and nothing is cached", async () => {
+    mocks.searchTmdb.mockRejectedValue(new Error("TMDB unavailable"));
+    mocks.searchOpenLibrary.mockRejectedValue(new Error("OL unavailable"));
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    await expect(searchCatalog("Dune", "all", "es")).resolves.toEqual({
+      status: "provider_down",
+      hits: [],
+    });
+    expect(mocks.set).not.toHaveBeenCalled();
+  });
+
+  it("reports partial with the hits of the provider that answered", async () => {
+    const book = {
+      source: "openlibrary",
+      externalId: "OL893415W",
+      type: "book",
+      title: "Dune",
+    };
+    mocks.searchTmdb.mockRejectedValue(new Error("TMDB unavailable"));
+    mocks.searchOpenLibrary.mockResolvedValue([book]);
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    await expect(searchCatalog("Dune", "all", "es")).resolves.toEqual({
+      status: "partial",
+      hits: [book],
+    });
+    expect(mocks.set).not.toHaveBeenCalled();
+  });
+
+  it("reports provider_down when the only queried provider fails", async () => {
+    mocks.searchOpenLibrary.mockRejectedValue(new Error("OL unavailable"));
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    await expect(searchCatalog("Dune", "book", "es")).resolves.toEqual({
+      status: "provider_down",
+      hits: [],
+    });
+  });
+
+  it("does not call providers for queries shorter than the minimum", async () => {
+    await expect(searchCatalog(" a ", "all", "es")).resolves.toEqual({
+      status: "ok",
+      hits: [],
+    });
+    expect(mocks.get).not.toHaveBeenCalled();
+    expect(mocks.checkRateLimit).not.toHaveBeenCalled();
+    expect(mocks.searchTmdb).not.toHaveBeenCalled();
+    expect(mocks.searchOpenLibrary).not.toHaveBeenCalled();
   });
 
   it("ignores queries longer than 200 characters", async () => {
     await expect(
       searchCatalog("a".repeat(201), "all", "es"),
-    ).resolves.toEqual([]);
+    ).resolves.toEqual({ status: "ok", hits: [] });
     expect(mocks.searchTmdb).not.toHaveBeenCalled();
   });
 
-  it("returns no results when the IP rate limit is exceeded", async () => {
+  it("reports rate_limited when the IP budget is spent and nothing is cached", async () => {
     mocks.checkRateLimit.mockReturnValue({ ok: false, retryAfterSec: 60 });
 
     await expect(
       searchCatalog("Dune", "all", "es", "203.0.113.5"),
-    ).resolves.toEqual([]);
+    ).resolves.toEqual({ status: "rate_limited", hits: [] });
     expect(mocks.searchTmdb).not.toHaveBeenCalled();
+  });
+
+  it("serves stale hits instead of rate_limited when the budget is spent", async () => {
+    const stale = [
+      { source: "tmdb", externalId: "11", type: "movie", title: "Dune" },
+    ];
+    mocks.get
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(JSON.stringify(stale));
+    mocks.checkRateLimit.mockReturnValue({ ok: false, retryAfterSec: 60 });
+
+    await expect(
+      searchCatalog("Dune", "all", "es", "203.0.113.5"),
+    ).resolves.toEqual({ status: "ok", hits: stale });
   });
 
   it("keys the search budget by IP and groups IPv6 by /64", async () => {

@@ -24,9 +24,20 @@
     "subtitle": "Busca películas, series, anime, libros, manga y cómics—y lleva tu progreso sin ruido.",
     "openLibrary": "Abrir mi biblioteca →",
     "emptyTitle": "¿Qué te interesa últimamente?",
-    "emptySubtitle": "Empieza a escribir arriba para buscar en el catálogo compartido.",
+    "emptySubtitle": "Escribe arriba y pulsa Buscar para consultar el catálogo compartido.",
     "resultsFor": "Resultados para “{query}”",
     "foundCount": "{count} encontrados",
+    "foundOne": "1 encontrado",
+    "searchSubmit": "Buscar",
+    "minQuery": "Escribe al menos {min} caracteres para buscar.",
+    "rateLimitedTitle": "Has hecho demasiadas búsquedas",
+    "rateLimitedBody": "Para proteger los catálogos limitamos las búsquedas por hora. Espera unos minutos y vuelve a intentarlo.",
+    "statusRateLimited": "Límite de búsquedas alcanzado",
+    "providerDownTitle": "Los catálogos no responden",
+    "providerDownBody": "No hemos podido consultar los catálogos externos. Esto no significa que el título no exista: inténtalo de nuevo en unos minutos.",
+    "statusProviderDown": "Catálogos no disponibles",
+    "partialNotice": "Uno de los catálogos no ha respondido, así que puede que falten resultados.",
+    "retrySearch": "Reintentar la búsqueda",
     "noMatchTitle": "No apareció una coincidencia exacta.",
     "noMatchSubtitle": "Los catálogos externos pueden omitir títulos de nicho o recién publicados.",
     "manualTitle": "¿No lo encuentras? Crea un título manual",
@@ -140,7 +151,8 @@
     "searchAria": "Buscar títulos",
     "mediaTypeAria": "Tipo de media",
     "allMedia": "Todo",
-    "trackTitle": "Seguir este título"
+    "trackTitle": "Seguir este título",
+    "trackTitleFor": "Seguir este título: {title}"
   },
   "entryForm": {
     "status": "Estado",
@@ -261,6 +273,7 @@
     "coverUrlTooLong": "La URL de la portada puede tener como máximo {max} caracteres.",
     "manualQuotaExceeded": "Has alcanzado el límite de {max} obras manuales al día. Vuelve a intentarlo en {hours} h.",
     "manualTotalQuotaExceeded": "Has alcanzado el máximo de {max} obras manuales por cuenta.",
-    "rateLimited": "Demasiadas solicitudes. Vuelve a intentarlo en {minutes} min."
+    "rateLimited": "Demasiadas solicitudes. Vuelve a intentarlo en {minutes} min.",
+    "importFailed": "No se pudo importar el título desde el catálogo. Inténtalo de nuevo en unos minutos."
   }
 }

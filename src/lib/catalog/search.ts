@@ -13,7 +13,9 @@ import { resolveTmdbBilingual, searchTmdb } from "./tmdb";
 import type { CatalogHit } from "./types";
 
 const SEARCH_CACHE_TTL_SECONDS = 1800;
-const MAX_QUERY_LENGTH = 200;
+/** Shorter queries are not searched (and never spend provider budget). */
+export const MIN_QUERY_LENGTH = 2;
+export const MAX_QUERY_LENGTH = 200;
 const SEARCH_WINDOW_MS = 3_600_000;
 /**
  * Per client IP. Search abuse only costs provider quota, so a broken store
@@ -29,6 +31,24 @@ const UNKNOWN_IP_SEARCH_RATE_LIMIT = {
   limit: 300,
   windowMs: SEARCH_WINDOW_MS,
   failOpen: true,
+};
+
+/**
+ * What a search tells the page, so a failure is never shown as "no matches":
+ * - `ok`: providers answered (or a fresh/stale cache did); `hits` may be empty.
+ * - `partial`: one provider failed; `hits` come from the other one.
+ * - `rate_limited`: the client's search budget is spent and nothing is cached.
+ * - `provider_down`: every provider failed and nothing is cached.
+ */
+export type CatalogSearchStatus =
+  | "ok"
+  | "partial"
+  | "rate_limited"
+  | "provider_down";
+
+export type CatalogSearchResult = {
+  status: CatalogSearchStatus;
+  hits: CatalogHit[];
 };
 
 export async function resolveCatalogHit(
@@ -54,10 +74,13 @@ export async function searchCatalog(
   typeFilter: WorkType | "all",
   locale: Locale,
   clientIp?: string | null,
-): Promise<CatalogHit[]> {
+): Promise<CatalogSearchResult> {
   const normalizedQuery = query.trim().replace(/\s+/g, " ");
-  if (!normalizedQuery || normalizedQuery.length > MAX_QUERY_LENGTH) {
-    return [];
+  if (
+    normalizedQuery.length < MIN_QUERY_LENGTH ||
+    normalizedQuery.length > MAX_QUERY_LENGTH
+  ) {
+    return { status: "ok", hits: [] };
   }
 
   const cache = createDbSearchCacheStore();
@@ -67,7 +90,7 @@ export async function searchCatalog(
     cachedPayload === null ? null : parseCachedHits(cachedPayload);
 
   if (cachedHits) {
-    return cachedHits;
+    return { status: "ok", hits: cachedHits };
   }
   if (cachedPayload !== null) {
     await cache.invalidate(key);
@@ -81,7 +104,9 @@ export async function searchCatalog(
     ? checkRateLimit(`search:ip:${ipRateLimitBucket(clientIp)}`, SEARCH_RATE_LIMIT)
     : checkRateLimit("search:unknown-ip", UNKNOWN_IP_SEARCH_RATE_LIMIT);
   if (!limited.ok) {
-    return staleHits ?? [];
+    return staleHits
+      ? { status: "ok", hits: staleHits }
+      : { status: "rate_limited", hits: [] };
   }
 
   const searches: Promise<CatalogHit[]>[] = [];
@@ -108,14 +133,18 @@ export async function searchCatalog(
   );
 
   if (successful.length === 0) {
-    return staleHits ?? [];
+    return staleHits
+      ? { status: "ok", hits: staleHits }
+      : { status: "provider_down", hits: [] };
   }
 
   const hits = successful.flatMap((result) => result.value);
   if (successful.length < settled.length) {
     // A provider is down: serve what we have without caching a partial list.
-    return staleHits ?? hits;
+    return staleHits
+      ? { status: "ok", hits: staleHits }
+      : { status: "partial", hits };
   }
   await cache.set(key, JSON.stringify(hits), SEARCH_CACHE_TTL_SECONDS);
-  return hits;
+  return { status: "ok", hits };
 }

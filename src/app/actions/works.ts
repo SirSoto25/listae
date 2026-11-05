@@ -9,27 +9,38 @@ import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { FormInputError, type FormState } from "@/lib/form-error";
 import { formErrorState } from "@/lib/form-error-state";
-import { isLocale } from "@/lib/i18n/config";
+import { isLocale, type Locale } from "@/lib/i18n/config";
 import { localePath } from "@/lib/i18n/path";
+import { safeReturnPath } from "@/lib/safe-return-path";
 import { checkRateLimit } from "@/lib/security/rate-limit";
 import { WORK_TYPES, type WorkType } from "@/types/domain";
 
 /** Imports per user per hour (D8). */
 const IMPORTS_PER_HOUR = 60;
 
-async function requireAuthenticatedUser(): Promise<string> {
+async function findAuthenticatedUserId(): Promise<string | null> {
   const session = await auth();
   if (!session?.user?.email) {
-    redirect("/login");
+    return null;
   }
   const user = await db.query.users.findFirst({
     columns: { id: true },
     where: eq(users.email, session.user.email),
   });
-  if (!user) {
+  return user?.id ?? null;
+}
+
+async function requireAuthenticatedUser(): Promise<string> {
+  const userId = await findAuthenticatedUserId();
+  if (!userId) {
     redirect("/login");
   }
-  return user.id;
+  return userId;
+}
+
+function localeFromForm(formData: FormData): Locale {
+  const raw = String(formData.get("locale") ?? "");
+  return isLocale(raw) ? raw : "es";
 }
 
 function requireWorkType(raw: FormDataEntryValue | null): WorkType {
@@ -82,30 +93,61 @@ function optionalInteger(raw: FormDataEntryValue | null): number | undefined {
   return value;
 }
 
-export async function importHitAction(formData: FormData): Promise<never> {
-  const userId = await requireAuthenticatedUser();
-  const limit = checkRateLimit(`import:user:${userId}`, {
-    limit: IMPORTS_PER_HOUR,
-    windowMs: 60 * 60 * 1000,
-  });
-  if (!limit.ok) {
-    throw new FormInputError("rateLimited", "import rate limit reached", {
-      minutes: Math.max(1, Math.ceil((limit.retryAfterSec ?? 60) / 60)),
+/**
+ * "Follow this title" from the search results. Anonymous visitors go to the
+ * login page and come back to the same search; everything the user can
+ * correct or retry (rate limit, provider failure) is returned as form state
+ * instead of reaching Next's error page.
+ */
+export async function importHitAction(
+  _previous: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const locale = localeFromForm(formData);
+  const userId = await findAuthenticatedUserId();
+  if (!userId) {
+    const returnTo = safeReturnPath(
+      formData.get("returnTo"),
+      localePath(locale, "/"),
+    );
+    redirect(
+      `${localePath(locale, "/login")}?callbackUrl=${encodeURIComponent(returnTo)}`,
+    );
+  }
+
+  let workId: string;
+  try {
+    const limit = checkRateLimit(`import:user:${userId}`, {
+      limit: IMPORTS_PER_HOUR,
+      windowMs: 60 * 60 * 1000,
     });
-  }
-  const source = formData.get("source");
-  if (source !== "tmdb" && source !== "openlibrary") {
-    throw new Error("invalid catalog source");
+    if (!limit.ok) {
+      throw new FormInputError("rateLimited", "import rate limit reached", {
+        minutes: Math.max(1, Math.ceil((limit.retryAfterSec ?? 60) / 60)),
+      });
+    }
+
+    const source = formData.get("source");
+    const externalId = String(formData.get("externalId") ?? "").trim();
+    if ((source !== "tmdb" && source !== "openlibrary") || !externalId) {
+      throw new FormInputError("importFailed", "invalid catalog identity");
+    }
+
+    workId = (await importWork(source, externalId)).id;
+  } catch (error) {
+    if (!(error instanceof FormInputError)) {
+      // Provider timeouts, 429s and outages: the user can retry, and the
+      // raw message (which may name internals) stays in the server log.
+      console.error("[listae catalog] import failed:", error);
+      return formErrorState(
+        new FormInputError("importFailed", "catalog import failed"),
+        locale,
+      );
+    }
+    return formErrorState(error, locale);
   }
 
-  const externalId = String(formData.get("externalId") ?? "").trim();
-  if (!externalId) {
-    throw new Error("catalog identity is required");
-  }
-
-  const work = await importWork(source, externalId);
-
-  redirect(`/title/${work.id}`);
+  redirect(localePath(locale, `/title/${workId}`));
 }
 
 export async function createManualWorkAction(
@@ -113,8 +155,7 @@ export async function createManualWorkAction(
   formData: FormData,
 ): Promise<FormState> {
   const userId = await requireAuthenticatedUser();
-  const rawLocale = String(formData.get("locale") ?? "");
-  const locale = isLocale(rawLocale) ? rawLocale : "es";
+  const locale = localeFromForm(formData);
 
   let workId: string;
   try {

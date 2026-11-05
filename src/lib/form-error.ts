@@ -17,7 +17,8 @@ export type FormErrorCode =
   | "coverUrlTooLong"
   | "manualQuotaExceeded"
   | "manualTotalQuotaExceeded"
-  | "rateLimited";
+  | "rateLimited"
+  | "importFailed";
 
 /**
  * Input the user can correct. Server actions turn it into a translated

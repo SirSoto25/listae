@@ -7,8 +7,14 @@ import { CatalogSearch } from "@/components/catalog-search";
 import { WorkCover } from "@/components/work-cover";
 import { ActionForm } from "@/components/action-form";
 import { SubmitButton } from "@/components/submit-button";
-import { searchCatalog } from "@/lib/catalog/search";
+import {
+  MAX_QUERY_LENGTH,
+  MIN_QUERY_LENGTH,
+  searchCatalog,
+  type CatalogSearchResult,
+} from "@/lib/catalog/search";
 import { isLocale, type Locale } from "@/lib/i18n/config";
+import { localePath } from "@/lib/i18n/path";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import {
   catalogSearchLabels,
@@ -50,9 +56,34 @@ export default async function Home({ params, searchParams }: HomeProps) {
   const query = firstParam(sp.q)?.trim() ?? "";
   const type = validType(firstParam(sp.type));
   const clientIp = clientIpFromHeaders(await headers());
-  const results = query
-    ? await searchCatalog(query, type, locale, clientIp)
-    : [];
+  const tooShort = query.length > 0 && query.length < MIN_QUERY_LENGTH;
+  const search: CatalogSearchResult =
+    query && !tooShort
+      ? await searchCatalog(query, type, locale, clientIp)
+      : { status: "ok", hits: [] };
+  const results = search.hits;
+  const failed =
+    search.status === "rate_limited" || search.status === "provider_down";
+
+  // The same search as a link: the retry target, and where an anonymous
+  // visitor lands after logging in from "Track this title".
+  const searchParamsOut = new URLSearchParams({ q: query });
+  if (type !== "all") searchParamsOut.set("type", type);
+  const searchHref = `${localePath(locale, "/")}?${searchParamsOut.toString()}`;
+
+  let statusText = "";
+  if (tooShort) {
+    statusText = t("home.minQuery", { min: MIN_QUERY_LENGTH });
+  } else if (query && search.status === "rate_limited") {
+    statusText = t("home.statusRateLimited");
+  } else if (query && search.status === "provider_down") {
+    statusText = t("home.statusProviderDown");
+  } else if (query) {
+    statusText =
+      results.length === 1
+        ? t("home.foundOne")
+        : t("home.foundCount", { count: results.length });
+  }
 
   return (
     <div className="flex-1 bg-transparent text-foreground">
@@ -84,6 +115,8 @@ export default async function Home({ params, searchParams }: HomeProps) {
               labels={catalogSearchLabels(t)}
               initialQuery={query}
               initialType={type}
+              minQueryLength={MIN_QUERY_LENGTH}
+              maxQueryLength={MAX_QUERY_LENGTH}
             />
           </div>
         </div>
@@ -97,15 +130,37 @@ export default async function Home({ params, searchParams }: HomeProps) {
           </div>
         )}
 
-        {query && (
-          <div className="mb-6 flex items-baseline justify-between gap-4">
+        {/* Always mounted so assistive tech announces the outcome of a search. */}
+        <div
+          className={
+            query ? "mb-6 flex items-baseline justify-between gap-4" : undefined
+          }
+        >
+          {query && (
             <h2 className="text-2xl font-black tracking-tight">
               {t("home.resultsFor", { query })}
             </h2>
-            <span className="text-sm text-muted">
-              {t("home.foundCount", { count: results.length })}
-            </span>
-          </div>
+          )}
+          <p
+            aria-atomic="true"
+            aria-live="polite"
+            className="text-sm text-muted empty:hidden"
+            role="status"
+          >
+            {statusText}
+          </p>
+        </div>
+
+        {search.status === "partial" && (
+          <p className="mb-6 rounded-2xl border border-border bg-surface px-5 py-3 text-sm">
+            {t("home.partialNotice")}{" "}
+            <a
+              className="font-bold underline underline-offset-4 hover:text-accent"
+              href={searchHref}
+            >
+              {t("home.retrySearch")}
+            </a>
+          </p>
         )}
 
         {results.length > 0 && (
@@ -134,27 +189,53 @@ export default async function Home({ params, searchParams }: HomeProps) {
                   <p className="mt-1 text-sm text-muted">
                     {hit.year ?? t("common.yearUnknown")}
                   </p>
-                  <form className="mt-auto pt-5" action={importHitAction}>
+                  <ActionForm className="mt-auto pt-5" action={importHitAction}>
                     <input type="hidden" name="source" value={hit.source} />
                     <input
                       type="hidden"
                       name="externalId"
                       value={hit.externalId}
                     />
+                    <input type="hidden" name="locale" value={locale} />
+                    <input type="hidden" name="returnTo" value={searchHref} />
                     <SubmitButton
+                      aria-label={t("catalog.trackTitleFor", {
+                        title: workTitle(hit, locale),
+                      })}
                       className="w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground transition hover:opacity-90 group-hover:opacity-90">
                       {t("catalog.trackTitle")}
                     </SubmitButton>
-                  </form>
+                  </ActionForm>
                 </div>
               </article>
             ))}
           </div>
         )}
 
-        {query && results.length === 0 && (
+        {query && !tooShort && failed && (
           <div className="rounded-3xl border border-border bg-surface p-8 text-center">
-            <h2 className="text-xl font-bold">{t("home.noMatchTitle")}</h2>
+            <h3 className="text-xl font-bold">
+              {search.status === "rate_limited"
+                ? t("home.rateLimitedTitle")
+                : t("home.providerDownTitle")}
+            </h3>
+            <p className="mt-2 text-muted">
+              {search.status === "rate_limited"
+                ? t("home.rateLimitedBody")
+                : t("home.providerDownBody")}
+            </p>
+            <a
+              className="mt-5 inline-block rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground hover:opacity-90"
+              href={searchHref}
+            >
+              {t("home.retrySearch")}
+            </a>
+          </div>
+        )}
+
+        {query && !tooShort && search.status === "ok" && results.length === 0 && (
+          <div className="rounded-3xl border border-border bg-surface p-8 text-center">
+            <h3 className="text-xl font-bold">{t("home.noMatchTitle")}</h3>
             <p className="mt-2 text-muted">{t("home.noMatchSubtitle")}</p>
           </div>
         )}
