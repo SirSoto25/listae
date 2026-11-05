@@ -10,7 +10,14 @@ export type FormErrorCode =
   | "invalidWorkType"
   | "titleRequired"
   | "invalidCoverUrl"
-  | "invalidNumber";
+  | "invalidNumber"
+  | "titleTooLong"
+  | "originalTitleTooLong"
+  | "synopsisTooLong"
+  | "coverUrlTooLong"
+  | "manualQuotaExceeded"
+  | "manualTotalQuotaExceeded"
+  | "rateLimited";
 
 /**
  * Input the user can correct. Server actions turn it into a translated

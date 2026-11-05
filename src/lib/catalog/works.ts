@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { and, eq } from "drizzle-orm";
+import { and, count, eq, gt, min, sql } from "drizzle-orm";
 
 import { createDbSearchCacheStore } from "@/lib/cache/db-search-cache";
 import { db } from "@/lib/db";
@@ -163,12 +163,105 @@ export async function fillMissingWorkLocale(
   return true;
 }
 
+export const MAX_TITLE_LENGTH = 300;
+export const MAX_ORIGINAL_TITLE_LENGTH = 300;
+export const MAX_SYNOPSIS_LENGTH = 5000;
+export const MAX_COVER_URL_LENGTH = 500;
+export const MANUAL_WORKS_PER_DAY = 20;
+export const MANUAL_WORKS_PER_USER = 500;
+const DAY_SECONDS = 24 * 60 * 60;
+
+function requireMaxLength(
+  value: string | undefined,
+  max: number,
+  code:
+    | "titleTooLong"
+    | "originalTitleTooLong"
+    | "synopsisTooLong"
+    | "coverUrlTooLong",
+) {
+  if (value !== undefined && value.length > max) {
+    throw new FormInputError(code, `${code}: at most ${max} characters`, {
+      max,
+    });
+  }
+}
+
 export async function createManualWork(
   input: ManualWorkInput,
-): Promise<{ id: string }> {
+): Promise<{ id: string; reused: boolean }> {
   const title = input.title.trim();
   if (!title) {
     throw new FormInputError("titleRequired", "A manual work title is required.");
+  }
+  const originalTitle = input.originalTitle?.trim() || undefined;
+  const coverUrl = input.coverUrl?.trim() || undefined;
+  const synopsis = input.synopsis?.trim() || undefined;
+  requireMaxLength(title, MAX_TITLE_LENGTH, "titleTooLong");
+  requireMaxLength(originalTitle, MAX_ORIGINAL_TITLE_LENGTH, "originalTitleTooLong");
+  requireMaxLength(synopsis, MAX_SYNOPSIS_LENGTH, "synopsisTooLong");
+  requireMaxLength(coverUrl, MAX_COVER_URL_LENGTH, "coverUrlTooLong");
+
+  const duplicate = db
+    .select({ id: works.id })
+    .from(works)
+    .where(
+      and(
+        eq(works.externalSource, "manual"),
+        eq(works.createdBy, input.createdBy),
+        eq(works.type, input.type),
+        sql`lower(trim(${works.title})) = ${title.toLowerCase()}`,
+        input.year === undefined
+          ? sql`${works.year} is null`
+          : eq(works.year, input.year),
+      ),
+    )
+    .get();
+  if (duplicate) {
+    return { id: duplicate.id, reused: true };
+  }
+
+  const total =
+    db
+      .select({ n: count() })
+      .from(works)
+      .where(
+        and(
+          eq(works.createdBy, input.createdBy),
+          eq(works.externalSource, "manual"),
+        ),
+      )
+      .get()?.n ?? 0;
+  if (total >= MANUAL_WORKS_PER_USER) {
+    throw new FormInputError(
+      "manualTotalQuotaExceeded",
+      "manual works limit per user reached",
+      { max: MANUAL_WORKS_PER_USER },
+    );
+  }
+
+  const recent = db
+    .select({ n: count(), oldest: min(works.createdAt) })
+    .from(works)
+    .where(
+      and(
+        eq(works.createdBy, input.createdBy),
+        eq(works.externalSource, "manual"),
+        gt(works.createdAt, sql`unixepoch() - ${DAY_SECONDS}`),
+      ),
+    )
+    .get();
+  if (recent && recent.n >= MANUAL_WORKS_PER_DAY) {
+    const oldestSec = recent.oldest ? recent.oldest.getTime() / 1000 : 0;
+    const waitSec = oldestSec + DAY_SECONDS - Date.now() / 1000;
+    throw new FormInputError(
+      "manualQuotaExceeded",
+      "daily manual works limit reached",
+      {
+        max: MANUAL_WORKS_PER_DAY,
+        hours: Math.min(24, Math.max(1, Math.ceil(waitSec / 3600))),
+      },
+    );
   }
 
   const id = randomUUID();
@@ -177,16 +270,17 @@ export async function createManualWork(
       id,
       type: input.type,
       title,
-      originalTitle: input.originalTitle?.trim() || undefined,
-      coverUrl: input.coverUrl?.trim() || undefined,
+      originalTitle,
+      coverUrl,
       year: input.year,
-      synopsis: input.synopsis?.trim() || undefined,
+      synopsis,
       externalSource: "manual",
+      createdBy: input.createdBy,
       episodesTotal: input.episodesTotal,
       chaptersTotal: input.chaptersTotal,
       pagesTotal: input.pagesTotal,
     })
     .run();
 
-  return { id };
+  return { id, reused: false };
 }

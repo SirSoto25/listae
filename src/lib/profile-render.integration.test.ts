@@ -41,6 +41,7 @@ describe("manual work to themed profile render", () => {
     const work = await createManualWork({
       type: "book",
       title: "Manual Odyssey",
+      createdBy: "user-1",
       pagesTotal: 300,
     });
     await addListEntry("user-1", work.id, {
