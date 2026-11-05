@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { listEntries, works } from "@/lib/db/schema";
 import { FormInputError } from "@/lib/form-error";
 import type { Locale } from "@/lib/i18n/config";
+import { workTypeLabels } from "@/lib/i18n/labels";
 import { syncTranslator } from "@/lib/i18n/sync-dictionary";
 import { workTitle } from "@/lib/i18n/work-text";
 import type { ProfileEntry } from "@/lib/theme/placeholders";
@@ -254,6 +255,7 @@ export function rowsToProfileEntries(
   locale: Locale,
 ): ProfileEntry[] {
   const t = syncTranslator(locale);
+  const typeLabels = workTypeLabels(t);
 
   return rows.map(({ entry, work }) => {
     const total =
@@ -264,14 +266,23 @@ export function rowsToProfileEntries(
           : entry.progressUnit === "pages"
             ? work.pagesTotal
             : null;
+    const unit = entry.progressUnit
+      ? t(`profile.unit.${entry.progressUnit}`)
+      : null;
     const progress =
       work.type === "movie"
         ? t("profile.noProgressTracking")
-        : `${entry.progressValue}${total ? ` / ${total}` : ""} ${entry.progressUnit ?? "items"}`;
+        : [
+            `${entry.progressValue}${total ? ` / ${total}` : ""}`,
+            unit,
+          ]
+            .filter(Boolean)
+            .join(" ");
 
     return {
       title: workTitle(work, locale),
       type: work.type,
+      typeLabel: typeLabels[work.type],
       status: entry.status,
       score: entry.score,
       progress,

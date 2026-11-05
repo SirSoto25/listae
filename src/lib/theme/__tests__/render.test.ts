@@ -31,6 +31,7 @@ function render(template: string, entries: ProfileEntry[] = []) {
 const completedMovie: ProfileEntry = {
   title: "Arrival",
   type: "movie",
+  typeLabel: "Movie",
   status: "completed",
   score: 8,
   progress: "1/1",
@@ -41,6 +42,7 @@ const completedMovie: ProfileEntry = {
 const readingBook: ProfileEntry = {
   title: 'Dune "quoted" <b>',
   type: "book",
+  typeLabel: "Book",
   status: "in_progress",
   score: null,
   progress: "10/600",
@@ -97,7 +99,7 @@ describe("renderTheme sanitizes the final document (SEC-M1)", () => {
     expect(result.html).toContain("Keep me");
     expect(result.html).not.toMatch(/(href|src)="(?!https:|\/(?![/\\]))/i);
     expect(result.html).not.toMatch(/javascript:|data:|http:/i);
-    expect(result.html).not.toMatch(/<(?!\/?(?:div|a|section|h2|table|thead|tbody|tr|th|td|span|img)\b)/);
+    expect(result.html).not.toMatch(/<(?!\/?(?:div|a|section|h2|h3|table|thead|tbody|tr|th|td|span|img)\b)/);
   });
 
   it("keeps Listae data attributes", () => {
@@ -188,6 +190,7 @@ describe("renderTheme keeps bundled themes intact", () => {
       return {
         title: `T${n} <b>&"' $& {{username}}`,
         type,
+        typeLabel: type,
         status,
         score: n % 3 === 0 ? null : (n % 10) + 1,
         progress: `${n}/99`,

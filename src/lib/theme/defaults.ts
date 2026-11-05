@@ -5,11 +5,11 @@ export const DEFAULT_HTML_TEMPLATE = `
     <p class="listae-profile-username">@{{username}}</p>
   </section>
   <section class="listae-domain-block">
-    <h2 class="listae-domain-heading">Audiovisual</h2>
+    <h2 class="listae-domain-heading">{{audiovisual_heading}}</h2>
     {{audiovisual_lists}}
   </section>
   <section class="listae-domain-block">
-    <h2 class="listae-domain-heading">Reading</h2>
+    <h2 class="listae-domain-heading">{{reading_heading}}</h2>
     {{reading_lists}}
   </section>
 </div>
@@ -30,7 +30,7 @@ body {
 /* listae:domain-vars:start */
 .listae-domain--audiovisual {
   --listae-domain-bg: #1a2238;
-  --listae-domain-accent: #6b7ae8;
+  --listae-domain-accent: #8e9bf5;
   --listae-domain-fg: #e8eef9;
 }
 
@@ -114,11 +114,16 @@ body {
   margin-top: 2rem;
 }
 
+/* An h3 inside a domain block, an h2 in {{lists}}: same look for both. */
+.listae-status-title {
+  font-size: 1.125rem;
+}
+
 .listae-status-table {
   width: 100%;
   margin-top: 1rem;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
 }
 
 .listae-status-table th,
@@ -164,12 +169,12 @@ body {
 }
 
 .listae-entry-title {
-  overflow: hidden;
+  display: block;
   color: #f9fafb;
   font-weight: 700;
   text-decoration: none;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .listae-entry-title:hover {
@@ -178,5 +183,51 @@ body {
 
 .listae-col-type {
   text-transform: capitalize;
+}
+
+/* Text for screen readers only (the cover column header). */
+.listae-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 40rem) {
+  .listae-col-index,
+  .listae-col-cover,
+  .listae-col-type {
+    display: none;
+  }
+
+  .listae-col-score,
+  .listae-col-progress {
+    width: auto;
+  }
+
+  /* Keeps short titles whole: wrapping anywhere would shrink them to a letter. */
+  .listae-col-title {
+    min-width: 5.75rem;
+  }
+
+  .listae-profile {
+    width: calc(100% - 1.5rem);
+    padding: 1.5rem 0;
+  }
+
+  .listae-domain--audiovisual,
+  .listae-domain--reading {
+    padding: 0.75rem;
+  }
+
+  .listae-status-table th,
+  .listae-status-table td {
+    padding: 0.5rem 0.375rem;
+  }
 }
 `.trim();

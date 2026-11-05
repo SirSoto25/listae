@@ -102,10 +102,20 @@
       "on_hold": "On hold",
       "dropped": "Dropped"
     },
+    "domain": {
+      "audiovisual": "Audiovisual",
+      "reading": "Reading"
+    },
+    "unit": {
+      "episodes": "episodes",
+      "chapters": "chapters",
+      "pages": "pages"
+    },
     "notScored": "Not scored",
     "score": "Score: {score}",
     "table": {
       "index": "#",
+      "cover": "Cover",
       "title": "Title",
       "score": "Score",
       "type": "Type",
@@ -175,7 +185,7 @@
     "viewPublicProfile": "View public profile",
     "profileFrameTitle": "{name}'s Listae profile",
     "htmlTemplate": "HTML template",
-    "htmlTemplateHelp": "Supported placeholders: {{displayName}}, {{username}}, {{audiovisual_lists}}, {{reading_lists}}, and {{lists}}.",
+    "htmlTemplateHelp": "Supported placeholders: {{displayName}}, {{username}}, {{audiovisual_heading}}, {{reading_heading}}, {{audiovisual_lists}}, {{reading_lists}}, and {{lists}}.",
     "customCss": "Custom CSS",
     "customCssHelp": "HTTPS Google Fonts imports are allowed. JavaScript is never run. Domain picker rewrites the marked /* listae:domain-vars */ block only.",
     "domainColors": "Domain colors",

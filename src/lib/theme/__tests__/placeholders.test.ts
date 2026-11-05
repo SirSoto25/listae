@@ -20,6 +20,7 @@ const entries: ProfileEntry[] = [
   {
     title: "Dune",
     type: "book",
+    typeLabel: "Book",
     status: "completed",
     score: 9,
     progress: "600/600p",
@@ -29,6 +30,7 @@ const entries: ProfileEntry[] = [
   {
     title: "Frieren",
     type: "anime",
+    typeLabel: "Anime",
     status: "in_progress",
     score: null,
     progress: "12/28 episodes",
@@ -55,7 +57,7 @@ describe("buildStatusListsHtml", () => {
     expect(html).toContain('src="https://example.com/dune.jpg"');
     expect(html).toContain('href="/title/1"');
     expect(html).toContain("Dune");
-    expect(html).toContain("book");
+    expect(html).toContain('<td class="listae-col-type">Book</td>');
     expect(html).toContain("Score: 9");
     expect(html).toContain("600/600p");
   });
@@ -353,5 +355,132 @@ describe("renderTheme", () => {
         snippet: '@import url("https://evil.example/theme.css");',
       });
     }
+  });
+});
+
+describe("localized profile", () => {
+  const es = syncTranslator("es");
+  const esEntries: ProfileEntry[] = [
+    {
+      title: "Alien",
+      type: "movie",
+      typeLabel: "Película",
+      status: "completed",
+      score: 8,
+      progress: "Sin seguimiento de progreso",
+      cover: null,
+      url: "/title/3",
+    },
+    {
+      title: "Dune",
+      type: "book",
+      typeLabel: "Libro",
+      status: "in_progress",
+      score: null,
+      progress: "5 / 20 capítulos",
+      cover: null,
+      url: "/title/1",
+    },
+  ];
+
+  it("shows the localized work type and keeps data-type as the raw value", () => {
+    const html = buildListsHtml(esEntries, es);
+
+    expect(html).toContain('data-type="movie"');
+    expect(html).toContain('<td class="listae-col-type">Película</td>');
+    expect(html).not.toContain(">movie<");
+  });
+
+  it("marks every column header with scope=col and names the cover column", () => {
+    const html = buildListsHtml(esEntries, es);
+    const headers = html.match(/<th\b[^>]*>/g) ?? [];
+
+    expect(headers.length).toBeGreaterThan(0);
+    for (const header of headers) {
+      expect(header).toContain('scope="col"');
+    }
+    expect(html).toContain(
+      '<th class="listae-col-cover" scope="col"><span class="listae-sr-only">Portada</span></th>',
+    );
+    expect(syncTranslator("en")("profile.table.cover")).toBe("Cover");
+  });
+
+  it("substitutes the domain heading placeholders in each locale", () => {
+    const template = "<h2>{{audiovisual_heading}}</h2><h2>{{reading_heading}}</h2>";
+    const render = (locale: "es" | "en") =>
+      renderProfileHtml({
+        template,
+        username: "a",
+        displayName: "A",
+        entries: [],
+        t: syncTranslator(locale),
+      });
+
+    expect(render("es")).toBe("<h2>Audiovisual</h2><h2>Lectura</h2>");
+    expect(render("en")).toBe("<h2>Audiovisual</h2><h2>Reading</h2>");
+  });
+
+  it("renders status headings as h3 inside domain blocks and h2 in {{lists}}", () => {
+    const domain = buildDomainListsHtml(esEntries, "audiovisual", es);
+    expect(domain).toContain('<h3 class="listae-status-title">Completado</h3>');
+    expect(domain).not.toContain("<h2");
+
+    const flat = buildListsHtml(esEntries, es);
+    expect(flat).toContain('<h2 class="listae-status-title">Completado</h2>');
+    expect(flat).not.toContain("<h3");
+
+    const viaTemplate = renderProfileHtml({
+      template: "{{audiovisual_lists}}{{lists}}",
+      username: "a",
+      displayName: "A",
+      entries: esEntries,
+      t: es,
+    });
+    expect(viaTemplate).toContain("<h3");
+    expect(viaTemplate).toContain("<h2");
+  });
+
+  it("keeps the new markup after the final sanitization", () => {
+    const result = renderTheme({
+      template: DEFAULT_HTML_TEMPLATE,
+      css: DEFAULT_CSS,
+      username: "alex",
+      displayName: "Alex",
+      entries: esEntries,
+      t: es,
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.html).toContain('scope="col"');
+      expect(result.html).toContain('class="listae-sr-only"');
+      expect(result.html).toContain("<h3");
+      expect(result.html).toContain("Lectura");
+      expect(result.html).not.toContain("Reading");
+    }
+  });
+});
+
+describe("default theme responsiveness", () => {
+  it("lets columns size to their content and hides secondary ones on small screens", () => {
+    expect(DEFAULT_CSS).not.toContain("table-layout: fixed");
+    expect(DEFAULT_CSS).toContain("table-layout: auto");
+    expect(DEFAULT_CSS).toMatch(
+      /\.listae-entry-title\s*\{[^}]*display:\s*block/,
+    );
+    const media = DEFAULT_CSS.match(
+      /@media \(max-width: 40rem\)\s*\{([\s\S]*?\n\})/,
+    );
+    expect(media?.[1]).toMatch(/\.listae-col-index/);
+    expect(media?.[1]).toMatch(/\.listae-col-cover/);
+    expect(media?.[1]).toMatch(/\.listae-col-type/);
+    expect(media?.[1]).toMatch(/\.listae-col-title\s*\{[^}]*min-width/);
+    expect(DEFAULT_CSS).toMatch(/\.listae-sr-only\s*\{[^}]*clip/);
+  });
+
+  it("uses domain headings that can be localized", () => {
+    expect(DEFAULT_HTML_TEMPLATE).toContain("{{audiovisual_heading}}");
+    expect(DEFAULT_HTML_TEMPLATE).toContain("{{reading_heading}}");
+    expect(DEFAULT_HTML_TEMPLATE).not.toMatch(/>\s*(Audiovisual|Reading)\s*</);
   });
 });

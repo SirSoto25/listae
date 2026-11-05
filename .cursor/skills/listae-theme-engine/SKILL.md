@@ -24,6 +24,7 @@ Source of truth: `src/lib/theme/placeholders.ts` (`renderProfileHtml`) and `src/
 |-------|---------------|
 | `{{username}}` | Public username (HTML-escaped) |
 | `{{displayName}}` | Display name (HTML-escaped) |
+| `{{audiovisual_heading}}` / `{{reading_heading}}` | Localized domain name (`profile.domain.*`: "Audiovisual"/"Lectura"/"Reading"), HTML-escaped. Use them instead of hard-coded headings so the profile follows `profileLocale` |
 | `{{lists}}` | All domains: one `section.listae-status` per non-empty status, in `LIST_STATUSES` order |
 | `{{audiovisual_lists}}` | `section.listae-domain.listae-domain--audiovisual[data-domain]` with its non-empty status sections, or empty |
 | `{{reading_lists}}` | `section.listae-domain.listae-domain--reading[data-domain]` with its non-empty status sections, or empty |
@@ -33,9 +34,9 @@ Statuses: `plan`, `in_progress`, `completed`, `on_hold`, `dropped`. Status headi
 
 Generated markup:
 
-- Status block: `section.listae-status[data-status]` > `h2.listae-status-title` + `table.listae-status-table`.
-- Table head: `th.listae-col-index`, `th.listae-col-cover`, `th.listae-col-title`, `th.listae-col-score`, `th.listae-col-type`, `th.listae-col-progress`.
-- Row: `tr.listae-entry[data-type][data-index]` with the matching `td.listae-col-*` cells. Cover is an `img.listae-entry-cover` only for `https:` URLs; title links are `a.listae-entry-title` only for `/…` or `https:` URLs.
+- Status block: `section.listae-status[data-status]` > `h2.listae-status-title` (`h3` inside `{{audiovisual_lists}}`/`{{reading_lists}}`, so it nests under the template's own domain `h2`) + `table.listae-status-table`.
+- Table head (every `th` has `scope="col"`; the cover `th` holds `span.listae-sr-only` with a screen-reader label, so custom CSS should define `.listae-sr-only`): `th.listae-col-index`, `th.listae-col-cover`, `th.listae-col-title`, `th.listae-col-score`, `th.listae-col-type`, `th.listae-col-progress`.
+- Row: `tr.listae-entry[data-type][data-index]` with the matching `td.listae-col-*` cells (type cell shows the localized label, `data-type` keeps the raw value). Cover is an `img.listae-entry-cover` only for `https:` URLs; title links are `a.listae-entry-title` only for `/…` or `https:` URLs.
 - Domain CSS hooks: `--listae-domain-bg`, `--listae-domain-accent`, `--listae-domain-fg` (defined in `DEFAULT_CSS`, between `listae:domain-vars` markers).
 
 Substitution is a single pass over `{{\w+}}`: unknown tokens stay literal, and user-controlled values are never re-scanned for placeholders.
@@ -52,7 +53,7 @@ Substitution is a single pass over `{{\w+}}`: unknown tokens stay literal, and u
 
 `sanitizeThemeHtml` keeps the generated hooks (`section[data-status|data-domain]`, `tr[data-type|data-index]`), keeps `a[href]` / `img[src]` only for `https:` or `/…` (not `//`, not `/\`), and forces `rel="noopener noreferrer"` on links and `referrerpolicy="no-referrer"` on images. If you add generated markup, add its attributes to the allowlist and to the bundled-theme test in `src/lib/theme/__tests__/render.test.ts`.
 
-Default template (`DEFAULT_HTML_TEMPLATE`) uses `{{displayName}}`, `{{username}}`, `{{audiovisual_lists}}` and `{{reading_lists}}`, so entries are grouped by domain and then by status, with cover, title, score, type and progress.
+Default template (`DEFAULT_HTML_TEMPLATE`) uses `{{displayName}}`, `{{username}}`, the two heading placeholders, `{{audiovisual_lists}}` and `{{reading_lists}}`, so entries are grouped by domain and then by status, with cover, title, score, type and progress.
 
 ## CSS policy (Listae)
 
@@ -71,3 +72,7 @@ Default template (`DEFAULT_HTML_TEMPLATE`) uses `{{displayName}}`, `{{username}}
 - Tests covering Google Fonts allow + rejected import diagnostics
 
 When unsure, prefer stricter sanitization and clearer errors.
+
+## Default theme upgrades (T1.8)
+
+`src/lib/theme/legacy-defaults.ts` keeps a literal copy of the previous default (never edit it). On startup (`instrumentation.ts`) `upgradeLegacyDefaultThemes` moves stored themes that still equal it to the current default, keeping the user's domain colors, inside one transaction that first copies each row into `profile_themes_upgrade_backup`. Customized templates/CSS are never touched. When you change the default again, freeze the old one the same way.
