@@ -5,6 +5,15 @@ const mocks = vi.hoisted(() => ({
   createManualWork: vi.fn(),
   importWork: vi.fn(),
   upsertWorkFromHit: vi.fn(),
+  checkRateLimit: vi.fn(),
+  findUser: vi.fn(),
+}));
+
+vi.mock("@/lib/security/rate-limit", () => ({
+  checkRateLimit: mocks.checkRateLimit,
+}));
+vi.mock("@/lib/db", () => ({
+  db: { query: { users: { findFirst: mocks.findUser } } },
 }));
 
 vi.mock("@/lib/auth", () => ({ auth: mocks.auth }));
@@ -25,6 +34,8 @@ describe("importHitAction", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.auth.mockResolvedValue({ user: { email: "reader@example.com" } });
+    mocks.findUser.mockResolvedValue({ id: "user-1" });
+    mocks.checkRateLimit.mockReturnValue({ ok: true });
     mocks.importWork.mockResolvedValue({ id: "server-work" });
     mocks.upsertWorkFromHit.mockResolvedValue({ id: "client-work" });
   });
@@ -45,6 +56,33 @@ describe("importHitAction", () => {
     expect(mocks.upsertWorkFromHit).not.toHaveBeenCalled();
   });
 
+  it("limits imports per user, not per IP", async () => {
+    const formData = new FormData();
+    formData.set("source", "tmdb");
+    formData.set("externalId", "438631");
+
+    await expect(importHitAction(formData)).rejects.toThrow(
+      "REDIRECT:/title/server-work",
+    );
+    expect(mocks.checkRateLimit).toHaveBeenCalledWith("import:user:user-1", {
+      limit: 60,
+      windowMs: 60 * 60 * 1000,
+    });
+  });
+
+  it("refuses imports over the hourly limit with a retry hint", async () => {
+    mocks.checkRateLimit.mockReturnValue({ ok: false, retryAfterSec: 1500 });
+    const formData = new FormData();
+    formData.set("source", "tmdb");
+    formData.set("externalId", "438631");
+
+    await expect(importHitAction(formData)).rejects.toMatchObject({
+      code: "rateLimited",
+      params: { minutes: 25 },
+    });
+    expect(mocks.importWork).not.toHaveBeenCalled();
+  });
+
   it("rejects unauthenticated imports before mutating the catalog", async () => {
     mocks.auth.mockResolvedValue(null);
     const formData = new FormData();
@@ -62,6 +100,8 @@ describe("createManualWorkAction", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.auth.mockResolvedValue({ user: { email: "reader@example.com" } });
+    mocks.findUser.mockResolvedValue({ id: "user-1" });
+    mocks.checkRateLimit.mockReturnValue({ ok: true });
   });
 
   function manualForm(fields: Record<string, string>) {
@@ -83,6 +123,30 @@ describe("createManualWorkAction", () => {
 
     expect(state.error).toMatch(/https:\/\//);
     expect(mocks.createManualWork).not.toHaveBeenCalled();
+  });
+
+  it("passes the user id as createdBy", async () => {
+    mocks.createManualWork.mockResolvedValue({ id: "work-1", reused: false });
+
+    await expect(
+      createManualWorkAction({ error: null }, manualForm({})),
+    ).rejects.toThrow("REDIRECT:/en/title/work-1");
+    expect(mocks.createManualWork).toHaveBeenCalledWith(
+      expect.objectContaining({ createdBy: "user-1" }),
+    );
+  });
+
+  it("returns the translated quota error with the retry hint", async () => {
+    const { FormInputError } = await import("@/lib/form-error");
+    mocks.createManualWork.mockRejectedValue(
+      new FormInputError("manualQuotaExceeded", "quota", { max: 20, hours: 5 }),
+    );
+
+    const state = await createManualWorkAction({ error: null }, manualForm({}));
+
+    expect(state.error).toBe(
+      "You have reached the limit of 20 manual works per day. Try again in 5 h.",
+    );
   });
 
   it("redirects to the new title in the form's locale", async () => {

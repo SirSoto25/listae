@@ -243,6 +243,13 @@
     "invalidWorkType": "Choose a valid media type.",
     "titleRequired": "Enter a title.",
     "invalidCoverUrl": "The cover URL must be a valid https:// address.",
-    "invalidNumber": "Year and totals must be whole numbers from 0 to {max}."
+    "invalidNumber": "Year and totals must be whole numbers from 0 to {max}.",
+    "titleTooLong": "The title can be at most {max} characters.",
+    "originalTitleTooLong": "The original title can be at most {max} characters.",
+    "synopsisTooLong": "The synopsis can be at most {max} characters.",
+    "coverUrlTooLong": "The cover URL can be at most {max} characters.",
+    "manualQuotaExceeded": "You have reached the limit of {max} manual works per day. Try again in {hours} h.",
+    "manualTotalQuotaExceeded": "You have reached the maximum of {max} manual works per account.",
+    "rateLimited": "Too many requests. Try again in {minutes} min."
   }
 }

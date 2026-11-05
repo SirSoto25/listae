@@ -21,6 +21,8 @@ export type CatalogHit = {
 };
 
 export type ManualWorkInput = {
+  /** Owner; drives the per-user quotas and dedupe. */
+  createdBy: string;
   type: WorkType;
   title: string;
   originalTitle?: string;

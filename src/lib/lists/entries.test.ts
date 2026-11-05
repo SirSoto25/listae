@@ -176,8 +176,8 @@ describe("normalizeEntryInput", () => {
 
 describe("listLibraryEntries domain filter", () => {
   it('returns only audiovisual works when domain is "audiovisual"', async () => {
-    const movie = await createManualWork({ type: "movie", title: "AV Movie" });
-    const book = await createManualWork({ type: "book", title: "Reading Book" });
+    const movie = await createManualWork({ type: "movie", title: "AV Movie", createdBy: "user-domain" });
+    const book = await createManualWork({ type: "book", title: "Reading Book", createdBy: "user-domain" });
 
     await addListEntry("user-domain", movie.id, { status: "plan" });
     await addListEntry("user-domain", book.id, {

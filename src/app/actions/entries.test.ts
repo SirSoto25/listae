@@ -37,7 +37,7 @@ beforeAll(async () => {
     insert into users (id, email, username, display_name)
     values ('user-actions', 'actions@example.com', 'actionsuser', 'Actions')
   `);
-  workId = (await createManualWork({ type: "movie", title: "Action Movie" })).id;
+  workId = (await createManualWork({ type: "movie", title: "Action Movie", createdBy: "user-actions" })).id;
 });
 
 beforeEach(() => {
@@ -120,7 +120,7 @@ describe("addToList", () => {
 
 describe("updateEntry", () => {
   it("rejects when the entry does not exist (current behaviour)", async () => {
-    const other = await createManualWork({ type: "book", title: "No entry" });
+    const other = await createManualWork({ type: "book", title: "No entry", createdBy: "user-actions" });
     await expect(
       updateEntry(INITIAL_FORM_STATE, form({ workId: other.id, status: "completed" })),
     ).rejects.toThrow("list entry not found");

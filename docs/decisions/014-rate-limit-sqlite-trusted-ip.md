@@ -56,3 +56,17 @@ Así, un visitante sin IP conocida no puede saltarse el límite por email (ningu
 - Si SQLite falla, no se puede pedir magic link (fail-closed). La búsqueda sigue funcionando sin límite.
 - Los intentos bloqueados también suman en `count`, pero no alargan la ventana.
 - Rollback: revertir el PR. La tabla de la migración `0001` puede quedarse.
+
+## Adenda (2026-11-05): cuotas del catálogo por usuario (T1.6, SEC-M2, FUN-P1-4)
+
+Las cuotas del catálogo se aplican **por usuario autenticado**, nunca por IP (D8):
+
+| Qué | Límite | Mecanismo |
+|---|---|---|
+| Imports (`importHitAction`) | 60 / h por usuario | `checkRateLimit("import:user:<userId>")`, fail-closed. Al superarlo, `FormInputError("rateLimited")` con `{minutes}` hasta que se libere la ventana |
+| Obras manuales por día | 20 / 24 h por usuario | `count(*)` sobre `works` (`created_by`, `created_at`, índice `works_created_by_idx`). Error `manualQuotaExceeded` con `{max, hours}` (horas hasta que caduque la obra más antigua de la ventana) |
+| Obras manuales en total | 500 por usuario | Mismo recuento sin ventana. Error `manualTotalQuotaExceeded` con `{max}` |
+
+- Las obras manuales no usan `rate_limit_windows`: el recuento sobre `works` ya es persistente, compartido entre workers y exacto (una ventana fija permitiría ráfagas de 2×20 en el cambio de ventana).
+- `createManualWork` rellena `works.created_by` y reutiliza (`reused: true`) la obra manual del mismo usuario con igual tipo, `lower(trim(title))` y año, sin consumir cuota.
+- Límites de longitud en servidor: título ≤ 300, título original ≤ 300, sinopsis ≤ 5 000, URL de portada ≤ 500 (https). Los `maxLength` del formulario solo son ayuda de UI.

@@ -243,6 +243,13 @@
     "invalidWorkType": "Elige un tipo de obra válido.",
     "titleRequired": "Escribe un título.",
     "invalidCoverUrl": "La URL de la portada debe ser una dirección https:// válida.",
-    "invalidNumber": "El año y los totales deben ser números enteros entre 0 y {max}."
+    "invalidNumber": "El año y los totales deben ser números enteros entre 0 y {max}.",
+    "titleTooLong": "El título puede tener como máximo {max} caracteres.",
+    "originalTitleTooLong": "El título original puede tener como máximo {max} caracteres.",
+    "synopsisTooLong": "La sinopsis puede tener como máximo {max} caracteres.",
+    "coverUrlTooLong": "La URL de la portada puede tener como máximo {max} caracteres.",
+    "manualQuotaExceeded": "Has alcanzado el límite de {max} obras manuales al día. Vuelve a intentarlo en {hours} h.",
+    "manualTotalQuotaExceeded": "Has alcanzado el máximo de {max} obras manuales por cuenta.",
+    "rateLimited": "Demasiadas solicitudes. Vuelve a intentarlo en {minutes} min."
   }
 }

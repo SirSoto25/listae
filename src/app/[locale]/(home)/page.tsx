@@ -174,6 +174,7 @@ export default async function Home({ params, searchParams }: HomeProps) {
                 <input
                   className="h-11 rounded-xl border border-border-control bg-surface px-3 outline-none focus:border-accent"
                   name="title"
+                  maxLength={300}
                   defaultValue={query}
                   required
                 />
@@ -197,6 +198,7 @@ export default async function Home({ params, searchParams }: HomeProps) {
                 <input
                   className="h-11 rounded-xl border border-border-control bg-surface px-3 outline-none focus:border-accent"
                   name="originalTitle"
+                  maxLength={300}
                 />
               </label>
               <label className="grid gap-1.5 text-sm font-semibold">
@@ -214,6 +216,7 @@ export default async function Home({ params, searchParams }: HomeProps) {
                   className="h-11 rounded-xl border border-border-control bg-surface px-3 outline-none focus:border-accent"
                   type="url"
                   name="coverUrl"
+                  maxLength={500}
                   pattern="https://.*"
                   placeholder="https://…"
                 />
@@ -223,6 +226,7 @@ export default async function Home({ params, searchParams }: HomeProps) {
                 <textarea
                   className="min-h-24 rounded-xl border border-border-control bg-surface px-3 py-2 outline-none focus:border-accent"
                   name="synopsis"
+                  maxLength={5000}
                 />
               </label>
               <div className="grid grid-cols-3 gap-3 sm:col-span-2">

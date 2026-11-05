@@ -1,20 +1,35 @@
 "use server";
 
+import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
 import { createManualWork, importWork } from "@/lib/catalog/works";
+import { db } from "@/lib/db";
+import { users } from "@/lib/db/schema";
 import { FormInputError, type FormState } from "@/lib/form-error";
 import { formErrorState } from "@/lib/form-error-state";
 import { isLocale } from "@/lib/i18n/config";
 import { localePath } from "@/lib/i18n/path";
+import { checkRateLimit } from "@/lib/security/rate-limit";
 import { WORK_TYPES, type WorkType } from "@/types/domain";
 
-async function requireAuthenticatedUser(): Promise<void> {
+/** Imports per user per hour (D8). */
+const IMPORTS_PER_HOUR = 60;
+
+async function requireAuthenticatedUser(): Promise<string> {
   const session = await auth();
   if (!session?.user?.email) {
     redirect("/login");
   }
+  const user = await db.query.users.findFirst({
+    columns: { id: true },
+    where: eq(users.email, session.user.email),
+  });
+  if (!user) {
+    redirect("/login");
+  }
+  return user.id;
 }
 
 function requireWorkType(raw: FormDataEntryValue | null): WorkType {
@@ -68,7 +83,16 @@ function optionalInteger(raw: FormDataEntryValue | null): number | undefined {
 }
 
 export async function importHitAction(formData: FormData): Promise<never> {
-  await requireAuthenticatedUser();
+  const userId = await requireAuthenticatedUser();
+  const limit = checkRateLimit(`import:user:${userId}`, {
+    limit: IMPORTS_PER_HOUR,
+    windowMs: 60 * 60 * 1000,
+  });
+  if (!limit.ok) {
+    throw new FormInputError("rateLimited", "import rate limit reached", {
+      minutes: Math.max(1, Math.ceil((limit.retryAfterSec ?? 60) / 60)),
+    });
+  }
   const source = formData.get("source");
   if (source !== "tmdb" && source !== "openlibrary") {
     throw new Error("invalid catalog source");
@@ -88,13 +112,14 @@ export async function createManualWorkAction(
   _previous: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  await requireAuthenticatedUser();
+  const userId = await requireAuthenticatedUser();
   const rawLocale = String(formData.get("locale") ?? "");
   const locale = isLocale(rawLocale) ? rawLocale : "es";
 
   let workId: string;
   try {
     const work = await createManualWork({
+      createdBy: userId,
       type: requireWorkType(formData.get("type")),
       title: String(formData.get("title") ?? ""),
       originalTitle:
