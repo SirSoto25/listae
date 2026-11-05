@@ -34,9 +34,10 @@ El limitador de `src/lib/security/rate-limit.ts` (2026-07-29) tenía tres fallos
 | Clave | Límite | Si la IP es desconocida |
 |---|---|---|
 | `search:ip:<ip>` | 30 / h, fail-open | Cubo compartido `search:unknown-ip`, 300 / h |
-| `magic-link:<email normalizado>` (`sendVerificationRequest`) | 5 / h, fail-closed | Igual: no depende de la IP |
-| `login:email:<email>` (action del login) | 5 / h, fail-closed | Igual |
-| `login:ip:<ip>` (action del login) | 20 / h, fail-closed | No se aplica: un cubo compartido dejaría a cualquiera bloquear el login de todos |
+| `magic-link:email:<email normalizado>` (`callbacks.signIn`, ADR 016) | 5 / h, fail-closed | Igual: no depende de la IP |
+| `magic-link:ip:<ip>` (`callbacks.signIn`, ADR 016) | 20 / h, fail-closed | No se aplica: un cubo compartido dejaría a cualquiera bloquear el login de todos |
+
+> ADR 016 sustituye los antiguos `magic-link:<email>` (`sendVerificationRequest`), `login:email:<email>` y `login:ip:<ip>` (action del login) por este único límite.
 
 Así, un visitante sin IP conocida no puede saltarse el límite por email (ninguna rama lo omite), ni bloquear el login de los demás (no hay cubo compartido en auth), ni rotar cabeceras para buscar sin límite (comparte un cubo de 300 / h).
 

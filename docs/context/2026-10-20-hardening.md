@@ -28,8 +28,12 @@ eliminaron los SVG de `create-next-app` sin referencias.
   el 2026-11-04 (SEC-A2): ventanas en SQLite sin desalojo, fail-closed en
   auth, IP solo desde `CLIENT_IP_HEADER`/`TRUSTED_PROXY_HOPS`
   ([ADR 014](../decisions/014-rate-limit-sqlite-trusted-ip.md)).
-- Throttle del magic link también en `sendVerificationRequest`, para cubrir
-  los POST directos a `/api/auth/signin/nodemailer`.
+- ~~Throttle del magic link también en `sendVerificationRequest`, para cubrir
+  los POST directos a `/api/auth/signin/nodemailer`.~~ Sustituido el
+  2026-11-05 (FUN-P2-9, SEC-B3): un único límite en `callbacks.signIn`, antes
+  de crear el token; enlaces de 15 min, email estricto y entorno de auth
+  validado al arrancar
+  ([ADR 016](../decisions/016-auth-env-and-single-login-limit.md)).
 - `?error=constructor` en login ya no da 500 (`Object.hasOwn`).
 - Fetch a TMDB/Open Library con timeout de 8 s. La búsqueda solo gasta cupo
   de IP en los cache miss y no cachea resultados parciales si cae un proveedor.
