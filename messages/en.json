@@ -81,7 +81,7 @@
     "loginFooter": "Locally, open the Next.js terminal and look for [listae magic link]. Links expire and can only be used once.",
     "verifyEyebrow": "Check your inbox",
     "verifyTitle": "Magic link sent",
-    "verifyBody": "Open the email and click the sign-in link. It works once and usually expires within about 24 hours.",
+    "verifyBody": "Open the email and click the sign-in link. It works once and expires after 15 minutes.",
     "verifyDevHint": "In local development, the link is printed in the Next.js server console as [listae magic link].",
     "differentEmail": "Use a different email",
     "backToSearch": "Back to search",
@@ -91,6 +91,7 @@
     "errorConfiguration": "Sign-in is temporarily unavailable. Try again in a moment.",
     "errorAccessDenied": "You do not have permission to sign in.",
     "errorRateLimited": "Too many sign-in attempts. Wait a bit and try again.",
+    "errorEmailInvalid": "Enter a valid email address, like name@example.com, without spaces, quotes or parentheses.",
     "errorDefault": "Something went wrong signing in. Request a new magic link below."
   },
   "profile": {

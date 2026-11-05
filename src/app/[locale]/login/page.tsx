@@ -1,9 +1,8 @@
 import { eq } from "drizzle-orm";
-import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import { SubmitButton } from "@/components/submit-button";
-import { auth, signIn } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { loginErrorMessage } from "@/lib/auth/login-messages";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
@@ -12,11 +11,8 @@ import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { localePath } from "@/lib/i18n/path";
 import { pageMetadata } from "@/lib/i18n/page-metadata";
 import { createTranslator } from "@/lib/i18n/t";
-import {
-  clientIpFromHeaders,
-  ipRateLimitBucket,
-} from "@/lib/security/client-ip";
-import { checkRateLimit } from "@/lib/security/rate-limit";
+
+import { requestMagicLink } from "./actions";
 
 type LoginPageProps = {
   params: Promise<{ locale: string }>;
@@ -81,42 +77,7 @@ export default async function LoginPage({
 
         <form
           className="mt-6 space-y-4"
-          action={async (formData) => {
-            "use server";
-
-            const email = String(formData.get("email") ?? "")
-              .trim()
-              .toLowerCase();
-            if (!email) {
-              redirect(localePath(locale, "/login?error=Configuration"));
-            }
-
-            const emailLimit = checkRateLimit(`login:email:${email}`, {
-              limit: 5,
-              windowMs: 3_600_000,
-            });
-            if (!emailLimit.ok) {
-              redirect(localePath(locale, "/login?error=RateLimited"));
-            }
-
-            // Unknown IP: no shared bucket (it would let anyone lock everyone
-            // out of login); the per-email limit above still applies.
-            const ip = clientIpFromHeaders(await headers());
-            if (ip) {
-              const ipLimit = checkRateLimit(`login:ip:${ipRateLimitBucket(ip)}`, {
-                limit: 20,
-                windowMs: 3_600_000,
-              });
-              if (!ipLimit.ok) {
-                redirect(localePath(locale, "/login?error=RateLimited"));
-              }
-            }
-
-            await signIn("nodemailer", {
-              email,
-              callbackUrl: localePath(locale, "/library"),
-            });
-          }}
+          action={requestMagicLink.bind(null, locale)}
         >
           <label className="block text-sm font-bold text-foreground">
             {t("auth.emailLabel")}

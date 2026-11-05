@@ -40,3 +40,24 @@ describe("safeReturnPath with locale", () => {
     expect(safeReturnPath("//evil.com", "/es/library")).toBe("/es/library");
   });
 });
+
+describe("safeReturnPath for login errors", () => {
+  // callbacks.redirect runs the URL returned by callbacks.signIn through
+  // safeReturnPath: without this, a rate-limited request would land on home.
+  it.each(["/en/login?error=RateLimited", "/es/login?error=EmailInvalid"])(
+    "accepts %j",
+    (value) => {
+      expect(safeReturnPath(value, "")).toBe(value);
+    },
+  );
+
+  it.each([
+    "/en/login?error=<script>",
+    "/en/login?error=RateLimited&next=//evil.example",
+    "/en/login",
+    "/login?error=RateLimited",
+    "/fr/login?error=RateLimited",
+  ])("rejects %j", (value) => {
+    expect(safeReturnPath(value, "")).toBe("");
+  });
+});

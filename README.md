@@ -43,8 +43,19 @@ an email at `/login`; Listae prints a line like this in the server console:
 [listae magic link] you@example.com -> http://localhost:3000/api/auth/callback/...
 ```
 
-Open that URL to sign in, then choose a username during onboarding. To send
-real email instead, set `EMAIL_SERVER` and `EMAIL_FROM` in `.env.local`.
+Open that URL to sign in, then choose a username during onboarding. Links
+expire after 15 minutes and work once. To send real email instead, set
+`EMAIL_SERVER` and `EMAIL_FROM` in `.env.local`.
+
+The copied `.env.example` placeholder secret only works outside production
+(the server logs a warning). In production (`pnpm start`) the server refuses to
+start unless ([ADR 016](docs/decisions/016-auth-env-and-single-login-limit.md)):
+
+- `AUTH_SECRET` carries at least 32 random bytes (`openssl rand -base64 32`)
+  and is not the `.env.example` placeholder;
+- `AUTH_URL` is the public `https://` origin of the app (`AUTH_TRUST_HOST` is
+  never accepted without it);
+- `EMAIL_SERVER` is set.
 
 ## Catalog providers
 
@@ -55,7 +66,7 @@ remains available when an external provider is unavailable or has no match.
 
 ## Rate limits and client IP
 
-Login, magic-link and search limits live in SQLite (`rate_limit_windows`), so
+Magic-link (5/hour per email, 20/hour per trusted IP) and search limits live in SQLite (`rate_limit_windows`), so
 they survive restarts and are shared by every worker
 ([ADR 014](docs/decisions/014-rate-limit-sqlite-trusted-ip.md)). Listae never
 trusts client-sent IP headers on its own. In production, put a reverse proxy in

@@ -1,5 +1,7 @@
 import { expect, it } from "vitest";
 
+import { syncTranslator } from "@/lib/i18n/sync-dictionary";
+
 import { loginErrorMessage } from "./login-messages";
 
 it("returns Spanish verification error when locale es", () => {
@@ -25,4 +27,14 @@ it("returns null when there is no error", () => {
 it("does not resolve Object.prototype names as error codes", () => {
   expect(loginErrorMessage("constructor", "en")).toMatch(/new magic link/i);
   expect(loginErrorMessage("__proto__", "en")).toMatch(/new magic link/i);
+});
+
+it("tells users that magic links expire in 15 minutes", () => {
+  expect(syncTranslator("es")("auth.verifyBody")).toMatch(/15 minutos/);
+  expect(syncTranslator("en")("auth.verifyBody")).toMatch(/15 minutes/);
+});
+
+it("explains invalid email addresses in both locales", () => {
+  expect(loginErrorMessage("EmailInvalid", "en")).toMatch(/valid email/i);
+  expect(loginErrorMessage("EmailInvalid", "es")).toMatch(/correo válido/i);
 });

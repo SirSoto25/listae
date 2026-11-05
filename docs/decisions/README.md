@@ -44,3 +44,4 @@ Implicaciones positivas y negativas.
 | 013 | CSP con nonce, dos políticas (app y perfil `/u/*`) | aceptada |
 | 014 | Rate limits en SQLite con IP de confianza (`CLIENT_IP_HEADER`) | aceptada |
 | 015 | Sanitizar el documento final del perfil; placeholders solo en texto | aceptada |
+| 016 | Entorno de auth validado al arrancar, magic link de 15 min, email estricto y límite único | aceptada |
