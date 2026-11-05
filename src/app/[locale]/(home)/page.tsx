@@ -16,7 +16,7 @@ import {
   workTypeLabels,
 } from "@/lib/i18n/labels";
 import { createTranslator } from "@/lib/i18n/t";
-import { clientIpFromHeaders } from "@/lib/security/rate-limit";
+import { clientIpFromHeaders } from "@/lib/security/client-ip";
 import { workTitle } from "@/lib/i18n/work-text";
 import { WORK_TYPES, type WorkType } from "@/types/domain";
 import { headers } from "next/headers";

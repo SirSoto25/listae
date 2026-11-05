@@ -61,7 +61,8 @@ marcados como pendientes y no se consideran verificados por los unit tests.
 - ~~`CHECK` e índices en la BBDD~~ — hecho el 2026-11-04 con la migración
   `0001`: `CHECK` de puntuación, progreso, estado, unidad, tipo, fuente e
   idioma; índices de listas, obras, sesiones, caché y tokens;
-  `works.created_by` y tabla `rate_limit_windows` (aún sin uso: T1.2 y la
-  cuota de obras manuales). Limpia filas inválidas en vez de fallar
+  `works.created_by` y tabla `rate_limit_windows` (en uso desde T1.2,
+  [ADR 014](../decisions/014-rate-limit-sqlite-trusted-ip.md); `created_by`
+  queda para la cuota de obras manuales). Limpia filas inválidas en vez de fallar
   (addendum de [ADR 012](../decisions/012-migrations-on-startup.md)).
 - Checks manuales de navegador listados arriba (pendientes del usuario).

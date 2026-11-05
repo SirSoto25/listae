@@ -13,9 +13,10 @@ import { localePath } from "@/lib/i18n/path";
 import { pageMetadata } from "@/lib/i18n/page-metadata";
 import { createTranslator } from "@/lib/i18n/t";
 import {
-  checkRateLimit,
   clientIpFromHeaders,
-} from "@/lib/security/rate-limit";
+  ipRateLimitBucket,
+} from "@/lib/security/client-ip";
+import { checkRateLimit } from "@/lib/security/rate-limit";
 
 type LoginPageProps = {
   params: Promise<{ locale: string }>;
@@ -98,9 +99,11 @@ export default async function LoginPage({
               redirect(localePath(locale, "/login?error=RateLimited"));
             }
 
+            // Unknown IP: no shared bucket (it would let anyone lock everyone
+            // out of login); the per-email limit above still applies.
             const ip = clientIpFromHeaders(await headers());
             if (ip) {
-              const ipLimit = checkRateLimit(`login:ip:${ip}`, {
+              const ipLimit = checkRateLimit(`login:ip:${ipRateLimitBucket(ip)}`, {
                 limit: 20,
                 windowMs: 3_600_000,
               });

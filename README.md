@@ -53,6 +53,17 @@ the **v3 API Key** or the **v4 Read Access Token** (JWT starting with `eyJ`)
 works. Open Library search does not require a key, and manual title creation
 remains available when an external provider is unavailable or has no match.
 
+## Rate limits and client IP
+
+Login, magic-link and search limits live in SQLite (`rate_limit_windows`), so
+they survive restarts and are shared by every worker
+([ADR 014](docs/decisions/014-rate-limit-sqlite-trusted-ip.md)). Listae never
+trusts client-sent IP headers on its own. In production, put a reverse proxy in
+front that **overwrites** `X-Real-IP` with the socket address and set
+`CLIENT_IP_HEADER=x-real-ip` (or `TRUSTED_PROXY_HOPS=<n>` if your proxies
+append to `X-Forwarded-For`). Without either, client IPs are unknown: anonymous
+searches share one budget (300/hour) and login is limited per email only.
+
 ## Scripts
 
 | Command | Purpose |

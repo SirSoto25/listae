@@ -23,8 +23,11 @@ eliminaron los SVG de `create-next-app` sin referencias.
   strings, `url(` sin cerrar, `image-set()` y `src()`.
 - Placeholders en una sola pasada: los títulos (controlados por el usuario) ya
   no se reescanean y `$` se trata como literal.
-- Rate limiter con memoria acotada (10k claves; las claves largas se guardan
-  como hash). La IP sale del último salto de `X-Forwarded-For`.
+- ~~Rate limiter con memoria acotada (10k claves; las claves largas se guardan
+  como hash). La IP sale del último salto de `X-Forwarded-For`.~~ Sustituido
+  el 2026-11-04 (SEC-A2): ventanas en SQLite sin desalojo, fail-closed en
+  auth, IP solo desde `CLIENT_IP_HEADER`/`TRUSTED_PROXY_HOPS`
+  ([ADR 014](../decisions/014-rate-limit-sqlite-trusted-ip.md)).
 - Throttle del magic link también en `sendVerificationRequest`, para cubrir
   los POST directos a `/api/auth/signin/nodemailer`.
 - `?error=constructor` en login ya no da 500 (`Object.hasOwn`).

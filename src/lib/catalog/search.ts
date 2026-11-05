@@ -5,6 +5,7 @@ import {
 import type { Locale } from "@/lib/i18n/config";
 import type { WorkType } from "@/types/domain";
 
+import { ipRateLimitBucket } from "@/lib/security/client-ip";
 import { checkRateLimit } from "@/lib/security/rate-limit";
 
 import { resolveOpenLibraryBilingual, searchOpenLibrary } from "./openlibrary";
@@ -13,7 +14,22 @@ import type { CatalogHit } from "./types";
 
 const SEARCH_CACHE_TTL_SECONDS = 1800;
 const MAX_QUERY_LENGTH = 200;
-const SEARCH_RATE_LIMIT = { limit: 30, windowMs: 3_600_000 };
+const SEARCH_WINDOW_MS = 3_600_000;
+/**
+ * Per client IP. Search abuse only costs provider quota, so a broken store
+ * lets searches through (`failOpen`) instead of taking search down.
+ */
+const SEARCH_RATE_LIMIT = { limit: 30, windowMs: SEARCH_WINDOW_MS, failOpen: true };
+/**
+ * Every visitor whose IP is unknown (no trusted proxy configured) shares one
+ * bucket: they cannot rotate headers to skip the limit, and the bucket only
+ * covers search, never login (ADR 014).
+ */
+const UNKNOWN_IP_SEARCH_RATE_LIMIT = {
+  limit: 300,
+  windowMs: SEARCH_WINDOW_MS,
+  failOpen: true,
+};
 
 export async function resolveCatalogHit(
   source: CatalogHit["source"],
@@ -61,11 +77,11 @@ export async function searchCatalog(
     stalePayload === null ? null : parseCachedHits(stalePayload);
 
   // Only provider round-trips spend the IP budget; cache hits are free.
-  if (clientIp) {
-    const limited = checkRateLimit(`search:ip:${clientIp}`, SEARCH_RATE_LIMIT);
-    if (!limited.ok) {
-      return staleHits ?? [];
-    }
+  const limited = clientIp
+    ? checkRateLimit(`search:ip:${ipRateLimitBucket(clientIp)}`, SEARCH_RATE_LIMIT)
+    : checkRateLimit("search:unknown-ip", UNKNOWN_IP_SEARCH_RATE_LIMIT);
+  if (!limited.ok) {
+    return staleHits ?? [];
   }
 
   const searches: Promise<CatalogHit[]>[] = [];

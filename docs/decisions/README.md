@@ -42,3 +42,4 @@ Implicaciones positivas y negativas.
 | 011 | URL locales (es/en), i18n casero, perfiles sin prefijo | aceptada |
 | 012 | Migraciones al arrancar (instrumentation) + SQLite en WAL | aceptada |
 | 013 | CSP con nonce, dos políticas (app y perfil `/u/*`) | aceptada |
+| 014 | Rate limits en SQLite con IP de confianza (`CLIENT_IP_HEADER`) | aceptada |
