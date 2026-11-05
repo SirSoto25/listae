@@ -20,6 +20,7 @@ describe("instrumentation register", () => {
   });
 
   afterEach(() => {
+    vi.unstubAllEnvs();
     process.env = { ...ORIGINAL_ENV };
   });
 
@@ -36,6 +37,32 @@ describe("instrumentation register", () => {
     const { register } = await import("./instrumentation");
     await register();
     expect(await tables()).not.toContain("users");
+  });
+
+  it("refuses to start in production with an insecure auth env", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    process.env.AUTH_URL = "http://listae.example";
+    const exit = vi
+      .spyOn(process, "exit")
+      .mockImplementation((() => undefined) as never);
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    const { register } = await import("./instrumentation");
+    await expect(register()).rejects.toThrow(/AUTH_URL/);
+    // `next start` only logs a failing instrumentation hook and keeps serving.
+    expect(exit).toHaveBeenCalledWith(1);
+    expect(error).toHaveBeenCalledWith(expect.stringMatching(/AUTH_URL/));
+    expect(await tables()).not.toContain("users");
+    exit.mockRestore();
+    error.mockRestore();
+  });
+
+  it("does not validate the auth env during next build", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    process.env.NEXT_PHASE = "phase-production-build";
+    process.env.AUTH_SECRET = "build-only-secret";
+    delete process.env.AUTH_URL;
+    const { register } = await import("./instrumentation");
+    await expect(register()).resolves.toBeUndefined();
   });
 
   it("does not migrate in the edge runtime", async () => {

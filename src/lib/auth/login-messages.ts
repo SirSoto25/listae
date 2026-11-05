@@ -6,6 +6,7 @@ const ERROR_KEYS: Record<string, string> = {
   Configuration: "auth.errorConfiguration",
   AccessDenied: "auth.errorAccessDenied",
   RateLimited: "auth.errorRateLimited",
+  EmailInvalid: "auth.errorEmailInvalid",
   Default: "auth.errorDefault",
 };
 

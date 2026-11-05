@@ -81,7 +81,7 @@
     "loginFooter": "En local, abre la terminal de Next.js y busca [listae magic link]. Los enlaces caducan y solo se pueden usar una vez.",
     "verifyEyebrow": "Revisa tu bandeja de entrada",
     "verifyTitle": "Enlace mágico enviado",
-    "verifyBody": "Abre el correo y haz clic en el enlace de acceso. Solo funciona una vez y suele caducar en unas 24 horas.",
+    "verifyBody": "Abre el correo y haz clic en el enlace de acceso. Solo funciona una vez y caduca a los 15 minutos.",
     "verifyDevHint": "En desarrollo local, el enlace se imprime en la consola del servidor Next.js como [listae magic link].",
     "differentEmail": "Usar otro correo",
     "backToSearch": "Volver a buscar",
@@ -91,6 +91,7 @@
     "errorConfiguration": "El acceso no está disponible temporalmente. Inténtalo de nuevo en un momento.",
     "errorAccessDenied": "No tienes permiso para iniciar sesión.",
     "errorRateLimited": "Demasiados intentos de acceso. Espera un momento e inténtalo de nuevo.",
+    "errorEmailInvalid": "Escribe un correo válido, como nombre@ejemplo.com, sin espacios, comillas ni paréntesis.",
     "errorDefault": "Algo falló al iniciar sesión. Solicita un nuevo enlace mágico abajo."
   },
   "profile": {
