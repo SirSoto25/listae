@@ -1,9 +1,12 @@
+import { randomBytes } from "node:crypto";
+
 import { describe, expect, it } from "vitest";
 
 import { AUTH_SECRET_PLACEHOLDER, validateAuthEnv } from "./env";
 
-// `openssl rand -base64 32`: 44 characters, 32 random bytes.
-const STRONG_SECRET = "q3Jr8vX0b5mK2pT7wY1zN4cF6hL9sD0aG3eR5uI8oP4=";
+// Same shape as `openssl rand -base64 32` (44 characters, 32 random bytes),
+// generated at run time so no secret-looking literal is committed.
+const STRONG_SECRET = randomBytes(32).toString("base64");
 
 const PRODUCTION = {
   NODE_ENV: "production",
@@ -37,7 +40,7 @@ describe("validateAuthEnv in production", () => {
     expect(() =>
       validateAuthEnv({
         ...PRODUCTION,
-        AUTH_SECRET: "0123456789abcdef0123456789abcdef",
+        AUTH_SECRET: "0123456789abcdef".repeat(2),
       }),
     ).toThrow(/AUTH_SECRET.*32 bytes/);
   });

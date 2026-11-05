@@ -1,3 +1,5 @@
+import { randomBytes } from "node:crypto";
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const ORIGINAL_ENV = { ...process.env };
@@ -41,6 +43,9 @@ describe("instrumentation register", () => {
 
   it("refuses to start in production with an insecure auth env", async () => {
     vi.stubEnv("NODE_ENV", "production");
+    // A strong secret of its own: the only problem left must be AUTH_URL, no
+    // matter what AUTH_SECRET the surrounding environment (e.g. CI) defines.
+    process.env.AUTH_SECRET = randomBytes(32).toString("base64");
     process.env.AUTH_URL = "http://listae.example";
     const exit = vi
       .spyOn(process, "exit")

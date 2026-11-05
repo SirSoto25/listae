@@ -1,0 +1,12 @@
+title = "listae gitleaks config"
+
+[extend]
+useDefault = true
+
+# The auth env validation tests need secret-shaped strings. Early commits of the
+# auth hardening PR carried them as literals (they are fake, not real secrets);
+# the scan covers every commit of a PR, so the file is allowlisted by path.
+# Current versions generate their secrets at run time.
+[allowlist]
+description = "Fake secrets used as fixtures by the auth env validation tests"
+paths = ['''^src/lib/auth/env\.test\.ts$''']
