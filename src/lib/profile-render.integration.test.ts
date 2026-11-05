@@ -67,6 +67,7 @@ describe("manual work to themed profile render", () => {
       entries: rows.map(({ entry, work: savedWork }) => ({
         title: savedWork.title,
         type: savedWork.type,
+        typeLabel: savedWork.type,
         status: entry.status,
         score: entry.score,
         progress: `${entry.progressValue} / ${savedWork.pagesTotal} pages`,

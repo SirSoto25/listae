@@ -9,6 +9,7 @@ let listLibraryEntries: typeof import("./entries").listLibraryEntries;
 let addListEntry: typeof import("./entries").addListEntry;
 let createManualWork: typeof import("@/lib/catalog/works").createManualWork;
 let database: typeof import("@/lib/db").db;
+let rowsToProfileEntries: typeof import("./entries").rowsToProfileEntries;
 
 beforeAll(async () => {
   // Real schema: CHECKs and indexes from `drizzle/`, not hand-written DDL.
@@ -22,6 +23,7 @@ beforeAll(async () => {
   normalizeEntryInput = entriesModule.normalizeEntryInput;
   listLibraryEntries = entriesModule.listLibraryEntries;
   addListEntry = entriesModule.addListEntry;
+  rowsToProfileEntries = entriesModule.rowsToProfileEntries;
   createManualWork = worksModule.createManualWork;
   database = dbModule.db;
 
@@ -192,5 +194,85 @@ describe("listLibraryEntries domain filter", () => {
 
     expect(rows.map((row) => row.work.type)).toEqual(["movie"]);
     expect(rows.map((row) => row.work.title)).toEqual(["AV Movie"]);
+  });
+});
+
+describe("rowsToProfileEntries", () => {
+  it("localizes type labels and progress units without raw English units", async () => {
+    const book = await createManualWork({
+      type: "book",
+      title: "Localized Book",
+      chaptersTotal: 20,
+    });
+    const anime = await createManualWork({
+      type: "anime",
+      title: "Localized Anime",
+      episodesTotal: 12,
+    });
+    const movie = await createManualWork({
+      type: "movie",
+      title: "Localized Movie",
+    });
+    await addListEntry("user-domain", book.id, {
+      status: "in_progress",
+      progressValue: 5,
+      progressUnit: "chapters",
+    });
+    await addListEntry("user-domain", anime.id, {
+      status: "in_progress",
+      progressValue: 3,
+      progressUnit: "episodes",
+    });
+    await addListEntry("user-domain", movie.id, { status: "plan" });
+
+    const rows = (await listLibraryEntries("user-domain")).filter((row) =>
+      row.work.title.startsWith("Localized"),
+    );
+    const byTitle = (locale: "es" | "en") =>
+      Object.fromEntries(
+        rowsToProfileEntries(rows, locale).map((e) => [e.title, e]),
+      );
+
+    const es = byTitle("es");
+    expect(es["Localized Book"]).toMatchObject({
+      typeLabel: "Libro",
+      type: "book",
+      progress: "5 / 20 capítulos",
+    });
+    expect(es["Localized Anime"]).toMatchObject({
+      typeLabel: "Anime",
+      progress: "3 / 12 episodios",
+    });
+    expect(es["Localized Movie"]!.typeLabel).toBe("Película");
+
+    const en = byTitle("en");
+    expect(en["Localized Book"]!.progress).toBe("5 / 20 chapters");
+    expect(en["Localized Anime"]!.progress).toBe("3 / 12 episodes");
+    expect(en["Localized Movie"]!.typeLabel).toBe("Movie");
+
+    for (const entry of rowsToProfileEntries(rows, "es")) {
+      expect(entry.progress).not.toContain("items");
+    }
+  });
+
+  it("shows only the number when the progress unit is unknown", async () => {
+    const work = await createManualWork({
+      type: "book",
+      title: "Localized No Unit",
+    });
+    await addListEntry("user-domain", work.id, {
+      status: "plan",
+      progressValue: 0,
+      progressUnit: "pages",
+    });
+    database.run(
+      sql`update list_entries set progress_unit = null, progress_value = 4 where work_id = ${work.id}`,
+    );
+
+    const rows = (await listLibraryEntries("user-domain")).filter(
+      (row) => row.work.title === "Localized No Unit",
+    );
+
+    expect(rowsToProfileEntries(rows, "es")[0]!.progress).toBe("4");
   });
 });

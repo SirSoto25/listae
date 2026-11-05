@@ -9,6 +9,8 @@ import type { createTranslator } from "@/lib/i18n/t";
 export type ProfileEntry = {
   title: string;
   type: WorkType;
+  /** Localized display name of `type`; `type` itself stays the raw `data-type`. */
+  typeLabel: string;
   status: ListStatus;
   score: number | null;
   progress: string;
@@ -76,15 +78,23 @@ function safeCoverUrl(url: string | null): string | null {
   }
 }
 
+function columnHeader(column: string, contentHtml: string): string {
+  return `<th class="listae-col-${column}" scope="col">${contentHtml}</th>`;
+}
+
 function tableHeadHtml(t: ProfileTranslator): string {
   return [
     "<thead><tr>",
-    `<th class="listae-col-index">${escapeHtml(t("profile.table.index"))}</th>`,
-    `<th class="listae-col-cover"></th>`,
-    `<th class="listae-col-title">${escapeHtml(t("profile.table.title"))}</th>`,
-    `<th class="listae-col-score">${escapeHtml(t("profile.table.score"))}</th>`,
-    `<th class="listae-col-type">${escapeHtml(t("profile.table.type"))}</th>`,
-    `<th class="listae-col-progress">${escapeHtml(t("profile.table.progress"))}</th>`,
+    columnHeader("index", escapeHtml(t("profile.table.index"))),
+    // No visible label: the cover column is an image. Screen readers get one.
+    columnHeader(
+      "cover",
+      `<span class="listae-sr-only">${escapeHtml(t("profile.table.cover"))}</span>`,
+    ),
+    columnHeader("title", escapeHtml(t("profile.table.title"))),
+    columnHeader("score", escapeHtml(t("profile.table.score"))),
+    columnHeader("type", escapeHtml(t("profile.table.type"))),
+    columnHeader("progress", escapeHtml(t("profile.table.progress"))),
     "</tr></thead>",
   ].join("");
 }
@@ -114,16 +124,20 @@ function buildEntryRowHtml(
     `<td class="listae-col-cover">${coverHtml}</td>`,
     `<td class="listae-col-title">${titleContent}</td>`,
     `<td class="listae-col-score">${escapeHtml(score)}</td>`,
-    `<td class="listae-col-type">${escapeHtml(entry.type)}</td>`,
+    `<td class="listae-col-type">${escapeHtml(entry.typeLabel)}</td>`,
     `<td class="listae-col-progress">${escapeHtml(entry.progress)}</td>`,
     "</tr>",
   ].join("");
 }
 
+/** `h3` inside a domain block (under the template's own `h2`), `h2` elsewhere. */
+export type StatusHeadingLevel = 2 | 3;
+
 function buildStatusTableHtml(
   statusEntries: ProfileEntry[],
   status: ListStatus,
   t: ProfileTranslator,
+  headingLevel: StatusHeadingLevel,
 ): string {
   const rows = statusEntries
     .map((entry, index) => buildEntryRowHtml(entry, index + 1, t))
@@ -131,7 +145,7 @@ function buildStatusTableHtml(
 
   return [
     `<section class="listae-status" data-status="${status}">`,
-    `<h2 class="listae-status-title">${escapeHtml(statusLabel(status, t))}</h2>`,
+    `<h${headingLevel} class="listae-status-title">${escapeHtml(statusLabel(status, t))}</h${headingLevel}>`,
     `<table class="listae-status-table">`,
     tableHeadHtml(t),
     `<tbody>${rows}</tbody>`,
@@ -144,13 +158,14 @@ export function buildStatusListsHtml(
   entries: ProfileEntry[],
   status: ListStatus,
   t: ProfileTranslator,
+  headingLevel: StatusHeadingLevel = 2,
 ): string {
   const statusEntries = entries.filter((entry) => entry.status === status);
   if (statusEntries.length === 0) {
     return "";
   }
 
-  return buildStatusTableHtml(statusEntries, status, t);
+  return buildStatusTableHtml(statusEntries, status, t, headingLevel);
 }
 
 export function buildDomainStatusListsHtml(
@@ -158,6 +173,7 @@ export function buildDomainStatusListsHtml(
   domain: ProfileDomain,
   status: ListStatus,
   t: ProfileTranslator,
+  headingLevel: StatusHeadingLevel = 2,
 ): string {
   const statusEntries = entries.filter(
     (entry) =>
@@ -167,14 +183,17 @@ export function buildDomainStatusListsHtml(
     return "";
   }
 
-  return buildStatusTableHtml(statusEntries, status, t);
+  return buildStatusTableHtml(statusEntries, status, t, headingLevel);
 }
 
 export function buildListsHtml(
   entries: ProfileEntry[],
   t: ProfileTranslator,
+  headingLevel: StatusHeadingLevel = 2,
 ): string {
-  return LIST_STATUSES.map((status) => buildStatusListsHtml(entries, status, t))
+  return LIST_STATUSES.map((status) =>
+    buildStatusListsHtml(entries, status, t, headingLevel),
+  )
     .filter(Boolean)
     .join("");
 }
@@ -192,7 +211,7 @@ export function buildDomainListsHtml(
     return "";
   }
 
-  const inner = buildListsHtml(domainEntries, t);
+  const inner = buildListsHtml(domainEntries, t, 3);
   if (!inner) {
     return "";
   }
@@ -221,6 +240,8 @@ export function renderProfileHtml({
   const replacements: Record<string, string> = {
     "{{username}}": escapeHtml(username),
     "{{displayName}}": escapeHtml(displayName),
+    "{{audiovisual_heading}}": escapeHtml(t("profile.domain.audiovisual")),
+    "{{reading_heading}}": escapeHtml(t("profile.domain.reading")),
     "{{lists}}": buildListsHtml(entries, t),
     "{{audiovisual_lists}}": buildDomainListsHtml(entries, "audiovisual", t),
     "{{reading_lists}}": buildDomainListsHtml(entries, "reading", t),

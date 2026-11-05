@@ -101,10 +101,20 @@
       "on_hold": "En pausa",
       "dropped": "Abandonado"
     },
+    "domain": {
+      "audiovisual": "Audiovisual",
+      "reading": "Lectura"
+    },
+    "unit": {
+      "episodes": "episodios",
+      "chapters": "capítulos",
+      "pages": "páginas"
+    },
     "notScored": "Sin puntuación",
     "score": "Puntuación: {score}",
     "table": {
       "index": "#",
+      "cover": "Portada",
       "title": "Título",
       "score": "Puntuación",
       "type": "Tipo",
@@ -174,7 +184,7 @@
     "viewPublicProfile": "Ver perfil público",
     "profileFrameTitle": "Perfil de {name} en Listae",
     "htmlTemplate": "Plantilla HTML",
-    "htmlTemplateHelp": "Marcadores de posición admitidos: {{displayName}}, {{username}}, {{audiovisual_lists}}, {{reading_lists}} y {{lists}}.",
+    "htmlTemplateHelp": "Marcadores de posición admitidos: {{displayName}}, {{username}}, {{audiovisual_heading}}, {{reading_heading}}, {{audiovisual_lists}}, {{reading_lists}} y {{lists}}.",
     "customCss": "CSS personalizado",
     "customCssHelp": "Se permiten importaciones de Google Fonts por HTTPS. Nunca se ejecuta JavaScript. El selector de colores por dominio solo reescribe el bloque marcado /* listae:domain-vars */.",
     "domainColors": "Colores por dominio",
