@@ -202,16 +202,19 @@ describe("rowsToProfileEntries", () => {
     const book = await createManualWork({
       type: "book",
       title: "Localized Book",
+      createdBy: "user-domain",
       chaptersTotal: 20,
     });
     const anime = await createManualWork({
       type: "anime",
       title: "Localized Anime",
+      createdBy: "user-domain",
       episodesTotal: 12,
     });
     const movie = await createManualWork({
       type: "movie",
       title: "Localized Movie",
+    createdBy: "user-domain",
     });
     await addListEntry("user-domain", book.id, {
       status: "in_progress",
@@ -259,6 +262,7 @@ describe("rowsToProfileEntries", () => {
     const work = await createManualWork({
       type: "book",
       title: "Localized No Unit",
+    createdBy: "user-domain",
     });
     await addListEntry("user-domain", work.id, {
       status: "plan",
