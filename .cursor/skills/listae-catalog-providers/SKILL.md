@@ -19,11 +19,11 @@ Dedicated anime API (e.g. AniList) is **out of v1** unless a new ADR adds it.
 
 ## Flow
 
-1. Debounced search with optional type filter
+1. Search on submit (`<form method="get" role="search">`, Enter or button; no typeahead, works without JS) with optional type filter; at least `MIN_QUERY_LENGTH` (2) characters
 2. `SearchCacheStore.get` → return if fresh
-3. Else query providers → unify cards (title, cover, year, source)
+3. Else query providers → unify cards (title, cover, year, source). `searchCatalog` returns `{ status, hits }` with `status` = `ok | partial | rate_limited | provider_down`: a failure is never rendered as "no matches"
 4. Cache via `set` (TTL 15–60 min)
-5. Select → upsert Work by `(externalSource, externalId)` → add ListEntry
+5. Select → `importHitAction` (`FormState`/`ActionForm`) → upsert Work by `(externalSource, externalId)` → title page. Anonymous users go to `/login?callbackUrl=<the search>`
 6. No match → manual form
 
 ## SearchCacheStore (v1)

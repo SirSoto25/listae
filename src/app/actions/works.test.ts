@@ -40,60 +40,142 @@ describe("importHitAction", () => {
     mocks.upsertWorkFromHit.mockResolvedValue({ id: "client-work" });
   });
 
-  it("resolves provider metadata server-side instead of trusting the form", async () => {
+  function importForm(fields: Record<string, string> = {}) {
     const formData = new FormData();
     formData.set("source", "tmdb");
     formData.set("externalId", "438631");
-    formData.set("title", "Forged title");
-    formData.set("type", "book");
-    formData.set("year", "1900");
-    formData.set("coverUrl", "https://evil.example/cover.jpg");
+    formData.set("locale", "es");
+    formData.set("returnTo", "/es?q=dune");
+    for (const [key, value] of Object.entries(fields)) {
+      formData.set(key, value);
+    }
+    return formData;
+  }
 
-    await expect(importHitAction(formData)).rejects.toThrow(
-      "REDIRECT:/title/server-work",
-    );
+  it("resolves provider metadata server-side instead of trusting the form", async () => {
+    const formData = importForm({
+      title: "Forged title",
+      type: "book",
+      year: "1900",
+      coverUrl: "https://evil.example/cover.jpg",
+    });
+
+    await expect(
+      importHitAction({ error: null }, formData),
+    ).rejects.toThrow("REDIRECT:/es/title/server-work");
     expect(mocks.importWork).toHaveBeenCalledWith("tmdb", "438631");
     expect(mocks.upsertWorkFromHit).not.toHaveBeenCalled();
   });
 
-  it("limits imports per user, not per IP", async () => {
-    const formData = new FormData();
-    formData.set("source", "tmdb");
-    formData.set("externalId", "438631");
+  it("redirects to the title in the form's locale", async () => {
+    await expect(
+      importHitAction({ error: null }, importForm({ locale: "en" })),
+    ).rejects.toThrow("REDIRECT:/en/title/server-work");
+  });
 
-    await expect(importHitAction(formData)).rejects.toThrow(
-      "REDIRECT:/title/server-work",
-    );
+  it("falls back to the default locale when the locale field is forged", async () => {
+    await expect(
+      importHitAction({ error: null }, importForm({ locale: "fr" })),
+    ).rejects.toThrow("REDIRECT:/es/title/server-work");
+  });
+
+  it("limits imports per user, not per IP", async () => {
+    await expect(
+      importHitAction({ error: null }, importForm()),
+    ).rejects.toThrow("REDIRECT:/es/title/server-work");
     expect(mocks.checkRateLimit).toHaveBeenCalledWith("import:user:user-1", {
       limit: 60,
       windowMs: 60 * 60 * 1000,
     });
   });
 
-  it("refuses imports over the hourly limit with a retry hint", async () => {
+  it("returns the translated rate limit message instead of throwing", async () => {
     mocks.checkRateLimit.mockReturnValue({ ok: false, retryAfterSec: 1500 });
-    const formData = new FormData();
-    formData.set("source", "tmdb");
-    formData.set("externalId", "438631");
 
-    await expect(importHitAction(formData)).rejects.toMatchObject({
-      code: "rateLimited",
-      params: { minutes: 25 },
-    });
+    const state = await importHitAction({ error: null }, importForm());
+
+    expect(state.error).toBe(
+      "Demasiadas solicitudes. Vuelve a intentarlo en 25 min.",
+    );
     expect(mocks.importWork).not.toHaveBeenCalled();
   });
 
-  it("rejects unauthenticated imports before mutating the catalog", async () => {
-    mocks.auth.mockResolvedValue(null);
-    const formData = new FormData();
-    formData.set("source", "tmdb");
-    formData.set("externalId", "438631");
-    formData.set("title", "Forged title");
+  it("translates the rate limit message to the form's locale", async () => {
+    mocks.checkRateLimit.mockReturnValue({ ok: false, retryAfterSec: 1500 });
 
-    await expect(importHitAction(formData)).rejects.toThrow("REDIRECT:/login");
+    const state = await importHitAction(
+      { error: null },
+      importForm({ locale: "en" }),
+    );
+
+    expect(state.error).toBe("Too many requests. Try again in 25 min.");
+  });
+
+  it("shows a form error when the catalog provider fails", async () => {
+    mocks.importWork.mockRejectedValue(new Error("TMDB lookup failed with status 429"));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    const state = await importHitAction({ error: null }, importForm());
+
+    expect(state.error).toMatch(/No se pudo importar/);
+    expect(state.error).not.toMatch(/429/);
+  });
+
+  it("shows the provider failure in English for English forms", async () => {
+    mocks.importWork.mockRejectedValue(new Error("boom"));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    const state = await importHitAction(
+      { error: null },
+      importForm({ locale: "en" }),
+    );
+
+    expect(state.error).toMatch(/Could not import/);
+  });
+
+  it("returns a form error for a forged catalog source", async () => {
+    const state = await importHitAction(
+      { error: null },
+      importForm({ source: "manual" }),
+    );
+
+    expect(state.error).not.toBeNull();
+    expect(mocks.importWork).not.toHaveBeenCalled();
+  });
+
+  it("sends anonymous users to login with a callback to the search", async () => {
+    mocks.auth.mockResolvedValue(null);
+
+    await expect(
+      importHitAction({ error: null }, importForm({ title: "Forged title" })),
+    ).rejects.toThrow("REDIRECT:/es/login?callbackUrl=%2Fes%3Fq%3Ddune");
     expect(mocks.importWork).not.toHaveBeenCalled();
     expect(mocks.upsertWorkFromHit).not.toHaveBeenCalled();
   });
+
+  it("keeps the form's locale in the login redirect", async () => {
+    mocks.auth.mockResolvedValue(null);
+
+    await expect(
+      importHitAction(
+        { error: null },
+        importForm({ locale: "en", returnTo: "/en?q=dune&type=movie" }),
+      ),
+    ).rejects.toThrow(
+      "REDIRECT:/en/login?callbackUrl=%2Fen%3Fq%3Ddune%26type%3Dmovie",
+    );
+  });
+
+  it.each(["https://evil.example/", "//evil.example", "/es/admin", ""])(
+    "falls back to the home page for an unsafe returnTo (%j)",
+    async (returnTo) => {
+      mocks.auth.mockResolvedValue(null);
+
+      await expect(
+        importHitAction({ error: null }, importForm({ returnTo })),
+      ).rejects.toThrow(/^REDIRECT:\/es\/login\?callbackUrl=%2Fes$/);
+    },
+  );
 });
 
 describe("createManualWorkAction", () => {

@@ -24,9 +24,20 @@
     "subtitle": "Search films, series, anime, books, manga, and comics—then keep your progress without the noise.",
     "openLibrary": "Open my library →",
     "emptyTitle": "What are you into lately?",
-    "emptySubtitle": "Start typing above to search the shared catalog.",
+    "emptySubtitle": "Type above and press Search to look through the shared catalog.",
     "resultsFor": "Results for “{query}”",
     "foundCount": "{count} found",
+    "foundOne": "1 found",
+    "searchSubmit": "Search",
+    "minQuery": "Type at least {min} characters to search.",
+    "rateLimitedTitle": "You've searched too many times",
+    "rateLimitedBody": "To protect the catalogs we limit searches per hour. Wait a few minutes and try again.",
+    "statusRateLimited": "Search limit reached",
+    "providerDownTitle": "The catalogs aren't responding",
+    "providerDownBody": "We couldn't reach the external catalogs. That doesn't mean the title doesn't exist: try again in a few minutes.",
+    "statusProviderDown": "Catalogs unavailable",
+    "partialNotice": "One of the catalogs did not respond, so some results may be missing.",
+    "retrySearch": "Retry search",
     "noMatchTitle": "No exact match surfaced.",
     "noMatchSubtitle": "External catalogs can miss niche or newly released titles.",
     "manualTitle": "Can't find it? Create a manual title",
@@ -140,7 +151,8 @@
     "searchAria": "Search titles",
     "mediaTypeAria": "Media type",
     "allMedia": "All media",
-    "trackTitle": "Track this title"
+    "trackTitle": "Track this title",
+    "trackTitleFor": "Track this title: {title}"
   },
   "entryForm": {
     "status": "Status",
@@ -261,6 +273,7 @@
     "coverUrlTooLong": "The cover URL can be at most {max} characters.",
     "manualQuotaExceeded": "You have reached the limit of {max} manual works per day. Try again in {hours} h.",
     "manualTotalQuotaExceeded": "You have reached the maximum of {max} manual works per account.",
-    "rateLimited": "Too many requests. Try again in {minutes} min."
+    "rateLimited": "Too many requests. Try again in {minutes} min.",
+    "importFailed": "Could not import the title from the catalog. Try again in a few minutes."
   }
 }

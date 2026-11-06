@@ -59,6 +59,7 @@ export function catalogSearchLabels(t: T) {
     searchAria: t("catalog.searchAria"),
     mediaTypeAria: t("catalog.mediaTypeAria"),
     allMedia: t("catalog.allMedia"),
+    submit: t("home.searchSubmit"),
     workTypes: workTypeLabels(t),
   };
 }

@@ -17,9 +17,10 @@ vi.mock("next/navigation", () => ({
 
 import { requestMagicLink } from "./actions";
 
-function form(email: string): FormData {
+function form(email: string, callbackUrl?: string): FormData {
   const data = new FormData();
   data.set("email", email);
+  if (callbackUrl !== undefined) data.set("callbackUrl", callbackUrl);
   return data;
 }
 
@@ -52,5 +53,45 @@ describe("requestMagicLink", () => {
     }
     expect(mocks.checkRateLimit).not.toHaveBeenCalled();
     expect(mocks.signIn).toHaveBeenCalledTimes(10);
+  });
+
+  describe("callbackUrl", () => {
+    it("sends the visitor back to the search they came from", async () => {
+      await requestMagicLink("es", form("reader@example.com", "/es?q=dune&type=movie"));
+      expect(mocks.signIn).toHaveBeenCalledWith("nodemailer", {
+        email: "reader@example.com",
+        redirectTo: "/es?q=dune&type=movie",
+      });
+    });
+
+    it.each([
+      "https://evil.example/phish",
+      "//evil.example",
+      "/\\evil.example",
+      "javascript:alert(1)",
+      "/api/auth/signout",
+      "",
+    ])("falls back to the library for the unsafe callbackUrl %j", async (url) => {
+      await requestMagicLink("es", form("reader@example.com", url));
+      expect(mocks.signIn).toHaveBeenCalledWith("nodemailer", {
+        email: "reader@example.com",
+        redirectTo: "/es/library",
+      });
+    });
+
+    it("keeps the destination in the EmailInvalid redirect", async () => {
+      await expect(
+        requestMagicLink("es", form("not-an-email", "/es?q=dune")),
+      ).rejects.toThrow(
+        "REDIRECT:/es/login?error=EmailInvalid&callbackUrl=%2Fes%3Fq%3Ddune",
+      );
+    });
+
+    it("does not carry an unsafe destination into the error redirect", async () => {
+      await expect(
+        requestMagicLink("es", form("not-an-email", "https://evil.example")),
+      ).rejects.toThrow("REDIRECT:/es/login?error=EmailInvalid");
+      expect(mocks.signIn).not.toHaveBeenCalled();
+    });
   });
 });

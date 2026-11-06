@@ -64,7 +64,7 @@ Las cuotas del catálogo se aplican **por usuario autenticado**, nunca por IP (D
 
 | Qué | Límite | Mecanismo |
 |---|---|---|
-| Imports (`importHitAction`) | 60 / h por usuario | `checkRateLimit("import:user:<userId>")`, fail-closed. Al superarlo, `FormInputError("rateLimited")` con `{minutes}` hasta que se libere la ventana |
+| Imports (`importHitAction`) | 60 / h por usuario | `checkRateLimit("import:user:<userId>")`, fail-closed. Al superarlo, `FormInputError("rateLimited")` con `{minutes}` hasta que se libere la ventana; desde T1.7 la acción lo devuelve como `FormState` (mensaje traducido en la propia tarjeta) en vez de lanzarlo |
 | Obras manuales por día | 20 / 24 h por usuario | `count(*)` sobre `works` (`created_by`, `created_at`, índice `works_created_by_idx`). Error `manualQuotaExceeded` con `{max, hours}` (horas hasta que caduque la obra más antigua de la ventana) |
 | Obras manuales en total | 500 por usuario | Mismo recuento sin ventana. Error `manualTotalQuotaExceeded` con `{max}` |
 
